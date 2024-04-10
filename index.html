@@ -115,11 +115,18 @@ async function readaudio() {
 			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; // { message: "Could not parse multipart form", type: "invalid_request_error", param: null, … }
 			// var form = {"file": blob_url, 'type': 'mp3', 'model': 'whisper-1'};
 			// OR
+			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
+			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			// var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
+			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			// { message: "Cannot specify both model and engine", type: "invalid_request_error", param: null, … }
+			// OR
 			var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
 			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
+			var form = {model: 'whisper-1', audio: blob_url};
 			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			
+
+	
 			// Print text part of JSON response only with user message
 			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
 			
