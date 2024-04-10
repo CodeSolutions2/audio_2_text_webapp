@@ -69,14 +69,14 @@ async function readaudio() {
 			let filename = Object.values(row.file_name).toString();
 			let out0 = filename.split('_');
 			
-			let date = out0.slice(0,2);
-			console.log("date:", date);
-			let time = out0.slice(3,5);
-			console.log("time:", time);
+			let date = out0.slice(0,3);
+			console.log("date:", date.split(',').join());
+			let time = out0.slice(3,6);
+			console.log("time:", time.split(',').join());
 
 			// -----------------------------------
 
-			let blob_url = Object.values(row.url_name).join();
+			let blob_url = Object.values(row.url_name).split(',').join();
 			console.log("blob_url.at(1):", blob_url.at(1));
 			
 			// let blob_url = '@'+Object.values(row.url_name);
@@ -101,7 +101,7 @@ async function readaudio() {
 			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
 			
 			// Create a dictionary w/ date, time, and text
-			// dict_out.push({date: date.join(), time: time.join(), text: text_out});
+			// dict_out.push({date: date.split(',').join(), time: time.split(',').join(), text: text_out});
 
 			// Processing information
 			outp.innerHTML = 'Processing audio';
