@@ -120,7 +120,7 @@ async function readaudio() {
 			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
 			
 			// Create a dictionary w/ date, time, and text
-			dict_out.push({date: date.split(',').join(), time: time.split(',').join(), text: text_out});
+			dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
 
 			// Processing information
 			outp.innerHTML = 'Processing audio';
