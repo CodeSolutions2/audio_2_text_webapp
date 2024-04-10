@@ -61,10 +61,9 @@ const outp = document.getElementById('output');
 async function readaudio() {
 
   const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
-
-  await get_URLBlob()
-	.then(url_list => {
-		// console.log("url_list:", url_list);
+	
+	return await get_URLBlob()
+	.then(url_list => { console.log("url_list:", url_list);
 		var dict_out = [];
 		url_list.forEach(async function(row, index) {
 			let dat = Object.values(row.date).toString();
@@ -89,17 +88,12 @@ async function readaudio() {
 			
 			// Create a dictionary w/ date, time, and text
 			// dict_out.push({date: date.join(), time: time.join(), text: text_out});
+
+			// Processing information
+			outp.innerHTML = 'Processing audio';
 		  });
 
-		   // Processing information
-		   outp.innerHTML = 'Processing audio';
-				   
-		  });
-
-	 outp.innerHTML = 'Processing Done';
-	console.log("dict_out:", dict_out);
-	
-	return dict_out;
+		   outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; });
 }
 
 
