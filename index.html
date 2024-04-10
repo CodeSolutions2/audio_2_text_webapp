@@ -69,14 +69,15 @@ async function readaudio() {
 			let filename = Object.values(row.file_name).toString();
 			let out0 = filename.split('_');
 			
-			let date = out0.slice(0,3).join();
-			console.log("date:", date.split(',').join());
-			let time = out0.slice(3,6).join();
-			console.log("time:", time.split(',').join());
+			let date = out0.slice(0,3).join().split(',');
+			const remove_comma = (val) => val != ",";
+			console.log("date:", date.filter(remove_comma));
+			let time = out0.slice(3,6).join().split(',');
+			console.log("time:", time.filter(remove_comma));
 
 			// -----------------------------------
 
-			let blob_url = Object.values(row.url_name).split(',').join();
+			let blob_url = Object.values(row.url_name).split(',').filter(remove_comma).join();
 			console.log("blob_url.at(1):", blob_url.at(1));
 			
 			// let blob_url = '@'+Object.values(row.url_name);
