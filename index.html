@@ -67,27 +67,29 @@ async function readaudio() {
 		// console.log("url_list:", url_list);
 		var dict_out = [];
 		url_list.forEach(async function(row, index) {
-			  let dat = Object.values(row.date).toString();
-			  let out0 = dat.split('_');
-			  let date = out0.slice(0,2);
-			  let time = out0.slice(3,5);
-			  let blob_url = Object.values(row.url_name).toString();
+			let dat = Object.values(row.date).toString();
+			let out0 = dat.split('_');
+			let date = out0.slice(0,2);
+			let time = out0.slice(3,5);
+			
+			// let blob_url = Object.values(row.url_name).toString(); 
+			let blob_url = '@/'+Object.values(row.file_name).toString();
 
-			  // REST API to convert .mp3 to text
-			  var url = 'https://api.openai.com/v1/audio/transcriptions';
-			  var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			  var form = {"file": blob_url, 'model': 'whisper-1'};
-			  var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			  try {
-				  // Print text part of JSON response only with user message
-				  const text_out = await fetch(url, options)
-					  .then(res => res.json())
-					  .then(res => { console.log(JSON.parse(JSON.stringify(res))); 
-							return JSON.parse(JSON.stringify(res))})
-			  } catch (error) { console.log(error); }
-
-			  // Create a dictionary w/ date, time, and text
-			  dict_out.push({date: date.join(), time: time.join(), text: text_out});
+			// REST API to convert .mp3 to text
+			var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			var form = {"file": blob_url, 'model': 'whisper-1'};
+			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			try {
+				// Print text part of JSON response only with user message
+				const text_out = await fetch(url, options)
+					.then(res => res.json())
+					.then(res => { console.log(JSON.parse(JSON.stringify(res))); 
+						      return JSON.parse(JSON.stringify(res))})
+			} catch (error) { console.log(error); }
+			
+			// Create a dictionary w/ date, time, and text
+			dict_out.push({date: date.join(), time: time.join(), text: text_out});
 		  });
 
 		   // Processing information
@@ -114,7 +116,7 @@ async function get_URLBlob() {
 	await fetch(url).then(res => res.json()).then(data => {
 		    data.forEach(file => {
 		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
-			url_vec.push({date: file.name, url_name: file.download_url});
+			url_vec.push({file_name: file.name, url_name: file.download_url});
 		      }
 		    });
 		  }).catch(error => { outp.innerHTML += error; });
