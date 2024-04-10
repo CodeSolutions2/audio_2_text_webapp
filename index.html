@@ -127,10 +127,10 @@ async function readaudio() {
 			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			// { message: "Cannot specify both model and engine", type: "invalid_request_error", param: null, … }
 			// OR
-			var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
-			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {prompt: 'Transcribe the following audio:', audio: blob_url};
-			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
+			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			// var form = {prompt: 'Transcribe the following audio:', audio: blob_url};
+			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			// message: "Invalid URL (POST /v1/engines/whisper-1/completions)", type: "invalid_request_error", param: null,
 			// OR
 			var url = 'https://api.openai.com/v1/audio/transcriptions';
