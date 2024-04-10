@@ -70,8 +70,8 @@ async function readaudio() {
 			let out0 = filename.split('_');
 
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
-			let YYYY = out0.slice(0,1);
-			let MM = out0.slice(1,2);
+			let YYYY = out0.slice(0,1).toString();
+			let MM = out0.slice(1,2).join();
 			let DD = out0.slice(2,3);
 			let HH = out0.slice(3,4);
 			let mm = out0.slice(4,5);
