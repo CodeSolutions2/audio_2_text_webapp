@@ -45,7 +45,7 @@
 <!-- CSS -->
 <style>
 div {position: relative; z-index: 2;},
-  table {border-collapse: collapse; position: relative;}
+  table {border-collapse: collapse; position: absolute;}
   td,
   th {border: 1px solid black;padding: 10px 20px;}
 </style>
@@ -73,7 +73,7 @@ async function readaudio() {
 			let time = out0.slice(3,5);
 			
 			// let blob_url = Object.values(row.url_name).toString(); 
-			let blob_url = '@/'+Object.values(row.file_name).toString();
+			let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString();
 
 			// REST API to convert .mp3 to text
 			var url = 'https://api.openai.com/v1/audio/transcriptions';
