@@ -68,12 +68,16 @@ async function readaudio() {
 		url_list.forEach(async function(row, index) {
 			let filename = Object.values(row.file_name).toString();
 			let out0 = filename.split('_');
+			
 			let date = out0.slice(0,2);
+			console.log("date:", date);
 			let time = out0.slice(3,5);
+			console.log("time:", time);
 
 			// -----------------------------------
 
 			let blob_url = Object.values(row.url_name).join();
+			console.log("blob_url.at(1):", blob_url.at(1));
 			
 			// let blob_url = '@'+Object.values(row.url_name);
 			
