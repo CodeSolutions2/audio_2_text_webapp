@@ -8,7 +8,7 @@
 <!-- <input id="mp3name_id" type="text" value="" placeholder="mp3name" rows="10" cols="100" style="display:block; text-align: left; width: 150px;"> -->
 <label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
 <br>
-<input id="OPENAPI_KEY" type="text" value="" placeholder="OPENAPI_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 
 <br><br>
 
@@ -45,7 +45,7 @@
 <!-- CSS -->
 <style>
 div {position: relative; z-index: 2;},
-  table {border-collapse: collapse;}
+  table {border-collapse: collapse; position: relative;}
   td,
   th {border: 1px solid black;padding: 10px 20px;}
 </style>
@@ -60,24 +60,17 @@ const outp = document.getElementById('output');
 	
 async function readaudio() {
 
-  const OPENAPI_KEY = document.getElementById("OPENAPI_KEY").value;
+  const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
   await get_URLBlob()
 	.then(url_list => {
-		console.log("url_list:", url_list);
-		var text_out = [];
-		   var datee = [];
-		  url_list.forEach(async function(row, index) {
-
-			  // Way 0
-			  // let key = Object.keys(row);
-			  // console.log("key:", key);
-			  // datee.push(key);
-			  // let blob_url = Object.values(key).toString();
-
-			  // Way 1
+		// console.log("url_list:", url_list);
+		var dict_out = [];
+		url_list.forEach(async function(row, index) {
 			  let dat = Object.values(row.date).toString();
-			  datee.push(dat);
+			  let out0 = dat.split('_');
+			  let date = out0.slice(0,3);
+			  let time = out0.slice(4,6);
 			  let blob_url = Object.values(row.url_name).toString();
 
 			  // REST API to convert .mp3 to text
@@ -87,27 +80,25 @@ async function readaudio() {
 			  var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			  try {
 				  // Print text part of JSON response only with user message
-				  const t_out = await fetch(url, options)
+				  const text_out = await fetch(url, options)
 					  .then(res => res.json())
 					  .then(res => { console.log(JSON.parse(JSON.stringify(res))); 
 							return JSON.parse(JSON.stringify(res))})
 			  } catch (error) { console.log(error); }
 
-			  text_out.push(t_out);
-			
+			  // Create a dictionary w/ date, time, and text
+			  dict_out.push({date: date.join(), time: time.join(), text: text_out});
 		  });
 
 		   // Processing information
 		   outp.innerHTML = 'Processing audio';
-		   
-		   // Create a dictionary w/ date and text
-		   let out = Object.fromEntries(date.map((key, index) => [key, text_out[index]]));
 				   
 		  });
 
 	 outp.innerHTML = 'Processing Done';
+	console.log("dict_out:", dict_out);
 	
-	return out;
+	return dict_out;
 }
 
 
@@ -118,30 +109,19 @@ async function get_URLBlob() {
 	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
 
 	// url_vec should be a dictionary
-	var url_vec2 = [];
-	var url_name = [];
+	var url_vec = [];
 	var date = [];
 	await fetch(url).then(res => res.json()).then(data => {
 		    data.forEach(file => {
 		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
-			// Way 0
-			// url_name.push(file.download_url);
-			// date.push(file.name);
-
-			// Way 1
-			url_vec2.push({date: file.name, url_name: file.download_url});
+			url_vec.push({date: file.name, url_name: file.download_url});
 		      }
 		    });
 		  }).catch(error => { outp.innerHTML += error; });
-
-   
 	
-	// var url_vec = Object.fromEntries(date.map((key, index) => [key, url_name[index]]));
-	// console.log('url_vec: ', url_vec);
+    	console.log('url_vec: ', url_vec);
 	
-    	console.log('url_vec2: ', url_vec2);
-	
-	return url_vec2;
+	return url_vec;
 }
 
 
