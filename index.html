@@ -19,7 +19,7 @@
 
 
 <!-- View results -->
-<div align="center">
+<div align="left">
     <table style='text-align: center; width: 600px; display:block'>
       <tr>
         <td>
@@ -28,7 +28,7 @@
       		<textarea id="journal" rows="35" cols="100" placeholder="Journal text" style="display:block"></textarea>
 	</td>
         <td>
-		<label id="chatbot_label" style="display:block">Journal text</label>
+		<label id="chatbot_label" style="display:block">Chatbot area</label>
       		<br>
       		<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
 	</td>
@@ -44,6 +44,7 @@
 
 <!-- CSS -->
 <style>
+div {position: relative; z-index: 2;},
   table {border-collapse: collapse;}
   td,
   th {border: 1px solid black;padding: 10px 20px;}
@@ -64,7 +65,7 @@ async function readaudio() {
   await get_URLBlob()
 	.then(url_list => {var text_out = [];
 			   var datee = [];
-			  url_list.forEach(async function (row, index) {
+			  url_list.forEach(async function(row, index) {
 				  let dat = Object.values(row.date).toString();
 				  datee.push(dat);
 
