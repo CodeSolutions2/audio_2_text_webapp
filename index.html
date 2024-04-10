@@ -69,9 +69,9 @@ async function readaudio() {
 			let filename = Object.values(row.file_name).toString();
 			let out0 = filename.split('_');
 			
-			let date = out0.slice(0,3);
+			let date = out0.slice(0,3).join();
 			console.log("date:", date.split(',').join());
-			let time = out0.slice(3,6);
+			let time = out0.slice(3,6).join();
 			console.log("time:", time.split(',').join());
 
 			// -----------------------------------
