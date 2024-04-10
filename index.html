@@ -69,8 +69,8 @@ async function readaudio() {
 		url_list.forEach(async function(row, index) {
 			  let dat = Object.values(row.date).toString();
 			  let out0 = dat.split('_');
-			  let date = out0.slice(0,3);
-			  let time = out0.slice(4,6);
+			  let date = out0.slice(0,2);
+			  let time = out0.slice(3,5);
 			  let blob_url = Object.values(row.url_name).toString();
 
 			  // REST API to convert .mp3 to text
