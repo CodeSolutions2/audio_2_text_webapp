@@ -69,33 +69,33 @@ async function readaudio() {
 			let filename = Object.values(row.file_name).toString();
 			let out0 = filename.split('_');
 
-			let date_step0 = out0.slice(0,3);
-			let date_step1 = date_step0.join();
-			
-			// Way 0
-			let date_step2 = date_step1.split(',');
-			const remove_comma = (val) => val != ",";
-			let date_step3 = date_step2.filter(remove_comma);
-			const remove_empty = (val) => val.length > 0;
-			let date_step4 = date_step3.filter(remove_empty);
-			console.log("date_step0:", date_step0);
-			console.log("date_step1:", date_step1);
-			console.log("date_step2:", date_step2);
-			console.log("date_step3:", date_step3);
-			console.log("date_step4:", date_step4);
-			
-			// Way 1
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+			let YYYY = out0.slice(0,1);
+			let MM = out0.slice(1,2);
+			let DD = out0.slice(2,3);
+			let HH = out0.slice(3,4);
+			let mm = out0.slice(4,5);
+			let ss = out0.slice(5,6);
+
 			const regex = /(,)+/g;
-			let date_step5 = date_step1.replace(regex, ' ');  // reassign the value
-			console.log("date_step5:", date_step5);
 			
-			let time = out0.slice(3,6).join().split(',');
-			console.log("time:", time.filter(remove_comma));
+			YYYY = YYYY.replace(regex, '');
+			MM = MM.replace(regex, '');
+			DD = DD.replace(regex, '');
+			HH = HH.replace(regex, '');
+			mm = mm.replace(regex, '');
+			ss = ss.replace(regex, '');
+			console.log("YYYY:", YYYY);
+			console.log("MM:", MM);
+			console.log("DD:", DD);
+			console.log("HH:", HH);
+			console.log("mm:", mm);
+			console.log("ss:", ss);
 
 			// -----------------------------------
 
 			let blob_url0 = Object.values(row.url_name).join();
-			let blob_url1 = blob_url0.replace(regex, ' ');
+			let blob_url1 = blob_url0.replace(regex, '');
 			console.log("blob_url1:", blob_url1);
 			
 			//console.log("blob_url.at(1):", blob_url.at(1));
