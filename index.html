@@ -72,8 +72,8 @@ async function readaudio() {
 			let date = out0.slice(0,2);
 			let time = out0.slice(3,5);
 			
-			// let blob_url = Object.values(row.url_name).toString(); 
-			let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString();
+			let blob_url = '@'+Object.values(row.url_name).toString(); 
+			// let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString(); // TypeError: can't convert undefined to object
 
 			// REST API to convert .mp3 to text
 			var url = 'https://api.openai.com/v1/audio/transcriptions';
