@@ -5,16 +5,49 @@
   </head>
   <body>
     
-<input id="mp3name_id" type="text" value="" placeholder="mp3name" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+<!-- <input id="mp3name_id" type="text" value="" placeholder="mp3name" rows="10" cols="100" style="display:block; text-align: left; width: 150px;"> -->
+<label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
+<br>
 <input id="OPENAPI_KEY" type="text" value="" placeholder="OPENAPI_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
-    
 
-<!-- <input type="file" id="text_file_input" accept=".txt"> -->
-	  
-    
+<br><br>
+
+<button id="readaudio" onclick="readaudio()">Transcribe audios</button>
+
 <!-- View results -->
 <div id="output" style="font-family:courier;font-size:24px;height:300px"></div>
 
+
+<!-- View results -->
+<div align="center">
+    <table style='text-align: center; width: 600px; display:block'>
+      <tr>
+        <td>
+		<label id="journal_label" style="display:block">Journal text</label>
+      		<br>
+      		<textarea id="journal" rows="35" cols="100" placeholder="Journal text" style="display:block"></textarea>
+	</td>
+        <td>
+		<label id="chatbot_label" style="display:block">Journal text</label>
+      		<br>
+      		<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+	</td>
+      </tr>
+    </table>
+</div>  
+    
+
+
+
+	  
+<!-- --------------------------------------------------- -->
+
+<!-- CSS -->
+<style>
+  table {border-collapse: collapse;}
+  td,
+  th {border: 1px solid black;padding: 10px 20px;}
+</style>
 
 <script>
 
@@ -23,19 +56,78 @@
 const outp = document.getElementById('output');
 
 
+	
 async function readaudio() {
 
   const OPENAPI_KEY = document.getElementById("OPENAPI_KEY").value;
 
-  
+  await get_URLBlob()
+	.then(url_list => {var text_out = [];
+			   var datee = [];
+			  url_list.forEach(async function (row, index) {
+				  let dat = Object.values(row.date).toString();
+				  datee.push(dat);
 
-  
+				  // 
+				  let blob_url = Object.values(row.url_name).toString();
 
+				  // REST API to convert .mp3 to text
+				  var url = 'https://api.openai.com/v1/audio/transscriptions';
+				  var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+				  var form = {"file": blob_url, 'model': 'whisper-1'};
+				  var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+				  try {
+					  // Print text part of JSON response only with user message
+					  const t_out = await fetch(url, options)
+						  .then(res => res.json())
+						  .then(res => { console.log(JSON.parse(JSON.stringify(res))); 
+								return JSON.parse(JSON.stringify(res))})
+				  } catch (error) { console.log(error); }
 
+				  text_out.push(t_out);
+			  	
+			  });
 
+			   // Processing information
+			   outp.innerHTML = 'Processing audio';
+			   
+			   // Create a dictionary w/ date and text
+			   let out = Object.fromEntries(date.map((key, index) => [key, text_out[index]]));
+					   
+			  });
 
+	 outp.innerHTML = 'Processing Done';
+	
+	return out;
 }
 
+
+async function get_URLBlob() {
+	
+	const repoOwner = 'CodeSolutions2';
+	const repoName = 'audio_2_text_webapp';
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	// url_vec should be a dictionary
+	var url_name = [];
+	var date = [];
+	await fetch(url).then(res => res.json()).then(data => {
+		    data.forEach(file => {
+		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
+			url_name.push(file.download_url);
+			date.push(file.name);
+		      }
+		    });
+		  }).catch(error => { outp.innerHTML += error; });
+
+   
+	// const get_csvDataset_URLblob = url_vec[0];
+	var url_vec = Object.fromEntries(date.map((key, index) => [key, url_name[index]]));
+
+	console.log('url_vec: ', url_vec);
+    
+	return url_vec;
+}
 
 
 // ----------------------------------------------------
