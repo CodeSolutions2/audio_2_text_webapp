@@ -92,65 +92,8 @@ async function readaudio() {
 			console.log("mm:", mm);
 			console.log("ss:", ss);
 
-			// -----------------------------------
-
-			let blob_url0 = Object.values(row.url_name).join();
-			let blob_url = blob_url0.replace(regex, '');
-			
-			// let blob_url = '@'+Object.values(row.url_name);
-			
-			// let blob_url = '@'+Object.values(row.url_name).toString(); // TypeError: can't convert undefined to object  // blob_url: @h,t,t,p,s,:,/,/,r,a,w,.,g,i,t,h,u,b,u,s,e,r,c,o,n,t,e,n,t,.,c,o,m,/,C,o,d,e,S,o,l,u,t,i,o,n,s,2,/,a,u,d,i,o,_,2,_,t,e,x,t,_,w,e,b,a,p,p,/,m,a,i,n,/,2,0,2,4,_,0,3,_,1,3,_,0,9,_,5,7,_,5,1,_,t,e,s,t,0,.,m,p,3
-			
-			// let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString(); // TypeError: can't convert undefined to object
-
-			//let blob_url = '@/run/media/oem2/3365-6330/audio_run_mp3/2024_03_13_09_57_51_test0.mp3';  // message: "1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)", type: "invalid_request_error"
-			// -----------------------------------
-			
-			console.log("blob_url:", blob_url);
-
-			// REST API to convert .mp3 to text
-			
-			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
-			// var url = 'https://api.openai.com/v1/audio/transcriptions';
-			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; // { message: "Could not parse multipart form", type: "invalid_request_error", param: null, … }
-			// var form = {"file": blob_url, 'type': 'mp3', 'model': 'whisper-1'};
-			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
-			// OR
-			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
-			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			// var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
-			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			// { message: "Cannot specify both model and engine", type: "invalid_request_error", param: null, … }
-			// OR
-			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
-			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			// var form = {model: 'whisper-1', audio: blob_url};
-			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			// { message: "Cannot specify both model and engine", type: "invalid_request_error", param: null, … }
-			// OR
-			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
-			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			// var form = {prompt: 'Transcribe the following audio:', audio: blob_url};
-			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			// message: "Invalid URL (POST /v1/engines/whisper-1/completions)", type: "invalid_request_error", param: null,
-			// OR
-			var url = 'https://api.openai.com/v1/audio/transcriptions';
-			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
-			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
-			// OR
-			// var url = 'https://api.openai.com/v1/engines/davinci/transcribe';
-			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			// var form = {audio: blob_url};
-			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-
-	
-			// Print text part of JSON response only with user message
-			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
-			
 			// Create a dictionary w/ date, time, and text
-			dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
+			dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: 'text_out'});
 
 			// Processing information
 			outp.innerHTML = 'Processing audio';
