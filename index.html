@@ -85,7 +85,7 @@ async function readaudio() {
 			console.log("date_step4:", date_step4);
 			
 			// Way 1
-			const regex = /,,/i;
+			const regex = /(,)+/g;
 			let date_step5 = date_step1.replace(regex, ' ');  // reassign the value
 			console.log("date_step5:", date_step5);
 			
@@ -109,7 +109,7 @@ async function readaudio() {
 			//let blob_url = '@/run/media/oem2/3365-6330/audio_run_mp3/2024_03_13_09_57_51_test0.mp3';  // message: "1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)", type: "invalid_request_error"
 			// -----------------------------------
 			
-			console.log("blob_url:", blob_url);
+			//console.log("blob_url:", blob_url);
 
 			// REST API to convert .mp3 to text
 			//var url = 'https://api.openai.com/v1/audio/transcriptions';
