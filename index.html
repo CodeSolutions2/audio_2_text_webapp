@@ -68,17 +68,37 @@ async function readaudio() {
 		url_list.forEach(async function(row, index) {
 			let filename = Object.values(row.file_name).toString();
 			let out0 = filename.split('_');
+
+			let date_step0 = out0.slice(0,3);
+			let date_step1 = date_step0.join();
 			
-			let date = out0.slice(0,3).join().split(',');
+			// Way 0
+			let date_step2 = date_step1.split(',');
 			const remove_comma = (val) => val != ",";
-			console.log("date:", date.filter(remove_comma));
+			let date_step3 = date_step2.filter(remove_comma);
+			const remove_empty = (val) => val.length > 0;
+			let date_step4 = date_step3.filter(remove_empty);
+			console.log("date_step0:", date_step0);
+			console.log("date_step1:", date_step1);
+			console.log("date_step2:", date_step2);
+			console.log("date_step3:", date_step3);
+			console.log("date_step4:", date_step4);
+			
+			// Way 1
+			const regex = /,,/i;
+			let date_step5 = date_step1.replace(regex, ' ');  // reassign the value
+			console.log("date_step5:", date_step5);
+			
 			let time = out0.slice(3,6).join().split(',');
 			console.log("time:", time.filter(remove_comma));
 
 			// -----------------------------------
 
-			let blob_url = Object.values(row.url_name).split(',').filter(remove_comma).join();
-			console.log("blob_url.at(1):", blob_url.at(1));
+			let blob_url0 = Object.values(row.url_name).join();
+			let blob_url1 = blob_url0.replace(regex, ' ');
+			console.log("blob_url1:", blob_url1);
+			
+			//console.log("blob_url.at(1):", blob_url.at(1));
 			
 			// let blob_url = '@'+Object.values(row.url_name);
 			
@@ -92,14 +112,14 @@ async function readaudio() {
 			console.log("blob_url:", blob_url);
 
 			// REST API to convert .mp3 to text
-			var url = 'https://api.openai.com/v1/audio/transcriptions';
+			//var url = 'https://api.openai.com/v1/audio/transcriptions';
 			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {"file": blob_url, 'model': 'whisper-1'};
-			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			//var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			//var form = {"file": blob_url, 'model': 'whisper-1'};
+			//var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			
 			// Print text part of JSON response only with user message
-			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
+			//const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
 			
 			// Create a dictionary w/ date, time, and text
 			// dict_out.push({date: date.split(',').join(), time: time.split(',').join(), text: text_out});
@@ -108,7 +128,8 @@ async function readaudio() {
 			outp.innerHTML = 'Processing audio';
 		  });
 
-		   outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; });
+		   // outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; 
+	});
 }
 
 
