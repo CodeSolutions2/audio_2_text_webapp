@@ -74,7 +74,7 @@ async function readaudio() {
 			  let blob_url = Object.values(row.url_name).toString();
 
 			  // REST API to convert .mp3 to text
-			  var url = 'https://api.openai.com/v1/audio/transscriptions';
+			  var url = 'https://api.openai.com/v1/audio/transcriptions';
 			  var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			  var form = {"file": blob_url, 'model': 'whisper-1'};
 			  var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
