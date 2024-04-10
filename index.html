@@ -66,8 +66,8 @@ async function readaudio() {
 	.then(url_list => { console.log("url_list:", url_list);
 		var dict_out = [];
 		url_list.forEach(async function(row, index) {
-			let dat = Object.values(row.date).toString();
-			let out0 = dat.split('_');
+			let filename = Object.values(row.file_name).toString();
+			let out0 = filename.split('_');
 			let date = out0.slice(0,2);
 			let time = out0.slice(3,5);
 			
