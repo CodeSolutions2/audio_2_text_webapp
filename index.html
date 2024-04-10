@@ -95,10 +95,7 @@ async function readaudio() {
 			// -----------------------------------
 
 			let blob_url0 = Object.values(row.url_name).join();
-			let blob_url1 = blob_url0.replace(regex, '');
-			console.log("blob_url1:", blob_url1);
-			
-			//console.log("blob_url.at(1):", blob_url.at(1));
+			let blob_url = blob_url0.replace(regex, '');
 			
 			// let blob_url = '@'+Object.values(row.url_name);
 			
@@ -109,26 +106,26 @@ async function readaudio() {
 			//let blob_url = '@/run/media/oem2/3365-6330/audio_run_mp3/2024_03_13_09_57_51_test0.mp3';  // message: "1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)", type: "invalid_request_error"
 			// -----------------------------------
 			
-			//console.log("blob_url:", blob_url);
+			console.log("blob_url:", blob_url);
 
 			// REST API to convert .mp3 to text
-			//var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var url = 'https://api.openai.com/v1/audio/transcriptions';
 			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			//var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			//var form = {"file": blob_url, 'model': 'whisper-1'};
-			//var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			var form = {"file": blob_url, 'model': 'whisper-1'};
+			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			
 			// Print text part of JSON response only with user message
-			//const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
+			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
 			
 			// Create a dictionary w/ date, time, and text
-			// dict_out.push({date: date.split(',').join(), time: time.split(',').join(), text: text_out});
+			dict_out.push({date: date.split(',').join(), time: time.split(',').join(), text: text_out});
 
 			// Processing information
 			outp.innerHTML = 'Processing audio';
 		  });
 
-		   // outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; 
+		   outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; 
 	});
 }
 
