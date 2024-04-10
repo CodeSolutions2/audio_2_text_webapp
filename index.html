@@ -71,7 +71,7 @@ async function readaudio() {
 			let date = out0.slice(0,2);
 			let time = out0.slice(3,5);
 			
-			let blob_url = '@'+Object.values(row.url_name).toString(); // TypeError: can't convert undefined to object
+			let blob_url = '@'+Object.values(row.url_name);//.toString(); // TypeError: can't convert undefined to object
 			// let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString(); // TypeError: can't convert undefined to object
 
 			//let blob_url = '@/run/media/oem2/3365-6330/audio_run_mp3/2024_03_13_09_57_51_test0.mp3';  // message: "1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)", type: "invalid_request_error"
