@@ -109,10 +109,11 @@ async function readaudio() {
 			console.log("blob_url:", blob_url);
 
 			// REST API to convert .mp3 to text
-			var url = 'https://api.openai.com/v1/audio/transcriptions';
-			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
+			// var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {"file": blob_url, 'model': 'whisper-1'};
+			var form = {"file": blob_url, 'type': 'mp3', 'model': 'whisper-1'};
 			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			
 			// Print text part of JSON response only with user message
