@@ -238,9 +238,9 @@ async function readaudio() {
   				.then(response => response.blob())
 				.then(async function(blob_object) { 
 					console.log("blob_object: ", blob_object); 
-					var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+					// var text_out = await send_a_form_w_fetch_using_formData(blob_object);
 					// var text_out = send_a_form_w_formElement_using_formData(blob_object);
-					// var text_out = send_a_form_w_formElement_using_input(blob_object);
+					var text_out = send_a_form_w_formElement_using_input(blob_object);
 					return text_out; })
 				.catch(error => { console.log(error); });
 			
