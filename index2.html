@@ -78,6 +78,8 @@ async function readaudio() {
 		var dict_out = [];
 		url_list.forEach(async function(row, index) {
 			let filename = Object.values(row.file_name).toString();
+			console.log("filename:", filename);
+			
 			let out0 = filename.split('_');
 
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
@@ -238,21 +240,21 @@ async function readaudio() {
 			// Form submission
 			// ------------------------------------------
 			// Way 0
-			var text_out = await send_a_form(blob_url).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
+			// var text_out = await send_a_form(blob_url).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
 			
 
 			// Way 1
-			// var url = 'https://api.openai.com/v1/audio/transcriptions';
-			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			// OR
 			// headers = new Headers(headers);
 			
-			// let form = new FormData();
-			// form.append("file", blob_url, filename);
-			// form.append("model", "whisper-1");
-			// form.append("language", "en");
+			let form = new FormData();
+			form.append("file", blob_url, filename);
+			form.append("model", "whisper-1");
+			form.append("language", "en");
 
-			// var options = {method : 'POST', headers: headers, body : form};
+			var options = {method : 'POST', headers: headers, body : form};
 			// message: "Could not parse multipart form", type: "invalid_request_error", param: null
 
 			// ------------------------------------------
@@ -277,11 +279,9 @@ async function readaudio() {
 async function send_a_form(blob_url) {
 
 	// Way 0
-
-	
 	// Create <form> element to submit parameters to endpoint
 	var formElement = document.createElement('form');
-	formElement.setAttribute('id', 'formElement_id');
+	// formElement.setAttribute('id', 'formElement_id');
 	formElement.setAttribute('method', 'POST');
 
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
@@ -290,7 +290,7 @@ async function send_a_form(blob_url) {
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	console.log('OPENAI_API_KEY set');
 	
-	// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 	formElement.setAttribute('headers', new Headers(headers));
 
 	formElement.setAttribute('Authorization', 'Bearer ' + OPENAI_API_KEY);
