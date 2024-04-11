@@ -110,9 +110,12 @@ async function readaudio() {
 			// let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString(); // TypeError: can't convert undefined to object
 
 			//let blob_url = '@/run/media/oem2/3365-6330/audio_run_mp3/2024_03_13_09_57_51_test0.mp3';  // message: "1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)", type: "invalid_request_error"
+			
 			// -----------------------------------
 			
 			console.log("blob_url:", blob_url);
+
+			// -----------------------------------
 
 			// REST API to convert .mp3 to text
 			
@@ -175,6 +178,20 @@ async function readaudio() {
 			// var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
 			// Uncaught ReferenceError: exports is not defined <anonymous> jsdelivr-header.js:7
 
+			// ------------------------------------
+			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
+			// ------------------------------------
+			
+			// OR
+
+			// Tried file instead of audio
+			// Tried multi-part form instead of json response
+			var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			var form = {"file": blob_url, 'model': 'whisper-1'};
+			var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
+			// message: "Could not parse multipart form", type: "invalid_request_error", param: null, … }
+
 			// OR
 
 			// Tried audio instead of file
@@ -187,28 +204,27 @@ async function readaudio() {
 			
 			// OR
 
-			// Tried file instead of audio
-			// Tried multi-part form instead of json response
-			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
-			var url = 'https://api.openai.com/v1/audio/transcriptions';
-			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {"file": blob_url, 'model': 'whisper-1'};
-			var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
-			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
-			
-			// OR
-
-			// Tried file instead of audio, added a type parameter
-			// Tried multi-part form instead of json response
-			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
+			// added a type parameter
 			// var url = 'https://api.openai.com/v1/audio/transcriptions';
-			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; // { message: "Could not parse multipart form", type: "invalid_request_error", param: null, … }
+			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; 
 			// var form = {"file": blob_url, 'type': 'mp3', 'model': 'whisper-1'};
 			// var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
 			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
 			
 			// OR
 
+			// Tring translations
+			var url = 'https://api.openai.com/v1/audio/translations';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; 
+			var form = {"file": blob_url, "model": 'whisper-1'};
+			var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
+			
+			// OR
+
+// "language", "en"
+
+
+			
 			// ------------------------------------------
 			
 			// Print text part of JSON response only with user message
