@@ -10,6 +10,8 @@
 <br>
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 
+<!-- <form id="formElement_id" name="formElement" onsubmit="return checkForm(this)"> -->
+	
 <br><br>
 
 <button id="readaudio" onclick="readaudio()">Transcribe audios</button>
@@ -61,7 +63,10 @@ div {position: relative; z-index: 2;},
 
 const outp = document.getElementById('output');
 
-
+// Create <form> element to submit parameters to endpoint
+var formElement = document.createElement('form');
+formElement.setAttribute('id', 'formElement_id');
+	
 // ----------------------------------------------------
 	
 async function readaudio() {
@@ -274,10 +279,6 @@ async function send_a_form() {
 
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-	
-	// Create <form> element to submit parameters to endpoint
-	var formElement = document.createElement('form');
-	formElement.setAttribute('id', 'formElement_id');
 	
 	formElement.setAttribute('method', 'POST'); 
 	formElement.setAttribute('action', url);
