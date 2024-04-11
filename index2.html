@@ -67,6 +67,8 @@ div {position: relative; z-index: 2;},
 const outp = document.getElementById('output');
 
 const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+
+var filename = '';
 	
 // ----------------------------------------------------
 	
@@ -79,7 +81,7 @@ async function readaudio() {
 			
 			console.log("file_object:", file_object);
 			
-			let filename = file_object.name;
+			filename = file_object.name;
 			console.log("filename:", filename);
 			
 			let out0 = filename.split('_');
@@ -231,8 +233,8 @@ async function readaudio() {
 			// ------------------------------------------
 			// Way 0
 			
-			// convert the file_url to a blob
-			await fetch(file_url)
+			// Convert the file_url to a blob
+			var text_out = await fetch(file_url)
   				.then(response => response.blob())
 				.then(async function(blob_object) { 
 					console.log("blob_object: ", blob_object); 
@@ -283,8 +285,8 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	// headers = new Headers(headers);
 	
 	let formData = new FormData();
-	// formData.append("file", blob_object, blob_object.name);
-	formData.append("file", blob_object);
+	formData.append("file", blob_object, filename);
+	// formData.append("file", blob_object);
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
@@ -319,9 +321,6 @@ async function send_a_form_w_formElement_using_formData(blob_url_obj) {
 
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	formElement.setAttribute('action', url);
-
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
-	console.log('OPENAI_API_KEY set');
 	
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 	formElement.setAttribute('headers', new Headers(headers));
