@@ -244,6 +244,8 @@ async function readaudio() {
 			// Way 1
 			// var url = 'https://api.openai.com/v1/audio/transcriptions';
 			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			// OR
+			// headers = new Headers(headers);
 			
 			// let form = new FormData();
 			// form.append("file", blob_url, filename);
@@ -275,6 +277,8 @@ async function readaudio() {
 async function send_a_form(blob_url) {
 
 	// Way 0
+
+	
 	// Create <form> element to submit parameters to endpoint
 	var formElement = document.createElement('form');
 	formElement.setAttribute('id', 'formElement_id');
@@ -284,9 +288,14 @@ async function send_a_form(blob_url) {
 	formElement.setAttribute('action', url);
 
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+	console.log('OPENAI_API_KEY set');
 	
-	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-	formElement.setAttribute('headers', headers);
+	// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+	formElement.setAttribute('headers', new Headers(headers));
+
+	formElement.setAttribute('Authorization', 'Bearer ' + OPENAI_API_KEY);
+	formElement.setAttribute('enctype', "multipart/form-data");
+	formElement.setAttribute('target', "_blank");
 	
 	// Just use arrays: each column is a form variable
 	let type_parameters = ['file', 'text', 'text', 'submit'];
