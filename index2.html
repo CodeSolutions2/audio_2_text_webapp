@@ -6,11 +6,14 @@
   <body>
     
 <!-- <input id="mp3name_id" type="text" value="" placeholder="mp3name" rows="10" cols="100" style="display:block; text-align: left; width: 150px;"> -->
+	  
 <label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
+	  
 <br>
+	  
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 
-<form id="formElement_id" name="formElement" action="https://api.openai.com/v1/audio/transcriptions" method="POST" onsubmit="return checkForm(this)">
+<!-- <form id="formElement_id" name="formElement" action="https://api.openai.com/v1/audio/transcriptions" method="POST" onsubmit="return checkForm(this)"> -->
 	
 <br><br>
 
@@ -273,12 +276,12 @@ async function send_a_form() {
 
 	// Way 0
 	// Create <form> element to submit parameters to endpoint
-	
-	// var url = 'https://api.openai.com/v1/audio/transcriptions';
-	// var formElement = document.createElement('form');
-	// formElement.setAttribute('id', 'formElement_id');
-	// formElement.setAttribute('method', 'POST'); 
-	// formElement.setAttribute('action', url);
+	var formElement = document.createElement('form');
+	formElement.setAttribute('id', 'formElement_id');
+	formElement.setAttribute('method', 'POST');
+
+	var url = 'https://api.openai.com/v1/audio/transcriptions';
+	formElement.setAttribute('action', url);
 
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
@@ -308,18 +311,26 @@ async function send_a_form() {
 }  // end of sendreceive_files_GCP_form
 
 
+
+// ----------------------------------------------------
+
 // Add an eventlistener to a button, when the button is clicked, do not redirect AND output the form results
 // Do not redirect page to the page that we want to perform GET,POST requests with
-document.getElementById("formElement_id").addEventListener("onsubmit", (event) => {
-	event.preventDefault();
-});
+// document.getElementById("formElement_id").addEventListener("onsubmit", (event) => {
+// 	event.preventDefault();
+// });
 
 
 // The onsubmit ONLY in 'form action' allows one to call a function after the form is submitted
-function checkForm(thisForm){
-	thisForm.preventDefault();
-}
+// function checkForm(thisForm){
+// 	thisForm.preventDefault();
+// }
 
+
+
+// ----------------------------------------------------
+
+	
 async function get_URLBlob() {
 	
 	const repoOwner = 'CodeSolutions2';
