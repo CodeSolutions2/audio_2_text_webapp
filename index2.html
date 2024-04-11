@@ -239,7 +239,8 @@ async function readaudio() {
 				.then(async function(blob_object) { 
 					console.log("blob_object: ", blob_object); 
 					// var text_out = await send_a_form_w_fetch_using_formData(blob_object);
-					var text_out = send_a_form_w_formElement_using_formData(blob_object);
+					// var text_out = send_a_form_w_formElement_using_formData(blob_object);
+					var text_out = send_a_form_w_formElement_using_input(blob_object);
 					return text_out; })
 				.catch(error => { console.log(error); });
 			
@@ -365,7 +366,7 @@ async function send_a_form_w_formElement_using_formData(blob_object) {
 // ----------------------------------------------------
 
 	
-async function send_a_form_w_formElement_using_input(blob_url_obj) {
+async function send_a_form_w_formElement_using_input(blob_object) {
 
 	// Way 0
 	// Create <form> element to submit parameters to endpoint
