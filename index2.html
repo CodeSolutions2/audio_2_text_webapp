@@ -342,7 +342,9 @@ async function send_a_form_w_formElement_using_formData(blob_url_obj) {
 	// ------------------------
 	// Add formData to the formElement
 	let formData = new FormData();
-	formData.append("file", blob_url_obj, blob_url_obj.name);
+	formData.append("file", blob_url_obj);
+	// formData.append("file", blob_url_obj, blob_url_obj.name);
+	// TypeError: FormData.append: Argument 2 does not implement interface Blob.
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
