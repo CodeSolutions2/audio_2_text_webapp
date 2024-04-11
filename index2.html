@@ -54,7 +54,6 @@ div {position: relative; z-index: 2;},
 <!-- --------------------------------------------------- -->
 	  
 
-<script src=" https://cdn.jsdelivr.net/npm/openai@4.33.0/index.min.js "></script>
 
 	  
 <script>
@@ -117,18 +116,14 @@ async function readaudio() {
 
 			// REST API to convert .mp3 to text
 			
-			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
-			// var url = 'https://api.openai.com/v1/audio/transcriptions';
-			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; // { message: "Could not parse multipart form", type: "invalid_request_error", param: null, … }
-			// var form = {"file": blob_url, 'type': 'mp3', 'model': 'whisper-1'};
-			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
-			// OR
 			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
 			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			// var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
 			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			// { message: "Cannot specify both model and engine", type: "invalid_request_error", param: null, … }
+			
 			// OR
+			
 			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
 			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			// var form = {model: 'whisper-1', audio: blob_url};
@@ -145,14 +140,6 @@ async function readaudio() {
 			
 			// OR
 			
-			// var url = 'https://api.openai.com/v1/audio/transcriptions';
-			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			// var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
-			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
-			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
-			
-			// OR
-			
 			// var url = 'https://api.openai.com/v1/engines/davinci/transcribe';
 			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			// var form = {audio: blob_url};
@@ -161,30 +148,64 @@ async function readaudio() {
 
 			// OR
 
-			var model_name = 'gpt-4';
-			var temperature = 0;
-			var system_content = "You are a helpful assistant";
-			var prompt = "Transcribe the following .mp3 audio: "+blob_url;
-			var assistant_content = "Respond concisely";
-			var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
-  var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
-  var url = 'https://api.openai.com/v1/chat/completions'
-  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
-  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+			// var model_name = 'gpt-4';
+			// var temperature = 0;
+			// var system_content = "You are a helpful assistant";
+			// var prompt = "Transcribe the following .mp3 audio: "+blob_url;
+			// var assistant_content = "Respond concisely";
+			// var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+  			// var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+  			// var url = 'https://api.openai.com/v1/chat/completions'
+  			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+  			// var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
 			// role: "assistant", content: "I'm sorry, but as a text-based AI, I'm unable to process or transcribe audio files."
 
 			// OR
-			const transcript = await transcribe(blob_url);
-			var model_name = 'gpt-4';
-			var temperature = 0;
-			var system_content = "You are a helpful assistant";
-			var assistant_content = "Transcribe the following audio concisely";
-			var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": transcript}, {"role": "assistant", "content": assistant_content}];
-  var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
-  var url = 'https://api.openai.com/v1/chat/completions'
-  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
-  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
 			
+			// https://cdn.jsdelivr.net/npm/openai@4.33.0/index.min.js 
+			// const transcript = await transcribe(blob_url);
+			// var model_name = 'gpt-4';
+			// var temperature = 0;
+			// var system_content = "You are a helpful assistant";
+			// var assistant_content = "Transcribe the following audio concisely";
+			// var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": transcript}, {"role": "assistant", "content": assistant_content}];
+			// var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+			// var url = 'https://api.openai.com/v1/chat/completions'
+			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+			// var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+			// Uncaught ReferenceError: exports is not defined <anonymous> jsdelivr-header.js:7
+
+			// OR
+
+			// Tried audio instead of file
+			// Tried json response instead of multi-part form
+			// var url = 'https://api.openai.com/v1/audio/transcriptions';
+			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			// var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
+			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
+			
+			// OR
+
+			// Tried file instead of audio
+			// Tried multi-part form instead of json response
+			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
+			var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			var form = {"file": blob_url, 'model': 'whisper-1'};
+			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
+			
+			// OR
+
+			// Tried file instead of audio, added a type parameter
+			// Tried multi-part form instead of json response
+			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
+			// var url = 'https://api.openai.com/v1/audio/transcriptions';
+			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; // { message: "Could not parse multipart form", type: "invalid_request_error", param: null, … }
+			// var form = {"file": blob_url, 'type': 'mp3', 'model': 'whisper-1'};
+			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
+			
+			// OR
 
 			// ------------------------------------------
 			
