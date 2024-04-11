@@ -233,7 +233,7 @@ async function readaudio() {
 			// Form submission
 			// ------------------------------------------
 			// Way 0
-			var text_out = await sendreceive_files_GCP_form().then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
+			var text_out = await send_a_form().then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
 			
 
 			// Way 1
