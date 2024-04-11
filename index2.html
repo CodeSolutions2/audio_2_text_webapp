@@ -112,8 +112,8 @@ async function readaudio() {
 
 			// -----------------------------------
 
-			let blob_url0 = Object.values(row.url_name).join();
-			let blob_url = blob_url0.replace(regex, '');
+			// let blob_url0 = Object.values(row.url_name).join();
+			// let blob_url = blob_url0.replace(regex, '');
 			
 			// let blob_url = '@'+Object.values(row.url_name);
 			
@@ -125,17 +125,7 @@ async function readaudio() {
 			
 			// -----------------------------------
 			
-			console.log("blob_url:", blob_url);
-
-			// blob_url needs to be converted into an object
-			
-
-			// -----------------------------------
-			
-			// Correct filename after regex usage
-			filename = blob_url.split('/');
-			filename = filename.pop();
-			console.log("filename:", filename);
+			// console.log("blob_url:", blob_url);
 
 			// -----------------------------------
 
@@ -255,7 +245,7 @@ async function readaudio() {
 			// Form submission
 			// ------------------------------------------
 			// Way 0
-			var text_out = await send_a_form_w_fetch_using_formData(blob_url_obj, filename).catch(error => { console.log(error); });
+			var text_out = await send_a_form_w_fetch_using_formData(blob_url_obj).catch(error => { console.log(error); });
 
 			// Way 1
 			// var text_out = await send_a_form_w_formElement_using_formData(blob_url_obj, filename).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
@@ -290,7 +280,7 @@ async function readaudio() {
 // ----------------------------------------------------
 
 
-async function send_a_form_w_fetch_using_formData(blob_url_obj, filename) {
+async function send_a_form_w_fetch_using_formData(blob_url_obj) {
 
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
@@ -298,7 +288,7 @@ async function send_a_form_w_fetch_using_formData(blob_url_obj, filename) {
 	// headers = new Headers(headers);
 	
 	let formData = new FormData();
-	formData.append("file", blob_url_obj, filename);
+	formData.append("file", blob_url_obj, blob_url_obj.name);
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
@@ -317,7 +307,7 @@ async function send_a_form_w_fetch_using_formData(blob_url_obj, filename) {
 // ----------------------------------------------------
 	
 
-async function send_a_form_w_formElement_using_formData(blob_url_obj, filename) {
+async function send_a_form_w_formElement_using_formData(blob_url_obj) {
 
 	// Way 0
 	// Create <form> element to ONLY a
@@ -352,7 +342,7 @@ async function send_a_form_w_formElement_using_formData(blob_url_obj, filename) 
 	// ------------------------
 	// Add formData to the formElement
 	let formData = new FormData();
-	formData.append("file", blob_url_obj, filename);
+	formData.append("file", blob_url_obj, blob_url_obj.name);
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
@@ -376,7 +366,7 @@ async function send_a_form_w_formElement_using_formData(blob_url_obj, filename) 
 // ----------------------------------------------------
 
 	
-async function send_a_form_w_formElement_using_input(blob_url_obj, filename) {
+async function send_a_form_w_formElement_using_input(blob_url_obj) {
 
 	// Way 0
 	// Create <form> element to submit parameters to endpoint
@@ -412,7 +402,7 @@ async function send_a_form_w_formElement_using_input(blob_url_obj, filename) {
 	// ------------------------
 	// Just use arrays: each column is a form variable
 	let type_parameters = ['file', 'text', 'text', 'submit', 'text', 'text', 'text'];
-	var name_parameters = [filename, 'model', 'language', 'confirm_submit', 'method', 'headers', 'enctype'];
+	var name_parameters = [blob_url_obj.name, 'model', 'language', 'confirm_submit', 'method', 'headers', 'enctype'];
 	var value_parameters = [blob_url_obj, 'whisper-1', 'en', 'Submit', 'POST', headers, 'multipart/form-data'];
 	
 	type_parameters.forEach(async function(type_val, index) {
