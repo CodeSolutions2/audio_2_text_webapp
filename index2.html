@@ -66,12 +66,11 @@ div {position: relative; z-index: 2;},
 
 const outp = document.getElementById('output');
 
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
 // ----------------------------------------------------
 	
 async function readaudio() {
-
-  const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
 	return await get_URLBlob()
 	.then(blob_url_obj_list => { console.log("blob_url_obj_list:", blob_url_obj_list);
@@ -281,7 +280,7 @@ async function readaudio() {
 
 
 async function send_a_form_w_fetch_using_formData(blob_url_obj) {
-
+	
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 	// OR
@@ -384,9 +383,6 @@ async function send_a_form_w_formElement_using_input(blob_url_obj) {
 
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	formElement.setAttribute('action', url);
-
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
-	console.log('OPENAI_API_KEY set');
 	
 	var headers = {'Content-Type': 'multipart/form-data', Authorization: 'Bearer ' + OPENAI_API_KEY};
 	formElement.setAttribute('headers', new Headers(headers));
