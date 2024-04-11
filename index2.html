@@ -78,7 +78,7 @@ async function readaudio() {
 		var dict_out = [];
 		url_list.forEach(async function(row, index) {
 			let filename = Object.values(row.file_name).toString();
-			console.log("filename:", filename);
+			// filename: 2,0,2,4,_,0,3,_,1,3,_,0,9,_,5,8,_,1,3,_,t,e,s,t,1,.,m,p,3
 			
 			let out0 = filename.split('_');
 
@@ -121,6 +121,13 @@ async function readaudio() {
 			// -----------------------------------
 			
 			console.log("blob_url:", blob_url);
+
+			// -----------------------------------
+			
+			// Correct filename after regex usage
+			filename = blob_url.split('/');
+			filename = filename.pop();
+			console.log("filename:", filename);
 
 			// -----------------------------------
 
@@ -282,6 +289,9 @@ async function send_a_form(blob_url) {
 	// Create <form> element to submit parameters to endpoint
 	var formElement = document.createElement('form');
 	// formElement.setAttribute('id', 'formElement_id');
+
+	const formData = new FormData(formElement);
+	
 	formElement.setAttribute('method', 'POST');
 
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
