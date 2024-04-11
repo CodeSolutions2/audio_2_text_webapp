@@ -50,13 +50,20 @@ div {position: relative; z-index: 2;},
   th {border: 1px solid black;padding: 10px 20px;}
 </style>
 
+	  
+<!-- --------------------------------------------------- -->
+	  
+
+<script src=" https://cdn.jsdelivr.net/npm/openai@4.33.0/index.min.js "></script>
+
+	  
 <script>
 
-// ----------------------------------------------------
 
 const outp = document.getElementById('output');
 
 
+// ----------------------------------------------------
 	
 async function readaudio() {
 
@@ -164,6 +171,20 @@ async function readaudio() {
   var url = 'https://api.openai.com/v1/chat/completions'
   var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
   var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+			// role: "assistant", content: "I'm sorry, but as a text-based AI, I'm unable to process or transcribe audio files."
+
+			// OR
+			const transcript = await transcribe(blob_url);
+			var model_name = 'gpt-4';
+			var temperature = 0;
+			var system_content = "You are a helpful assistant";
+			var assistant_content = "Transcribe the following audio concisely";
+			var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": transcript}, {"role": "assistant", "content": assistant_content}];
+  var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+  var url = 'https://api.openai.com/v1/chat/completions'
+  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+			
 
 			// ------------------------------------------
 			
