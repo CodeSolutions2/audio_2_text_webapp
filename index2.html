@@ -181,8 +181,6 @@ async function readaudio() {
 			// ------------------------------------
 			// https://platform.openai.com/docs/guides/speech-to-text/quickstart?lang=curl
 			// ------------------------------------
-			
-			// OR
 
 			// Tried file instead of audio
 			// Tried multi-part form instead of json response
@@ -214,14 +212,19 @@ async function readaudio() {
 			// OR
 
 			// Tring translations
-			var url = 'https://api.openai.com/v1/audio/translations';
-			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; 
-			var form = {"file": blob_url, "model": 'whisper-1'};
-			var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
+			// var url = 'https://api.openai.com/v1/audio/translations';
+			// var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY}; 
+			// var form = {"file": blob_url, "model": 'whisper-1'};
+			// var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
+			// message: "Could not parse multipart form", type: "invalid_request_error", param: null
 			
 			// OR
 
-// "language", "en"
+			var url = 'https://api.openai.com/v1/audio/transcriptions';
+			var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			var form = {"file": blob_url, 'model': 'whisper-1', "language", "en"};
+			var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
+
 
 
 			
