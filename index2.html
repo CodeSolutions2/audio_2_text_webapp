@@ -238,9 +238,9 @@ async function readaudio() {
   				.then(response => response.blob())
 				.then(async function(blob_object) { 
 					console.log("blob_object: ", blob_object); 
-					// var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+					var text_out = await send_a_form_w_fetch_using_formData(blob_object);
 					// var text_out = send_a_form_w_formElement_using_formData(blob_object);
-					var text_out = send_a_form_w_formElement_using_input(blob_object);
+					// var text_out = send_a_form_w_formElement_using_input(blob_object);
 					return text_out; })
 				.catch(error => { console.log(error); });
 			
@@ -285,6 +285,8 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 	// OR
 	// headers = new Headers(headers);
+
+	console.log("filename:", filename);
 	
 	let formData = new FormData();
 	formData.append("file", blob_object, filename);
@@ -299,7 +301,10 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	// ------------------------------------------
 	
 	// Print text part of JSON response only with user message
-	return await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
+	return await fetch(url, options)
+		.then(res => res)
+		.then(res => { console.log(res); return res;})
+		.catch(error => { console.log(error); });
 	
 }
 
@@ -401,7 +406,7 @@ async function send_a_form_w_formElement_using_input(blob_object) {
 	// Just use arrays: each column is a form variable
 	let type_parameters = ['file', 'text', 'text', 'submit', 'text', 'text', 'text'];
 	var name_parameters = [filename, 'model', 'language', 'confirm_submit', 'method', 'headers', 'enctype'];
-	var value_parameters = [blob_object, 'whisper-1', 'en', 'Submit', 'POST', headers, 'multipart/form-data'];
+	var value_parameters = [blob_object, 'whisper-1', 'en', 'Submit', 'POST', JSON.stringify(headers), 'multipart/form-data'];
 	
 	type_parameters.forEach(async function(type_val, index) {
 		let type = type_val;
