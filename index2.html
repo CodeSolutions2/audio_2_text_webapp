@@ -395,7 +395,7 @@ async function send_a_form_w_formElement_using_input(blob_url_obj, filename) {
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	console.log('OPENAI_API_KEY set');
 	
-	var headers = {Content-Type: 'multipart/form-data', Authorization: 'Bearer ' + OPENAI_API_KEY};
+	var headers = {'Content-Type': 'multipart/form-data', Authorization: 'Bearer ' + OPENAI_API_KEY};
 	formElement.setAttribute('headers', new Headers(headers));
 
 	formElement.setAttribute('enctype', 'multipart/form-data');
