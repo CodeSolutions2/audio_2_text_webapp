@@ -127,25 +127,46 @@ async function readaudio() {
 			// var form = {model: 'whisper-1', audio: blob_url};
 			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			// { message: "Cannot specify both model and engine", type: "invalid_request_error", param: null, … }
+			
 			// OR
+			
 			// var url = 'https://api.openai.com/v1/engines/whisper-1/completions';
 			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			// var form = {prompt: 'Transcribe the following audio:', audio: blob_url};
 			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			// message: "Invalid URL (POST /v1/engines/whisper-1/completions)", type: "invalid_request_error", param: null,
+			
 			// OR
+			
 			// var url = 'https://api.openai.com/v1/audio/transcriptions';
 			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 			// var form = {model: 'whisper-1', prompt: 'Transcribe the following audio:', audio: blob_url};
 			// var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
 			// 1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)
+			
 			// OR
-			var url = 'https://api.openai.com/v1/engines/davinci/transcribe';
-			var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-			var form = {audio: blob_url};
-			var options = {method : 'post', headers: headers, body : JSON.stringify(form)};
+			
+			// var url = 'https://api.openai.com/v1/engines/davinci/transcribe';
+			// var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+			// var form = {audio: blob_url};
+			// var options = {method : 'POST', headers: headers, body : JSON.stringify(form)};
+			// message: "The model `davinci` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations", type: "invalid_request_error", code: "model_not_found", … }
 
-	
+			// OR
+
+			var model_name = 'gpt-4';
+			var temperature = 0;
+			var system_content = "You are a helpful assistant";
+			var prompt = "Transcribe the following .mp3 audio: "+blob_url;
+			var assistant_content = "Respond concisely";
+			var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+  var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+  var url = 'https://api.openai.com/v1/chat/completions'
+  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+			// ------------------------------------------
+			
 			// Print text part of JSON response only with user message
 			const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
 			
