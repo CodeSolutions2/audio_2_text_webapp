@@ -64,8 +64,15 @@ div {position: relative; z-index: 2;},
 const outp = document.getElementById('output');
 
 // Create <form> element to submit parameters to endpoint
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+var url = 'https://api.openai.com/v1/audio/transcriptions';
+var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 var formElement = document.createElement('form');
 formElement.setAttribute('id', 'formElement_id');
+formElement.setAttribute('method', 'POST'); 
+formElement.setAttribute('action', url);
+formElement.setAttribute('headers', headers);
+
 	
 // ----------------------------------------------------
 	
@@ -275,14 +282,7 @@ async function readaudio() {
 async function send_a_form() {
 
 	// Way 0
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
-
-	var url = 'https://api.openai.com/v1/audio/transcriptions';
-	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
 	
-	formElement.setAttribute('method', 'POST'); 
-	formElement.setAttribute('action', url);
-	formElement.setAttribute('headers', headers);
 
 	// Just use arrays: each column is a form variable
 	let type_parameters = ['file', 'text', 'text', 'submit'];
