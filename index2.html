@@ -72,16 +72,14 @@ const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
 async function readaudio() {
 	
-	return await get_URLBlob()
-	.then(blob_url_obj_list => { console.log("blob_url_obj_list:", blob_url_obj_list);
+	return await get_file_objects()
+	.then(file_objects => { console.log("file_objects:", file_objects);
 		var dict_out = [];
-		blob_url_obj_list.forEach(async function(row, index) {
-			let blob_url_obj = row;
-			console.log("blob_url_obj:", blob_url_obj);
-	
-			// let filename = Object.values(row.file_name).toString();
-			// filename: 2,0,2,4,_,0,3,_,1,3,_,0,9,_,5,8,_,1,3,_,t,e,s,t,1,.,m,p,3
-			let filename = blob_url_obj.name;
+		file_objects.forEach(async function(file_object, index) {
+			
+			console.log("file_object:", file_object);
+			
+			let filename = file_object.name;
 			console.log("filename:", filename);
 			
 			let out0 = filename.split('_');
@@ -111,21 +109,9 @@ async function readaudio() {
 
 			// -----------------------------------
 
-			// let blob_url0 = Object.values(row.url_name).join();
-			// let blob_url = blob_url0.replace(regex, '');
+			let file_url = file_object.url;
+			console.log("file_url:", file_url);
 			
-			// let blob_url = '@'+Object.values(row.url_name);
-			
-			// let blob_url = '@'+Object.values(row.url_name).toString(); // TypeError: can't convert undefined to object  // blob_url: @h,t,t,p,s,:,/,/,r,a,w,.,g,i,t,h,u,b,u,s,e,r,c,o,n,t,e,n,t,.,c,o,m,/,C,o,d,e,S,o,l,u,t,i,o,n,s,2,/,a,u,d,i,o,_,2,_,t,e,x,t,_,w,e,b,a,p,p,/,m,a,i,n,/,2,0,2,4,_,0,3,_,1,3,_,0,9,_,5,7,_,5,1,_,t,e,s,t,0,.,m,p,3
-			
-			// let blob_url = '@/CodeSolutions2/audio_2_text_webapp/main/'+Object.values(row.file_name).toString(); // TypeError: can't convert undefined to object
-
-			//let blob_url = '@/run/media/oem2/3365-6330/audio_run_mp3/2024_03_13_09_57_51_test0.mp3';  // message: "1 validation error for Request\nbody -> file\n  field required (type=value_error.missing)", type: "invalid_request_error"
-			
-			// -----------------------------------
-			
-			// console.log("blob_url:", blob_url);
-
 			// -----------------------------------
 
 			// REST API to convert .mp3 to text
@@ -244,10 +230,20 @@ async function readaudio() {
 			// Form submission
 			// ------------------------------------------
 			// Way 0
+			
+			// convert the file_url to a blob
+			await fetch(file_url)
+  				.then(response => response.blob())
+				.then(async function(blob_object) { 
+					console.log("blob_object: ", blob_object); 
+					var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+					return text_out; })
+				.catch(error => { console.log(error); });
+			
 			// var text_out = await send_a_form_w_fetch_using_formData(blob_url_obj).catch(error => { console.log(error); });
 
 			// Way 1
-			var text_out = await send_a_form_w_formElement_using_formData(blob_url_obj).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
+			// var text_out = await send_a_form_w_formElement_using_formData(blob_url_obj).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
 
 			// Way 2
 			// var text_out = await send_a_form_w_formElement_using_input(blob_url_obj).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
@@ -279,7 +275,7 @@ async function readaudio() {
 // ----------------------------------------------------
 
 
-async function send_a_form_w_fetch_using_formData(blob_url_obj) {
+async function send_a_form_w_fetch_using_formData(blob_object) {
 	
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
@@ -287,8 +283,8 @@ async function send_a_form_w_fetch_using_formData(blob_url_obj) {
 	// headers = new Headers(headers);
 	
 	let formData = new FormData();
-	// formData.append("file", blob_url_obj, blob_url_obj.name);
-	formData.append("file", blob_url_obj);
+	// formData.append("file", blob_object, blob_object.name);
+	formData.append("file", blob_object);
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
@@ -443,27 +439,25 @@ async function send_a_form_w_formElement_using_input(blob_url_obj) {
 // ----------------------------------------------------
 
 	
-async function get_URLBlob() {
+async function get_file_objects() {
 	
 	const repoOwner = 'CodeSolutions2';
 	const repoName = 'audio_2_text_webapp';
 	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
 
-	// url_vec should be a dictionary
-	var url_vec = [];
+	var file_objects = [];
 	var date = [];
 	await fetch(url).then(res => res.json()).then(data => {
 		    data.forEach(file => {
 		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
-			// url_vec.push({file_name: file.name, url_name: file.download_url});
-			url_vec.push(file);
+			file_objects.push(file);
 		      }
 		    });
 		  }).catch(error => { outp.innerHTML += error; });
 	
-    	console.log('url_vec: ', url_vec);
+    	console.log('file_objects: ', file_objects);
 	
-	return url_vec;
+	return file_objects;
 }
 
 
