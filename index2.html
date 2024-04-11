@@ -248,10 +248,10 @@ async function readaudio() {
 			var text_out = await send_a_form_w_fetch_using_formData(blob_url_obj).catch(error => { console.log(error); });
 
 			// Way 1
-			// var text_out = await send_a_form_w_formElement_using_formData(blob_url_obj, filename).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
+			// var text_out = await send_a_form_w_formElement_using_formData(blob_url_obj).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
 
 			// Way 2
-			// var text_out = await send_a_form_w_formElement_using_input(blob_url_obj, filename).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
+			// var text_out = await send_a_form_w_formElement_using_input(blob_url_obj).then(res => { console.log(res); return res; }).catch(error => { console.log(error); });
 
 			// ------------------------------------------
 			
@@ -288,7 +288,8 @@ async function send_a_form_w_fetch_using_formData(blob_url_obj) {
 	// headers = new Headers(headers);
 	
 	let formData = new FormData();
-	formData.append("file", blob_url_obj, blob_url_obj.name);
+	// formData.append("file", blob_url_obj, blob_url_obj.name);
+	formData.append("file", blob_url_obj);
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
