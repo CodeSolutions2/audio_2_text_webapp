@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+<!-- <input id="mp3name_id" type="text" value="" placeholder="mp3name" rows="10" cols="100" style="display:block; text-align: left; width: 150px;"> -->
+	  
+<label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
+	  
+<br>
+	  
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+
+<!-- <form id="formElement_id" name="formElement" action="https://api.openai.com/v1/audio/transcriptions" method="POST" onsubmit="return checkForm(this)"> -->
+	
+<br><br>
+
+<button id="readaudio" onclick="readaudio()">Transcribe audios</button>
+
+<!-- View results -->
+<div id="output" style="font-family:courier;font-size:24px;height:300px"></div>
+
+
+<!-- View results -->
+<div align="left">
+    <table style='text-align: center; width: 600px; display:block'>
+      <tr>
+        <td>
+		<label id="journal_label" style="display:block">Journal text</label>
+      		<br>
+      		<textarea id="journal" rows="35" cols="100" placeholder="Journal text" style="display:block"></textarea>
+	</td>
+        <td>
+		<label id="chatbot_label" style="display:block">Chatbot area</label>
+      		<br>
+      		<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+	</td>
+      </tr>
+    </table>
+</div>  
+    
+
+
+
+	  
+<!-- --------------------------------------------------- -->
+
+<!-- CSS -->
+<style>
+div {position: relative; z-index: 2;},
+  table {border-collapse: collapse; position: absolute;}
+  td,
+  th {border: 1px solid black;padding: 10px 20px;}
+</style>
+
+	  
+<!-- --------------------------------------------------- -->
+	  
+
+
+	  
+<script>
+
+
+const outp = document.getElementById('output');
+
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+
+var filename = '';
+	
+// ----------------------------------------------------
+	
+async function readaudio() {
+	
+	return await get_file_objects()
+	.then(file_objects => { console.log("file_objects:", file_objects);
+		var dict_out = [];
+		file_objects.forEach(async function(file_object, index) {
+			
+			console.log("file_object:", file_object);
+			
+			filename = file_object.name;
+			console.log("filename:", filename);
+			
+			let out0 = filename.split('_');
+
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+			let YYYY = out0.slice(0,1).toString();
+			let MM = out0.slice(1,2).toString();
+			let DD = out0.slice(2,3).toString();
+			let HH = out0.slice(3,4).toString();
+			let mm = out0.slice(4,5).toString();
+			let ss = out0.slice(5,6).toString();
+
+			const regex = /(,)+/g;
+			
+			YYYY = YYYY.replace(regex, '');
+			MM = MM.replace(regex, '');
+			DD = DD.replace(regex, '');
+			HH = HH.replace(regex, '');
+			mm = mm.replace(regex, '');
+			ss = ss.replace(regex, '');
+			console.log("YYYY:", YYYY);
+			console.log("MM:", MM);
+			console.log("DD:", DD);
+			console.log("HH:", HH);
+			console.log("mm:", mm);
+			console.log("ss:", ss);
+
+			// -----------------------------------
+
+			let file_url = file_object.url;
+			console.log("file_url:", file_url);
+			
+			// -----------------------------------
+
+			// REST API to convert .mp3 to text
+			
+			// ------------------------------------------
+			// Form submission
+			// ------------------------------------------
+			// Way 0
+			
+			// Convert the file_url to a blob
+			var text_out = await fetch(file_url)
+  				.then(response => response.blob())
+				.then(async function(blob_object) { 
+					console.log("blob_object: ", blob_object); // blob_object is json;
+					
+					var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+					return text_out; })
+				.catch(error => { console.log(error); });
+
+			// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+
+			// ------------------------------------------
+			
+			// Print text part of JSON response only with user message
+			// const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
+			
+			// ------------------------------------------
+			
+			// Create a dictionary w/ date, time, and text
+			dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
+
+			// Processing information
+			outp.innerHTML = 'Processing audio';
+		  });
+
+		   outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; 
+	});
+}
+
+			
+
+			
+
+
+	
+// ----------------------------------------------------
+
+
+async function send_a_form_w_fetch_using_formData(blob_object) {
+	
+	var url = 'https://api.openai.com/v1/audio/transcriptions';
+	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+	// OR
+	// headers = new Headers(headers);
+
+	console.log("filename:", filename);
+
+	// with a mime-encoded audio file
+	
+	let formData = new FormData();
+	formData.append("file", blob_object, filename);
+	// formData.append("file", blob_object);
+	formData.append("model", "whisper-1");
+	formData.append("language", "en");
+	
+	var options = {method : 'POST', headers: headers, body : formData};
+	
+	// Print text part of JSON response only with user message
+	return await fetch(url, options)
+		.then(res => res)
+		.then(res => { console.log(res); return res;})
+		.catch(error => { console.log(error); });
+	
+}
+
+	
+// ----------------------------------------------------
+	
+
+
+
+// ----------------------------------------------------
+
+	
+async function get_file_objects() {
+	
+	const repoOwner = 'CodeSolutions2';
+	const repoName = 'audio_2_text_webapp';
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	var file_objects = [];
+	var date = [];
+	await fetch(url).then(res => res.json()).then(data => {
+		    data.forEach(file => {
+		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
+			file_objects.push(file);
+		      }
+		    });
+		  }).catch(error => { outp.innerHTML += error; });
+	
+    	console.log('file_objects: ', file_objects);
+	
+	return file_objects;
+}
+
+
+// ----------------------------------------------------
+
+
+  
+</script>
+
+  </body>
+</html>
