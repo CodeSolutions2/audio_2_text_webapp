@@ -127,20 +127,30 @@ async function readaudio() {
 			// ------------------------------------------
 			// Form submission
 			// ------------------------------------------
-			// Way 0
+			// Way 0: read in the mp3 as a blob_object specifed from the file_object - it says that the blob is JSON
 			
 			// Convert the file_url to a blob
-			var text_out = await fetch(file_url)
-  				.then(response => response.blob())
-				.then(async function(blob_object) { 
-					console.log("blob_object: ", blob_object); // blob_object is json;
+			// var text_out = await fetch(file_url)
+  			// 	.then(response => response.blob())
+			// 	.then(async function(blob_object) { 
+				// 	console.log("blob_object: ", blob_object); // blob_object is json;
 					
-					var text_out = await send_a_form_w_fetch_using_formData(blob_object);
-					return text_out; })
-				.catch(error => { console.log(error); });
+			// 		var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+				// 	return text_out; })
+				// .catch(error => { console.log(error); });
 
 			// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+			// Way 1: make mp3 a stream
+			
+			var audio = new Audio(file_url);
+			// audio.play();
+			document.body.appendChild(audio);
 
+			var audio_data_in_stream_format = audio.captureStream();
+			let blob_object = new Blob(audio_data_in_stream_format, { type: "audio/mp3"});
+			var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+		
+			
 			// ------------------------------------------
 			
 			// Print text part of JSON response only with user message
