@@ -19,9 +19,7 @@
 
 <button id="readaudio" onclick="readaudio()">Transcribe audios</button>
 
-<audio controls>
-    <source src="2024_03_13_09_57_51_test0.mp3" type="audio/mpeg">
-</audio>
+<!-- <audio controls><source src="2024_03_13_09_57_51_test0.mp3" type="audio/mpeg"></audio> -->
 
 
 	  
@@ -117,8 +115,8 @@ async function readaudio() {
 
 			// -----------------------------------
 
-			let file_url = file_object.download_url;
-			console.log("file_url:", file_url);
+			let file_download_url = file_object.download_url;
+			console.log("file_download_url:", file_download_url);
 			
 			// -----------------------------------
 
@@ -130,27 +128,34 @@ async function readaudio() {
 			// Way 0: read in the mp3 as a blob_object specifed from the file_object - it says that the blob is JSON
 			
 			// Convert the file_url to a blob
-			// var text_out = await fetch(file_url)
-  			// 	.then(response => response.blob())
-			// 	.then(async function(blob_object) { 
-				// 	console.log("blob_object: ", blob_object); // blob_object is json;
+			var text_out = await fetch(file_download_url)
+  				.then(response => response.blob())
+			 	.then(async function(blob_object) { 
+				 	console.log("blob_object: ", blob_object); // blob_object is json;
 					
-			// 		var text_out = await send_a_form_w_fetch_using_formData(blob_object);
-				// 	return text_out; })
-				// .catch(error => { console.log(error); });
+			 		var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+				 	return text_out; })
+				.catch(error => { console.log(error); });
 
 			// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
 			// Way 1: make mp3 a stream
+
+			audioElement = document.createElement('audio');
+			audioElement.setAttribute("src", file_download_url);
+			audioElement.setAttribute("type", "audio/mp3");
+			// OR
+			// audioElement.innerHTML = '<source src='+file_download_url+' type="audio/mpeg" />'
+			// OR
+			// var audioElement = new Audio(file_download_url);
 			
-			var audio = new Audio(file_url);
 			// audio.play();
-			document.body.appendChild(audio);
+			document.body.appendChild(audioElement);
+			console.log("audioElement: ", audioElement);
 
-			console.log("audio: ", audio);
+			// Obtain the stream element of the audioElement (it is equivalent to )
+			// audioElement.currentSrc
 
-			// var audio_data_in_stream_format = audio.captureStream();
-			let blob_object = new Blob(audio, { type: "audio/mp3"});
-			var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+			// var text_out = await send_a_form_w_fetch_using_formData(blob_object);
 		
 			
 			// ------------------------------------------
