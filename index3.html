@@ -139,9 +139,9 @@ async function readaudio() {
 			 	.then(async function(blob_object) { 
 				 	console.log("blob_object: ", blob_object); // blob_object is json;
 					const reader = new FileReader();
-					reader.onload = () => { const bytes = new Uint8Array(reader.result); };
+					// reader.onload = () => { const bytes = new Uint8Array(reader.result); };
 					// OR
-					// reader.onload = function(e) { const bytes = new Uint8Array(e.target.result); };
+					reader.onload = function(e) { const bytes = new Uint8Array(e.target.result); };
 					reader.readAsArrayBuffer(blob_object); 
 				})
 				// Return the promise
