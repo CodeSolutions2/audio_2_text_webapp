@@ -1,3 +1,0 @@
-name = "OpenAI"
-description = "Attempt to use OpenAI python with PyScript"
-packages = ["openai"]
