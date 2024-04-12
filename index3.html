@@ -143,7 +143,7 @@ async function readaudio() {
 					reader.readAsArrayBuffer(blob_object); 
 					return reader;
 				})
-				.then(async function(reader) { console.log("reader: ", reader); var blob_object2 = new Blob(reader), {type: "audio/mp3"}); })
+				.then(async function(reader) { console.log("reader: ", reader); var blob_object2 = new Blob(reader), {type: "audio/mp3"}); return blob_object2; })
 				.then(async function(blob_object2) {
 					console.log("blob_object2: ", blob_object2);
 					// reader is the blob_object converted in bytes, and saved in a file_object that is used to read data locally (reader)
