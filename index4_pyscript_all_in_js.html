@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+
+
+<!-- This script tag bootstraps PyScript -->
+<script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+
+<!-- ------------------------------ -->
+    
+<py-env>
+  - openai
+</py-env>
+  
+<!-- ------------------------------ -->
+
+<label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
+	  
+<br>
+	  
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+	
+<br><br>
+
+<!-- <button id="run" onclick="run()">Transcribe audio</button> -->
+    
+<!-- View results -->
+<div id="output" style="font-family:courier;font-size:24px;height:300px"></div>
+	
+<script>
+const outp = document.getElementById('output');
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+</script>
+
+<py-script>
+  import openai
+
+  from pyodide.http import open_url
+  from js import OPENAI_API_KEY
+
+  url = "https://raw.githubusercontent.com/CodeSolutions2/audio_2_text_webapp/main/2024_03_13_09_58_13_test1.mp3"
+  audio_file = open_url(url)
+
+
+  client = OpenAI(api_key = OPENAI_API_KEY)
+  transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
+  pyscript.write("output", transcription)
+  
+</py-script>
+
+    
+
+  </body>
+</html>
