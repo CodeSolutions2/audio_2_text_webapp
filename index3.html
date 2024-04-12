@@ -57,6 +57,10 @@ div {position: relative; z-index: 2;},
   table {border-collapse: collapse; position: absolute;}
   td,
   th {border: 1px solid black;padding: 10px 20px;}
+audio {
+    position: absolute;
+    top: 100px;
+}
 </style>
 
 	  
@@ -74,6 +78,7 @@ const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 var filename = '';
 
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
 var audioElement = document.createElement('audio');
 audioElement.setAttribute("controls", true);
 audioElement.setAttribute("type", "audio/mpeg");
