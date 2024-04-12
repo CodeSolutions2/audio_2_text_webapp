@@ -137,8 +137,14 @@ async function readaudio() {
 				 	console.log("blob_object: ", blob_object); // blob_object is json;
 				
 					const reader = new FileReader();
-					reader.onload = () => {const bytes = new Uint8Array(reader.result); resolve(bytes); };
-					reader.readAsArrayBuffer(blob_object); return reader;
+					// reader.onload = () => {const bytes = new Uint8Array(reader.result); };
+					// OR
+					reader.onload = function(e) { const bytes = new Uint8Array(e.target.result); };
+					reader.readAsArrayBuffer(blob_object); 
+					
+
+					
+					return reader;
 				})
 				.then(async function(reader) {
 					console.log("reader: ", reader);
@@ -149,8 +155,8 @@ async function readaudio() {
 
 			// Response { type: "cors", url: "https://api.openai.com/v1/audio/transcriptions", redirected: false, status: 400, ok: false, statusText: "", headers: Headers(2), body: ReadableStream, bodyUsed: false }
 			// Way 1: make mp3 a stream
-			// audioElement.src = file_download_url;
-			audioElement.setAttribute("src", file_download_url);
+			audioElement.src = file_download_url;
+			// audioElement.setAttribute("src", file_download_url);
 			
 			// OR
 			// audioElement.innerHTML = '<source src='+file_download_url+' type="audio/mpeg" />'
