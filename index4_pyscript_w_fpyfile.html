@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+
+
+
+<!-- ------------------------------ -->
+
+<!-- PyScript CSS -->
+<link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    
+<!-- CSS for examples -->
+<!-- <link rel="stylesheet" href="./assets/css/examples.css" /> -->
+
+<!-- This script tag bootstraps PyScript -->
+<script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    
+<!-- ------------------------------ -->
+    
+<script>
+  
+</script>
+
+<!-- ------------------------------ -->  
+
+<div id="python_source_file">
+    <h3>Click on button to run the python code</h3>
+    <input type="text" id="txt-url" class="py-input" size="70" />
+    <button type="submit" id="btn-load" class="py-button" py-click="loadFromURL">Run code</button>
+</div>
+
+<div id="python-output" hidden>
+    <h3>Output</h3>
+    <div id="python-output-inner"></div>
+</div>
+
+<section class="pyscript">
+    <script type="py" src="./main.py" config="./pyscript.toml"></script>
+</section>
+
+  </body>
+</html>
