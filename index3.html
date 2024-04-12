@@ -146,8 +146,10 @@ async function readaudio() {
 			// audio.play();
 			document.body.appendChild(audio);
 
-			var audio_data_in_stream_format = audio.captureStream();
-			let blob_object = new Blob(audio_data_in_stream_format, { type: "audio/mp3"});
+			console.log("audio: ", audio);
+
+			// var audio_data_in_stream_format = audio.captureStream();
+			let blob_object = new Blob(audio, { type: "audio/mp3"});
 			var text_out = await send_a_form_w_fetch_using_formData(blob_object);
 		
 			
