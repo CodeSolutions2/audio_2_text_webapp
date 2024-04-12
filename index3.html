@@ -73,6 +73,9 @@ const outp = document.getElementById('output');
 const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 var filename = '';
+
+var audioElement = document.createElement('audio');
+audioElement.setAttribute("type", "audio/mp3");
 	
 // ----------------------------------------------------
 	
@@ -132,17 +135,23 @@ async function readaudio() {
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
 				 	console.log("blob_object: ", blob_object); // blob_object is json;
-					
-			 		var text_out = await send_a_form_w_fetch_using_formData(blob_object);
+				
+					const reader = new FileReader();
+					reader.onload = () => {const bytes = new Uint8Array(reader.result); resolve(bytes); };
+					reader.readAsArrayBuffer(blob_object); return reader;
+				})
+				.then(async function(reader) {
+					console.log("reader: ", reader);
+					// reader is the blob_object converted in bytes, and saved in a file_object that is used to read data locally (reader)
+			 		var text_out = await send_a_form_w_fetch_using_formData(reader);
 				 	return text_out; })
 				.catch(error => { console.log(error); });
 
-			// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+			// Response { type: "cors", url: "https://api.openai.com/v1/audio/transcriptions", redirected: false, status: 400, ok: false, statusText: "", headers: Headers(2), body: ReadableStream, bodyUsed: false }
 			// Way 1: make mp3 a stream
-
-			audioElement = document.createElement('audio');
+			// audioElement.src = file_download_url;
 			audioElement.setAttribute("src", file_download_url);
-			audioElement.setAttribute("type", "audio/mp3");
+			
 			// OR
 			// audioElement.innerHTML = '<source src='+file_download_url+' type="audio/mpeg" />'
 			// OR
@@ -152,7 +161,10 @@ async function readaudio() {
 			document.body.appendChild(audioElement);
 			console.log("audioElement: ", audioElement);
 
-			// Obtain the stream element of the audioElement (it is equivalent to )
+
+			
+
+			// Obtain the stream element of the audioElement (it is equivalent to file_object.download_url)
 			// audioElement.currentSrc
 
 			// var text_out = await send_a_form_w_fetch_using_formData(blob_object);
