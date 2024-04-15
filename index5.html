@@ -181,15 +181,15 @@ async function readaudio() {
 				.then(async function(file_blob_object2) {
 
 					// One can send a blob_object, file_blob_object, or ReadableStream to the API
-				 	console.log("blob_object2: ", blob_object2);
+				 	// console.log("blob_object2: ", blob_object2);
 					// OR
-				 	//   // gives 400 REST API error
+				 	// const stream = file_blob_object2.stream();  // gives 400 REST API error
 					// OR
 					// the input needs to be a readable stream ( body: ReadableStream, bodyUsed: false )
-					const stream2 = new Response(blob_object2).body;
+					const stream2 = new Response(file_blob_object2).body;
 					console.log("stream2: ", stream2);
 					// OR
-					const stream = new Response(blob_object2.stream());
+					const stream = new Response(file_blob_object2.stream());
 					console.log("stream: ", stream);
 					return stream;
 				})
