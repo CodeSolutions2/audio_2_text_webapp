@@ -230,10 +230,13 @@ async function readFileAsDataURL(file_object) {
 	return await new Promise((resolve) =>  {
 		const reader = new FileReader();
 		reader.onload = (event) => resolve(reader.result);
+		
+		// ------------------
 		reader.readAsDataURL(file_object.download_url);
 		// OR
 		// reader.readAsDataURL(file_object);
 		// TypeError: FileReader.readAsDataURL: Argument 1 does not implement interface Blob.
+		// ------------------
 	});
 	// it returns arraryBuffer
 }
