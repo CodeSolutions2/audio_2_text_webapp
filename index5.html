@@ -184,13 +184,16 @@ async function readaudio() {
 				 	//   // gives 400 REST API error
 					// OR
 					// the input needs to be a readable stream ( body: ReadableStream, bodyUsed: false )
-					const stream = blob_object2.stream();
+					// const stream2 = new Response(blob_object2).body;
+					// console.log("stream2: ", stream2);
+					// OR
+					const stream = new Response(blob_object2.stream());
 					console.log("stream: ", stream);
-
-					const stream2 = new Response(blob).body;
-					console.log("stream2: ", stream2);
-					
-				 	var text_out = await send_a_form_w_fetch_using_formData(stream2);
+					return stream;
+				})
+			.then((response) => response.blob())
+			.then((stream_blob_object) => {
+				 	var text_out = await send_a_form_w_fetch_using_formData(stream_blob_object);
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
