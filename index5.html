@@ -163,15 +163,16 @@ async function readaudio() {
 					return bytes;
 				})
 				.then(bytes => { console.log("bytes: ", bytes); 
-				 	return new Blob(bytes, {type: "audio/mp3"});
+				 	// return new Blob(bytes, {type: "audio/mp3"});
+				 	return new Blob(bytes, {type: "audio/mpeg"});
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
-					return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
+					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
+					return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
 				})
 				.then(async function(file_blob_object2) {
 				 	console.log("file_blob_object2: ", file_blob_object2);
-					// reader is the blob_object converted in bytes, and saved in a file_object that is used to read data locally (reader)
 				 	var text_out = await send_a_form_w_fetch_using_formData(file_blob_object2);
 				 	return text_out; 
 				})
@@ -225,7 +226,8 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
-	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+	var headers = {"Content-Type": "multipart/form-data", 
+		       "Authorization": 'Bearer ' + OPENAI_API_KEY};
 	// headers = new Headers(headers);
 
 	console.log("filename:", filename);
@@ -236,7 +238,11 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
-	var options = {method: 'POST', headers: headers, body: formData};
+	var options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       credentials: "include", 
+		       redirect: "follow"};
 	
 	// Print text part of JSON response only with user message
 	return await fetch(url, options)
