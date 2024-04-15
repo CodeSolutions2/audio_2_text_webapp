@@ -177,36 +177,6 @@ async function readaudio() {
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
-
-
-
-      // ------------------------------------------
-      
-      // Way 1: read in the mp3 with file_download_url -->  convert to bytes (arrayBuffer) --> read in arrayBuffer using a local file --> convert to blob_object again --> put blob_object into a file --> send to endpoint
-
-			
-      // const reader = new FileReaderSync();
-      // FileReaderSync is not recognized by the browser, so FileReader has to be used	
-      // const arrayBuffer = reader.readAsDataURL(file_download_url);
-      
-	// OR
-			
-	// await readFileAsDataURL(file_object)
-	// .then(async function(arrayBuffer) { 
-		// console.log(arrayBuffer); 
-	// })
-	// ***[1] Check and see if arrayBuffer has values using download_url, instead of the file_object blob
-
-	// [0] used file_download_url (string) : returned error
-	// TypeError: FileReader.readAsDataURL: Argument 1 is not an object.
-	
-	// [1] Used the file_object: returned error
-	// reader.readAsDataURL(file_object);
-	// TypeError: FileReader.readAsDataURL: Argument 1 does not implement interface Blob.
-
-	// [2] Returned back to the original configuration, where one needs to use a blob_object as input to obtain bytes
-	// SOLUTION: use reader.readAsDataURL instead of reader.readAsArrayBuffer
-			
       
       // ------------------------------------------
 
@@ -216,21 +186,6 @@ async function readaudio() {
 			console.log("audioElement: ", audioElement);
 
       // ------------------------------------------
-
-			
-
-			// Obtain the stream element of the audioElement (it is equivalent to file_object.download_url)
-			// audioElement.currentSrc
-
-			// var text_out = await send_a_form_w_fetch_using_formData(blob_object);
-		
-			
-			// ------------------------------------------
-			
-			// Print text part of JSON response only with user message
-			// const text_out = await fetch(url, options).then(res => res.json()).then(res => { console.log(JSON.parse(JSON.stringify(res))); return JSON.parse(JSON.stringify(res))}).catch(error => { console.log(error); });
-			
-			// ------------------------------------------
 			
 			// Create a dictionary w/ date, time, and text
 			dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
@@ -259,7 +214,7 @@ async function readFileAsDataURL(blob_object) {
 		
 		// ------------------
 	});
-	// it returns arraryBuffer
+	// it returns encoded string data in base64 format
 }
 
 	
@@ -270,11 +225,9 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", "Authorization": 'Bearer ' + OPENAI_API_KEY};
-	// OR
-	// headers = new Headers(headers);
+	headers = new Headers(headers);
 
 	console.log("filename:", filename);
-
 	
 	let formData = new FormData();
 	formData.append("file", blob_object, filename);
@@ -282,7 +235,7 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	formData.append("model", "whisper-1");
 	formData.append("language", "en");
 	
-	var options = {method : 'POST', headers: headers, body : formData};
+	var options = {method: 'POST', headers: headers, body: formData};
 	
 	// Print text part of JSON response only with user message
 	return await fetch(url, options)
