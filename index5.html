@@ -139,37 +139,56 @@ async function readaudio() {
 				})
 				.then(async function(base64_string) {
 					console.log("base64_string: ", base64_string);
+
+					// Follow the process on https://www.base64encode.org/enc/map/, to convert base64_string to ASCII
+					
 					// mimeString = "audio/mpeg"
 
-					const binaryString = atob(base64_string);
-					console.log("binaryString: ", binaryString);
+					// remove header info
+					const regex = /(data:audio/mpeg;base64,)/g;
+					base64_string = base64_string.replace(regex, '');
+					console.log("base64_string: ", base64_string);
+
+					
+					// Decode the string
+					// const binaryString = atob(base64_string);
+					// console.log("binaryString: ", binaryString);
 
 					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
-					var character_array = binaryString.split('');
-					console.log("character_array: ", character_array);
 
-					// map each character to a number code
-					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
-					console.log("byteArray: ", byteArray);
+
 					
-					const bytes = new Uint8Array(byteArray);
-					console.log("bytes: ", bytes);
-					return bytes;
+
+
+
+					// var character_array = base64_string.split('');
+					// var character_array = binaryString.split('');
+					// console.log("character_array: ", character_array);
+
+
+					
+					// map each character to a number code
+					// var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
+					// console.log("byteArray: ", byteArray);
+					
+					// const bytes = new Uint8Array(byteArray);
+					// console.log("bytes: ", bytes);
+					// return bytes;
 				})
-				.then(bytes => { console.log("bytes: ", bytes); 
-					return new Blob(bytes, {type: "audio/mp3"});
-				})
-				.then(async function(blob_object2) { 
-					console.log("blob_object2: ", blob_object2); 
-					return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
-				})
-				.then(async function(file_blob_object2) {
-					console.log("file_blob_object2: ", file_blob_object2);
+				// .then(bytes => { console.log("bytes: ", bytes); 
+				// 	return new Blob(bytes, {type: "audio/mp3"});
+				// })
+				// .then(async function(blob_object2) { 
+				// 	console.log("blob_object2: ", blob_object2); 
+				// 	return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
+				// })
+				// .then(async function(file_blob_object2) {
+				// 	console.log("file_blob_object2: ", file_blob_object2);
 					// reader is the blob_object converted in bytes, and saved in a file_object that is used to read data locally (reader)
-					var text_out = await send_a_form_w_fetch_using_formData(file_blob_object2);
-					return text_out; 
-				})
-				.catch(error => { console.log(error); });
+				// 	var text_out = await send_a_form_w_fetch_using_formData(file_blob_object2);
+				// 	return text_out; 
+				// })
+				// .catch(error => { console.log(error); });
 
 
 
