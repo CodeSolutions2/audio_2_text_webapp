@@ -130,19 +130,24 @@ async function readaudio() {
 			// Way 0: read in the mp3 as file_download_url --> convert to  blob_object -->  convert to bytes (arrayBuffer) --> read in arrayBuffer using a local file --> convert to blob_object again --> put blob_object into a file --> send to endpoint
 			
 			// Convert the file_url to a blob
-			//var text_out = await fetch(file_download_url)
-  			//	.then(response => response.blob())
-			 //	.then(async function(blob_object) { 
-			//	 	console.log("blob_object: ", blob_object); // blob_object is json;
+			var text_out = await fetch(file_download_url)
+  				.then(response => response.blob())
+			 	.then(async function(blob_object) { 
+			 	console.log("blob_object: ", blob_object);
           
 				// ***[0] Check and see if arrayBuffer has values
-				// arrayBuffer is empty - this is the problem
+				// arrayBuffer is empty - this is the problem. SOLUTION: use reader.readAsDataURL instead of reader.readAsArrayBuffer
           
 				//	const reader = new FileReaderSync();
 				//	const arrayBuffer = reader.readAsArrayBuffer(blob_object);
 				//	const bytes = new Uint8Array(arrayBuffer);
-				//	return bytes;
-				//})
+				//      return bytes;
+
+				var arrayBuffer = await readFileAsDataURL(blob_object); return arrayBuffer;
+				})
+				.then(async function(arrayBuffer) {
+					console.log(arrayBuffer); 
+				})
 				//.then(bytes => { console.log("bytes: ", bytes); 
 				//	return new Blob(bytes, {type: "audio/mp3"});
 				//})
@@ -169,22 +174,23 @@ async function readaudio() {
       // const arrayBuffer = reader.readAsDataURL(file_download_url);
       
 	// OR
-await readFileAsDataURL(file_object)
-	.then(async function(arrayBuffer) { 
-		console.log(arrayBuffer); 
-	})
+			
+	// await readFileAsDataURL(file_object)
+	// .then(async function(arrayBuffer) { 
+		// console.log(arrayBuffer); 
+	// })
 	// ***[1] Check and see if arrayBuffer has values using download_url, instead of the file_object blob
-		
-      // const bytes = new Uint8Array(arrayBuffer);
-      // const blob_object2 = new Blob(bytes, {type: "audio/mp3"});
-      // const file_blob_object2 = new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
 
-
+	// [0] used file_download_url (string) : returned error
+	// TypeError: FileReader.readAsDataURL: Argument 1 is not an object.
 	
-      
-      // var text_out = await send_a_form_w_fetch_using_formData(file_blob_object2)
-      //    .then(text_out => { console.log('text_out: ', text_out); return text_out; })
-      //    .catch(error => { console.log(error); });
+	// [1] Used the file_object: returned error
+	// reader.readAsDataURL(file_object);
+	// TypeError: FileReader.readAsDataURL: Argument 1 does not implement interface Blob.
+
+	// [2] Returned back to the original configuration, where one needs to use a blob_object as input to obtain bytes
+	// SOLUTION: use reader.readAsDataURL instead of reader.readAsArrayBuffer
+			
       
       // ------------------------------------------
 
@@ -225,17 +231,15 @@ await readFileAsDataURL(file_object)
 // ----------------------------------------------------
 
 
-async function readFileAsDataURL(file_object) {
+async function readFileAsDataURL(blob_object) {
 
 	return await new Promise((resolve) =>  {
 		const reader = new FileReader();
 		reader.onload = (event) => resolve(reader.result);
 		
 		// ------------------
-		reader.readAsDataURL(file_object.download_url);
-		// OR
-		// reader.readAsDataURL(file_object);
-		// TypeError: FileReader.readAsDataURL: Argument 1 does not implement interface Blob.
+		reader.readAsDataURL(blob_object);
+		
 		// ------------------
 	});
 	// it returns arraryBuffer
