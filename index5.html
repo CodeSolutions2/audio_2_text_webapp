@@ -192,7 +192,7 @@ async function readaudio() {
 					return stream;
 				})
 			.then((response) => response.blob())
-			.then(async function(stream_blob_object) => {
+			.then(async function(stream_blob_object) {
 				 	var text_out = await send_a_form_w_fetch_using_formData(stream_blob_object);
 				 	return text_out; 
 				})
