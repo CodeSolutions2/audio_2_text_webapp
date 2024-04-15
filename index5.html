@@ -142,13 +142,10 @@ async function readaudio() {
 
 					// Follow the process on https://www.base64encode.org/enc/map/, to convert base64_string to ASCII
 					
-					// mimeString = "audio/mpeg"
-
-					// remove header info
+					// Remove header info (mimeString = "audio/mpeg")
 					const regex = /data:audio\/mpeg;base64,/g;
 					base64_string = base64_string.replace(regex, '');
 					console.log("base64_string: ", base64_string);
-
 					
 					// Decode the string
 					const binaryString = atob(base64_string);
