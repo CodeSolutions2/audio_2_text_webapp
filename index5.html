@@ -227,7 +227,10 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", 
-		       "Authorization": 'Bearer ' + OPENAI_API_KEY};
+		       "Authorization": 'Bearer ' + OPENAI_API_KEY,
+		       "Access-Control-Allow-Origin": "*", 
+		       "Access-Control-Allow-Credentials": true,
+		       "Connection": "keep-alive"};
 	// headers = new Headers(headers);
 
 	console.log("filename:", filename);
