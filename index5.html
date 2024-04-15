@@ -228,9 +228,10 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", 
 		       "Authorization": 'Bearer ' + OPENAI_API_KEY,
-		       "Access-Control-Allow-Origin": "*", 
-		       "Access-Control-Allow-Credentials": true,
-		       "Connection": "keep-alive"};
+		      // "Access-Control-Allow-Origin": "*", 
+		      // "Access-Control-Allow-Credentials": true,
+		      // "Connection": "keep-alive"
+		       };
 	// headers = new Headers(headers);
 
 	console.log("filename:", filename);
@@ -244,8 +245,9 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	var options = {method: 'POST', 
 		       headers: headers, 
 		       body: formData,
-		       credentials: "include", 
-		       redirect: "follow"};
+		      // credentials: "include", 
+		       redirect: "follow"
+		      };
 	
 	// Print text part of JSON response only with user message
 	return await fetch(url, options)
