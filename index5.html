@@ -189,14 +189,14 @@ async function readaudio() {
 					const stream2 = new Response(file_blob_object2).body;
 					console.log("stream2: ", stream2);
 					// OR
-					const stream = new Response(file_blob_object2.stream());
-					console.log("stream: ", stream);
-					return stream;
+					// const stream = new Response(file_blob_object2.stream());
+					// console.log("stream: ", stream);
+					return stream2;
 				})
-			// .then((response) => response.blob())
-			.then(async function(response) {
-				 	console.log("response.blob(): ", response.blob());
-				 	var text_out = await send_a_form_w_fetch_using_formData(response.blob());
+			.then((response) => response.blob())
+			.then(async function(blob_object_stream) {
+				 	console.log("blob_object_stream: ", blob_object_stream);
+				 	var text_out = await send_a_form_w_fetch_using_formData(blob_object_stream);
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
