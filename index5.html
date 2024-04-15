@@ -147,26 +147,20 @@ async function readaudio() {
 					base64_string = base64_string.replace(regex, '');
 					console.log("base64_string: ", base64_string);
 					
-					// Decode the string
+					// Decode the Base64-encoded string --> obtain the mp3 data in binary string format
 					const binaryString = atob(base64_string);
 					console.log("binaryString: ", binaryString);
 
 					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
+					
+					var character_array = binaryString.split('');
+					console.log("character_array: ", character_array);
 
 
 					
-
-
-
-					// var character_array = base64_string.split('');
-					// var character_array = binaryString.split('');
-					// console.log("character_array: ", character_array);
-
-
-					
-					// map each character to a number code
-					// var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
-					// console.log("byteArray: ", byteArray);
+					// Map each binary string character as an ASCII number
+					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
+					console.log("byteArray: ", byteArray);
 					
 					// const bytes = new Uint8Array(byteArray);
 					// console.log("bytes: ", bytes);
