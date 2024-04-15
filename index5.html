@@ -143,11 +143,24 @@ async function readaudio() {
 				//	const bytes = new Uint8Array(arrayBuffer);
 				//      return bytes;
 
-				var arrayBuffer = await readFileAsDataURL(blob_object); return arrayBuffer;
+				var base64_string = await readFileAsDataURL(blob_object); return base64_string;
 				})
-				.then(async function(arrayBuffer) {
-					console.log("arrayBuffer: ", arrayBuffer);
-					const bytes = new Uint8Array(arrayBuffer);
+				.then(async function(base64_string) {
+					console.log("base64_string: ", base64_string);
+					// mimeString = "audio/mpeg"
+
+					const binaryString = atob(base64_string);
+					console.log("binaryString: ", binaryString);
+
+					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
+					var character_array = binaryString.split('');
+					console.log("character_array: ", character_array);
+
+					// map each character to a number code
+					var byteArray = letter_array.map((character) => { return character.charCodeAt(0); });
+					console.log("byteArray: ", byteArray);
+					
+					const bytes = new Uint8Array(byteArray);
 					console.log("bytes: ", bytes);
 					return bytes;
 				})
