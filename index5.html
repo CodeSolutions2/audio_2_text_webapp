@@ -145,7 +145,7 @@ async function readaudio() {
 					// mimeString = "audio/mpeg"
 
 					// remove header info
-					const regex = /data:audio//mpeg;base64,/g;
+					const regex = /data:audio\/mpeg;base64,/g;
 					base64_string = base64_string.replace(regex, '');
 					console.log("base64_string: ", base64_string);
 
