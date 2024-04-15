@@ -169,7 +169,7 @@ async function readaudio() {
       // const arrayBuffer = reader.readAsDataURL(file_download_url);
       
 	// OR
-await readFileAsDataURL(file_download_url)
+await readFileAsDataURL(file_object)
 	.then(async function(arrayBuffer) { 
 		console.log(arrayBuffer); 
 	})
@@ -225,12 +225,12 @@ await readFileAsDataURL(file_download_url)
 // ----------------------------------------------------
 
 
-async function readFileAsDataURL(file_download_url) {
+async function readFileAsDataURL(file_object) {
 
 	return await new Promise((resolve) =>  {
 		const reader = new FileReader();
 		reader.onload = (event) => resolve(reader.result);
-		reader.readAsDataURL(file_download_url);
+		reader.readAsDataURL(file_object);
 	});
 	// it returns arraryBuffer
 }
