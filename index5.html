@@ -156,11 +156,11 @@ async function readaudio() {
 					// Map each binary string character as an ASCII number
 					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
 					console.log("byteArray: ", byteArray);
-					return byteArray;
+					// return byteArray;
 					
-					// const bytes = new Uint8Array(byteArray);
-					// console.log("bytes: ", bytes);
-					// return bytes;
+					const bytes = new Uint8Array(byteArray);
+					console.log("bytes: ", bytes);
+					return bytes;
 				})
 				.then(bytes => { console.log("bytes: ", bytes); 
 				 	return new Blob(bytes, {type: "audio/mp3"});
