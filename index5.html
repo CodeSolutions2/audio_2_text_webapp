@@ -135,14 +135,6 @@ async function readaudio() {
 			 	.then(async function(blob_object) { 
 			 	console.log("blob_object: ", blob_object);
           
-				// ***[0] Check and see if arrayBuffer has values
-				// arrayBuffer is empty - this is the problem. SOLUTION: use reader.readAsDataURL instead of reader.readAsArrayBuffer
-          
-				//	const reader = new FileReaderSync();
-				//	const arrayBuffer = reader.readAsArrayBuffer(blob_object);
-				//	const bytes = new Uint8Array(arrayBuffer);
-				//      return bytes;
-
 				var base64_string = await readFileAsDataURL(blob_object); return base64_string;
 				})
 				.then(async function(base64_string) {
@@ -157,7 +149,7 @@ async function readaudio() {
 					console.log("character_array: ", character_array);
 
 					// map each character to a number code
-					var byteArray = letter_array.map((character) => { return character.charCodeAt(0); });
+					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
 					console.log("byteArray: ", byteArray);
 					
 					const bytes = new Uint8Array(byteArray);
