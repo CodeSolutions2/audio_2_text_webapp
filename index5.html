@@ -179,29 +179,29 @@ async function readaudio() {
 					return file_blob_object2;
 				})
 				.then(async function(file_blob_object2) {
-					// One can send a blob_object, file_blob_object, or ReadableStream to the API
+					// One can send a blob_object, file_blob_object, or ReadableStream of a blob object to the API
 				 	// console.log("blob_object2: ", blob_object2);
-					return file_blob_object2;
+					// return file_blob_object2;
 					// OR
 				 	// const stream = file_blob_object2.stream();  // gives 400 REST API error
 					// return stream;
 					// OR
-					// const stream = new Response(file_blob_object2.stream());
-					// console.log("stream: ", stream);
-					// return stream2;
+					const stream = new Response(file_blob_object2.stream());
+					console.log("stream: ", stream);
+					return stream;
 				})
-			// .then((response) => response.blob())
-			// .then(async function(blob_object_stream) {
-			.then(async function(file_blob_object2) {
+			//.then(async function(file_blob_object2) {
 					// the API needs ReadableStream, bodyUsed to be true: this uses the body of a ReadableStream
-					const stream2 = new Response(file_blob_object2).body;  // ReadableStream [ locked: false }
-					console.log("stream2: ", stream2);
-					var text_out = await send_a_form_w_fetch_using_formData(stream2);
-
-					// OR
-				
-				 	// console.log("blob_object_stream: ", blob_object_stream);
-				 	// var text_out = await send_a_form_w_fetch_using_formData(blob_object_stream);
+					// const stream2 = new Response(file_blob_object2).body;  // ReadableStream [ locked: false }
+					// console.log("stream2: ", stream2);
+					// var text_out = await send_a_form_w_fetch_using_formData(stream2);
+					// stream2 is not a blob --> Argument 2 does not implement interface Blob.
+			//})
+			// OR
+			.then((response) => response.blob())
+			.then(async function(blob_object_stream) {	
+				 	console.log("blob_object_stream: ", blob_object_stream);
+				 	var text_out = await send_a_form_w_fetch_using_formData(blob_object_stream);
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
