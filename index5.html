@@ -157,11 +157,6 @@ async function readaudio() {
 					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
 					console.log("byteArray: ", byteArray);
 					return byteArray;
-
-					// bytes gives the same output as byteArray
-					// const bytes = new Uint8Array(byteArray);
-					// console.log("bytes: ", bytes);
-					// return bytes;
 				})
 				.then(bytes => { console.log("bytes: ", bytes); 
 				 	// return new Blob(bytes, {type: "audio/mp3"});
@@ -169,39 +164,13 @@ async function readaudio() {
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
-					// blob has prototype --> stream attribute, so it can be consumed as a readableStream
-					// return blob_object2;
-					// OR
-					// File also has prototype --> stream attribute, so it can be consumed as a readableStream
 					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
 					var file_blob_object2 = new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
 					console.log("file_blob_object2: ", file_blob_object2);
 					return file_blob_object2;
 				})
-				.then(async function(file_blob_object2) {
-					// One can send a blob_object, file_blob_object, or ReadableStream of a blob object to the API
-				 	// console.log("blob_object2: ", blob_object2);
-					// return file_blob_object2;
-					// OR
-				 	// const stream = file_blob_object2.stream();  // gives 400 REST API error
-					// return stream;
-					// OR
-					const stream = new Response(file_blob_object2.stream());
-					console.log("stream: ", stream);
-					return stream;
-				})
-			//.then(async function(file_blob_object2) {
-					// the API needs ReadableStream, bodyUsed to be true: this uses the body of a ReadableStream
-					// const stream2 = new Response(file_blob_object2).body;  // ReadableStream [ locked: false }
-					// console.log("stream2: ", stream2);
-					// var text_out = await send_a_form_w_fetch_using_formData(stream2);
-					// stream2 is not a blob --> Argument 2 does not implement interface Blob.
-			//})
-			// OR
-			.then((response) => response.blob())
-			.then(async function(blob_object_stream) {	
-				 	console.log("blob_object_stream: ", blob_object_stream);
-				 	var text_out = await send_a_form_w_fetch_using_formData(blob_object_stream);
+			.then(async function(file_blob_object2) {	
+				 	var text_out = await send_a_form_w_fetch_using_formData(file_blob_object2);
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
@@ -280,11 +249,6 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 		.catch(error => { console.log(error); });
 	
 }
-
-	
-// ----------------------------------------------------
-	
-
 
 
 // ----------------------------------------------------
