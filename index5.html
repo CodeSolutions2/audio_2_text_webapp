@@ -173,9 +173,16 @@ async function readaudio() {
 					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
 				// })
 				.then(async function(blob_object2) {
-				 	console.log("blob_object2: ", blob_object2); 
+
+					// One can send a blob_object, file_blob_object, or ReadableStream to the API
+				 	console.log("blob_object2: ", blob_object2);
+					// OR
 				 	// console.log("file_blob_object2: ", file_blob_object2);  // gives 400 REST API error
-				 	var text_out = await send_a_form_w_fetch_using_formData(blob_object2);
+					// OR
+					// the input needs to be a readable stream ( body: ReadableStream, bodyUsed: false )
+					const stream = blob_object2.stream();
+					
+				 	var text_out = await send_a_form_w_fetch_using_formData(stream);
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
@@ -230,9 +237,6 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	var url = 'https://api.openai.com/v1/audio/transcriptions';
 	var headers = {"Content-Type": "multipart/form-data", 
 		       "Authorization": 'Bearer ' + OPENAI_API_KEY,
-		      // "Access-Control-Allow-Origin": "*", 
-		      // "Access-Control-Allow-Credentials": true,
-		      // "Connection": "keep-alive"
 		       };
 	// headers = new Headers(headers);
 
@@ -247,7 +251,6 @@ async function send_a_form_w_fetch_using_formData(blob_object) {
 	var options = {method: 'POST', 
 		       headers: headers, 
 		       body: formData,
-		      // credentials: "include", 
 		       redirect: "follow"
 		      };
 	
