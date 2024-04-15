@@ -167,22 +167,30 @@ async function readaudio() {
 				 	// return new Blob(bytes, {type: "audio/mp3"});
 				 	return new Blob(bytes, {type: "audio/mpeg"});
 				})
-				// .then(async function(blob_object2) { 
-					// console.log("blob_object2: ", blob_object2); 
+				.then(async function(blob_object2) { 
+					console.log("blob_object2: ", blob_object2); 
 					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
 					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
+					var file_blob_object2 = new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
+					console.log("file_blob_object2: ", file_blob_object2);
+
+					return blob_object2;
 				// })
 				.then(async function(blob_object2) {
 
 					// One can send a blob_object, file_blob_object, or ReadableStream to the API
 				 	console.log("blob_object2: ", blob_object2);
 					// OR
-				 	// console.log("file_blob_object2: ", file_blob_object2);  // gives 400 REST API error
+				 	//   // gives 400 REST API error
 					// OR
 					// the input needs to be a readable stream ( body: ReadableStream, bodyUsed: false )
 					const stream = blob_object2.stream();
+					console.log("stream: ", stream);
+
+					const stream2 = new Response(blob).body;
+					console.log("stream2: ", stream2);
 					
-				 	var text_out = await send_a_form_w_fetch_using_formData(stream);
+				 	var text_out = await send_a_form_w_fetch_using_formData(stream2);
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
