@@ -22,7 +22,9 @@
 
 <button id="readaudio" onclick="readaudio()">Transcribe audios</button>
 
+<br>
 
+<button id="input_new_audio_into_journal" onclick="input_new_audio_into_journal()">input_new_audio_into_journal</button>
 	  
 <!-- View results -->
 <div id="output" style="font-family:courier;font-size:24px;height:300px"></div>
@@ -58,7 +60,7 @@ div {position: relative; z-index: 2;},
   table {border-collapse: collapse; position: absolute;}
   td,
   th {border: 1px solid black;padding: 10px 20px;}
-audio {position: absolute; top: 175px;}
+audio {position: absolute; top: 250px;}
 </style>
 
 	  
@@ -164,18 +166,15 @@ async function readaudio() {
 			var text_out = await fetch(file_download_url)
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
-			 		
 					console.log("blob_object: ", blob_object);
-					
-					var text_out = await openai_transcription(blob_object, 'blob_object');
+					return await openai_transcription(blob_object, 'blob_object');
 					// var text_out = await openai_translation(blob_object, 'blob_object');
 					// await openai_text_to_speech();
-
+				})
+				.then(async function(text_out) {
 					// Create a dictionary w/ date, time, and text
 					// dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
-					string_out =+ `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}\\n${text_out}\\n`;
-					
-					return string_out;
+					return string_out + `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}\\n${text_out}\\n`;
 				})
 				.catch(error => { console.log(error); });
 			
