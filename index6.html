@@ -5,13 +5,18 @@
   </head>
   <body>
     
-<!-- <input id="mp3name_id" type="text" value="" placeholder="mp3name" rows="10" cols="100" style="display:block; text-align: left; width: 150px;"> -->
+
 	  
 <label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
 	  
 <br>
+
+<!-- ----------------------------------- -->
+<!-- Strings that need to be stored in a secret location for security: temporarily as inputs to test app functionality -->
+<input id="auth_id" type="text" value="" placeholder="auth_id" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 	  
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+<!-- ----------------------------------- -->
 	
 <br><br>
 
@@ -64,23 +69,52 @@ audio {position: absolute; top: 175px;}
 	  
 <script>
 
-
 const outp = document.getElementById('output');
 
-var filename = '';
+const journal_filename = "text_data.txt";
+const repoOwner = 'CodeSolutions2';
+const repoName = 'audio_2_text_webapp';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
 var audioElement = document.createElement('audio');
 audioElement.setAttribute("controls", true);
 audioElement.setAttribute("type", "audio/mpeg");
+
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+
+// Input the secrets here: I do not know how to do this yet
+const auth = document.getElementById("auth_id").value;
 	
+// ----------------------------------------------------
+
+// Train model on existing journal
+
+
+// ----------------------------------------------------
+
+// Read in new audio (transcribe) --> add new text to existing journal 
+async function input_new_audio_into_journal() {
+
+	return await readaudio()
+		.then(async function(string_out) { 
+		console.log("string_out: ", string_out);
+			
+		// New data to add to the journal is string_out
+		var out = await PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(journal_filename, string_out);
+		console.log("out:", out);
+		return out;
+	})
+	
+}
+
 // ----------------------------------------------------
 	
 async function readaudio() {
 	
-	return await get_file_objects()
-	.then(file_objects => { console.log("file_objects:", file_objects);
-		var dict_out = [];
+	return await get_audio_file_objects()
+	.then(file_objects => { 
+		console.log("file_objects:", file_objects);
+		// var dict_out = [];
 		file_objects.forEach(async function(file_object, index) {
 			
 			console.log("file_object:", file_object);
@@ -125,10 +159,6 @@ async function readaudio() {
 			// ------------------------------------------
 			// Form submission
 			// ------------------------------------------
-			
-
-			// ------------------------------------------
-			
 			// Way 2: read in the mp3 as file_download_url --> convert to  blob_object
 			var text_out = await fetch(file_download_url)
   				.then(response => response.blob())
@@ -151,33 +181,15 @@ async function readaudio() {
 			// ------------------------------------------
 			
 			// Create a dictionary w/ date, time, and text
-			dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
+			// dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
+			string_out =+ `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}\\n${text_out}\\n`;
 
 			// Processing information
 			outp.innerHTML = 'Processing audio';
 		  });
 
-		   outp.innerHTML = 'Processing Done'; console.log("dict_out:", dict_out); return dict_out; 
+		   outp.innerHTML = 'Processing Done'; console.log("string_out:", string_out); return string_out; 
 	});
-}
-
-
-// ----------------------------------------------------
-
-
-async function readFileAsDataURL(blob_object) {
-
-	return await new Promise((resolve) =>  {
-		const reader = new FileReader();
-		reader.onload = (event) => resolve(reader.result);
-		
-		// ------------------
-		
-		reader.readAsDataURL(blob_object);
-		
-		// ------------------
-	});
-	// it returns encoded string data in base64 format
 }
 
 	
@@ -186,9 +198,6 @@ async function readFileAsDataURL(blob_object) {
 
 async function openai_transcription(file_input, which_input) {
 
-	// https://www.postman.com/devrel/workspace/openai/documentation/13183464-90abb798-cb85-43cb-ba3a-ae7941e968da
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
-	
 	const url = 'https://api.openai.com/v1/audio/transcriptions';
 
 	const headers = new Headers();
@@ -228,9 +237,6 @@ async function openai_transcription(file_input, which_input) {
 // ----------------------------------------------------
 
 async function openai_translation(file_input) {
-
-	// https://www.postman.com/devrel/workspace/openai/documentation/13183464-90abb798-cb85-43cb-ba3a-ae7941e968da
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
 	const url = 'https://api.openai.com/v1/audio/translations';
 
@@ -270,9 +276,6 @@ async function openai_translation(file_input) {
 // ----------------------------------------------------
 
 async function openai_text_to_speech() {
-
-	// https://www.postman.com/devrel/workspace/openai/documentation/13183464-90abb798-cb85-43cb-ba3a-ae7941e968da
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 	
 	const url = "https://api.openai.com/v1/audio/speech";
 	
@@ -300,14 +303,11 @@ async function openai_text_to_speech() {
 // ----------------------------------------------------
 
 	
-async function get_file_objects() {
+async function get_audio_file_objects() {
 	
-	const repoOwner = 'CodeSolutions2';
-	const repoName = 'audio_2_text_webapp';
 	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
 
 	var file_objects = [];
-	var date = [];
 	await fetch(url).then(res => res.json()).then(data => {
 		    data.forEach(file => {
 		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
@@ -325,6 +325,119 @@ async function get_file_objects() {
 // ----------------------------------------------------
 
 
+async function PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(journal_filename, new_string_content) {
+	
+   // PUT into an existing file
+   var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
+
+   return await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+	   .then(async function (file_objects) {
+		var file_object = file_objects.at(0);
+		   
+		var file_download_url = file_object.download_url;
+		console.log("file_download_url:", file_download_url);
+		   
+		var sha_val = file_object.sha;
+		console.log("sha_val:", sha_val);
+
+		// Way 0: to get text from file
+		let data_github_encoded_format = file_object.content;
+		console.log("data_github_encoded_format:", data_github_encoded_format);
+
+		return file_download_url;
+	   })
+	   .then(async function (file_download_url) {
+		// Way 1: to get text from file
+		var text_out = await fetch(file_download_url); return text_out
+	   })
+	   .then(response => response.text())
+	   .then(async function(text_out) { 
+		   console.log("text_out: ", text_out);
+		   return text_out;
+	   })
+	   .catch(error => { console.log(error); });
+
+
+// ----------------------------------------------------
+
+	
+async function PUT_add_to_a_file_w_auth_GitHub_RESTAPI(journal_filename, new_string_content) {
+	
+   // PUT into an existing file
+   var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
+
+   return await GET_text_from_file_w_auth_GitHub_RESTAPI()
+	   .then(async function (out) {
+		   sha_val = out.sha;
+		   let data_github_encoded_format = out.content;
+		   
+		   let data_decoded0 = atob(data_github_encoded_format);
+		   console.log('data already in file decoded:', data_decoded0);
+		   
+		   // Add new content to file
+		   raw_text = data_decoded0.concat(new_string_content);
+		   console.log('raw_text:', raw_text); 
+		   
+		// Encode protected data into github's encoded format
+		let content_encoded0 = btoa(raw_text);
+		console.log("content_encoded0: ", content_encoded0);
+		
+		var data = {"message": message, "committer":{"name":"App name","email":"App email"}, "content": content_encoded0, "sha": sha_val};
+		var headers = {"Accept": "application/vnd.github+json", "Authorization": `Bearer ${auth}`, "X-GitHub-Api-Version": "2022-11-28"};
+		var options = {method : 'PUT', headers: headers, body : JSON.stringify(data)};
+		var out1 = await fetch(url, options); return out1; })
+	   		.then(res => { console.log(res); } )
+	   		.catch(error => { console.log(error); });
+
+}
+
+	
+// ----------------------------------------------------
+
+	
+async function GET_text_from_file_w_auth_GitHub_RESTAPI() {
+
+	// GET data in a file - Way 0: REST API (WORKS!)
+	// https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
+
+	var headers = {"Accept": "application/vnd.github+json", "Authorization": `Bearer ${auth}`, "X-GitHub-Api-Version": "2022-11-28"}
+	var options = {method : 'GET', headers: headers};
+	
+	return await fetch(url, options)
+		.then(res => res.json())
+		.then(data => { return data; })
+		.catch(error => { console.log(error); });
+}
+
+	
+// ----------------------------------------------------
+
+	
+async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
+	
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	var file_objects = [];
+	return await fetch(url)
+		.then(res => res.json())
+		.then(data => { data.forEach(async function(file) {
+			    var regexp = new RegExp(`${journal_filename}`, 'g');
+		      if (file.type === 'file' && file.name.match(regexp)) {
+			 file_objects.push(file);
+		      }
+		    });
+		    return file_objects;
+		})
+		.catch(error => { console.log(error); });
+}
+
+
+// ----------------------------------------------------
+
+
+
+// ----------------------------------------------------
   
 </script>
 
