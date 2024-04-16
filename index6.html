@@ -174,8 +174,6 @@ async function readaudio() {
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
-					const out = await openai_translation(new File ([blob_object2], "recording.mpeg", {type: "mpeg"}));
-					console.log("out: ", out);
 					// return new File ([blob_object2], "recording.mp3", {type: "audio/mp3"});
 					// return new File ([blob_object2], "recording", {type: "mp3"});
 					// return new File ([blob_object2], "recording", {type: "audio/mpeg"});
@@ -183,7 +181,9 @@ async function readaudio() {
 				})
 			.then(async function(file_blob_object2) {	
 				 	console.log("file_blob_object2: ", file_blob_object2);
-				 	var text_out = await openai_transcription(file_blob_object2);
+				 	// var text_out = await openai_transcription(file_blob_object2);
+					var text_out = await openai_translation(file_blob_object2);
+					// await openai_text_to_speech();
 				 	return text_out; 
 				})
 				.catch(error => { console.log(error); });
@@ -244,7 +244,7 @@ async function openai_transcription(file_blob_object2) {
 	headers.append("Accept", "application/json");
 	
 	const formData = new FormData();
-	formData.append("file", file_blob_object2, "recording"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	formData.append("file", file_blob_object2, "recording.mpeg"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
@@ -287,7 +287,7 @@ async function openai_translation(file_blob_object2) {
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
 	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
-	formData.append("language", "fr");
+	formData.append("language", "en");
 	formData.append("transcription", "plain text"); // plain text, srt, vtt
 	
 	const options = {method: 'POST', 
@@ -301,6 +301,36 @@ async function openai_translation(file_blob_object2) {
 		.then(response => response.text())
 		.then(result => { console.log(result); return result; })
 		.catch(error => { console.log(error); });
+	
+}
+
+// ----------------------------------------------------
+
+async function openai_text_to_speech() {
+
+	// https://www.postman.com/devrel/workspace/openai/documentation/13183464-90abb798-cb85-43cb-ba3a-ae7941e968da
+	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+	
+	const url = "https://api.openai.com/v1/audio/speech";
+	
+	var data = {"model": "tts-1-hd", 
+		    "input": "OpenAI now also supports text to speech with two models: tts-1 and tts-1-hd. For real-time applications, the standard tts-1 model provides the lowest latency but at a lower quality than the tts-1-hd model. Due to the way the audio is generated, tts-1 is likely to generate content that has more static in certain situations than tts-1-hd. In some cases, the audio may not have noticeable differences depending on your listening device and the individual person. The input to generate the audio from can be up to 4096 characters. Supported voices are alloy, echo, fable, onyx, nova, and shimmer. Supported response formats are mp3, opus, aac, and flac. It is also possible to control the speed, select a value from 0.25 to 4.0. 1.0 is the default. There is no direct mechanism to control the emotional output of the audio generated. Certain factors may influence the output audio like capitalization or grammar but OpenAI's internal tests with these have yielded mixed results. Please note that OpenAI's Usage Policies require you to provide a clear disclosure to end users that the TTS voice they are hearing is AI-generated and not a human voice.",
+    "voice": "alloy",
+    "response_format": "mp3",
+    "speed": "1.1"};
+	
+	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+	var options = {method : 'post', headers: headers, body : JSON.stringify(data), redirect: "follow"};
+  
+	// Print text part of JSON response only with user message
+	return await fetch(url, options)
+            .then(res => res.json())
+            .then(res => {
+		    var json_response = JSON.parse(JSON.stringify(res));
+		    console.log('response: ', json_response); 
+		    return json_response;
+            })
+            .catch(error => { console.log(error); });
 	
 }
 	
