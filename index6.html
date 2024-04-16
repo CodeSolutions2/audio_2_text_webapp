@@ -170,8 +170,8 @@ async function readaudio() {
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
-					return new File ([blob_object2], "[PROXY]", {type: "audio/mp3"});
-					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
+					return new File ([blob_object2], "recording.mp3", {type: "audio/mp3"});
+					// return new File ([blob_object2], "recording.mp3", {type: "audio/mpeg"});
 				})
 			.then(async function(file_blob_object2) {	
 				 	console.log("file_blob_object2: ", file_blob_object2);
@@ -236,11 +236,10 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	headers.append("Accept", "application/json");
 	
 	const formData = new FormData();
-	formData.append("file", file_blob_object2, "[PROXY]"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
-	// formData.append("file", blob_object);
+	formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
 	formData.append("model", "whisper-1");
-	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription.
-	formData.append("response_format", "json");  // json, text, srt, verbose_json, or vtt.
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "json");  // json, text, srt, verbose_json, or vtt
 	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
 	formData.append("language", "en");
 	formData.append("transcription", "plain text"); // plain text, srt, vtt
@@ -254,7 +253,7 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	// Print text part of JSON response only with user message
 	return await fetch(url, options)
 		.then(response => response.text())
-		.then(result => { console.log(result); return result;})
+		.then(result => { console.log(result); return result; })
 		.catch(error => { console.log(error); });
 	
 }
