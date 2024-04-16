@@ -115,6 +115,7 @@ async function readaudio() {
 	.then(file_objects => { 
 		console.log("file_objects:", file_objects);
 		// var dict_out = [];
+		var string_out = '';
 		file_objects.forEach(async function(file_object, index) {
 			
 			console.log("file_object:", file_object);
