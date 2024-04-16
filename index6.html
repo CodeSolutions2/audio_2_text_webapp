@@ -134,20 +134,17 @@ async function readaudio() {
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
 			 		console.log("blob_object: ", blob_object);
-					// URL.createObjectURL(blob_object); // blob:https://codesolutions2.github.io/10f72fa2-21b8-425a-af78-b9e5b40bfb5c
 					return new File ([blob_object], "recording.mp3", {type: "audio/mp3"});
 				})
   				.then(async function(file_blob_object) {
+					console.log("file_blob_object: ", file_blob_object);
+					console.log("fileURL: ", URL.createObjectURL(file_blob_object));
 					var text_out = await openai_transcription(file_blob_object);
 					// var text_out = await openai_translation(file_blob_object);
 					// await openai_text_to_speech();
 					return text_out;
 				})
 				.catch(error => { console.log(error); });
-
-			
-
-			
 			
 			// ------------------------------------------
 
