@@ -170,7 +170,7 @@ async function readaudio() {
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
-					return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
+					return new File ([blob_object2], "[PROXY]", {type: "audio/mp3"});
 					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
 				})
 			.then(async function(file_blob_object2) {	
@@ -234,11 +234,9 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	headers.append("Content-Type", "multipart/form-data");
 	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
 	headers.append("Accept", "application/json");
-
-	console.log("filename:", filename);
 	
 	const formData = new FormData();
-	formData.append("file", file_blob_object2, filename); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	formData.append("file", file_blob_object2, "[PROXY]"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
 	// formData.append("file", blob_object);
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription.
