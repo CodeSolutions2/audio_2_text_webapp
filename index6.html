@@ -129,29 +129,25 @@ async function readaudio() {
 
 			// ------------------------------------------
 			
-			// Way 1: 
-			// Convert the file_url to a blob
+			// Way 2: 
 			var text_out = await fetch(file_download_url)
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
-			 	console.log("blob_object: ", blob_object);
-
-				// URL.createObjectURL(blob_object); // blob:https://codesolutions2.github.io/10f72fa2-21b8-425a-af78-b9e5b40bfb5c
-
-				var file_blob_object = new File ([blob_object], "recording.mp3", {type: "audio/mp3"});
-					
-				// Create a url for the data object
-				return URL.createObjectURL(file_blob_object);
+			 		console.log("blob_object: ", blob_object);
+					// URL.createObjectURL(blob_object); // blob:https://codesolutions2.github.io/10f72fa2-21b8-425a-af78-b9e5b40bfb5c
+					return new File ([blob_object], "recording.mp3", {type: "audio/mp3"});
 				})
-				.then(async function(fileURL) {	
-			console.log("fileURL: ", fileURL); 
-			const file_blob_object2 = { uri: fileURL, name: 'recording.mp3', type: 'audio/mp3' };
-			var text_out = await openai_transcription(file_blob_object2);
-			// var text_out = await openai_translation(file_blob_object2);
-			// await openai_text_to_speech();
-			return text_out;
-		})
-		.catch(error => { console.log(error); });
+  				.then(async function(file_blob_object) {
+					var text_out = await openai_transcription(file_blob_object);
+					// var text_out = await openai_translation(file_blob_object);
+					// await openai_text_to_speech();
+					return text_out;
+				})
+				.catch(error => { console.log(error); });
+
+			
+
+			
 			
 			// ------------------------------------------
 
