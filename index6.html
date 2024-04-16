@@ -129,7 +129,7 @@ async function readaudio() {
 
 			// ------------------------------------------
 			
-			// Way 2: 
+			// Way 2: read in the mp3 as file_download_url --> convert to  blob_object --> convert to file_blob_object
 			var text_out = await fetch(file_download_url)
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
@@ -138,9 +138,8 @@ async function readaudio() {
 				})
   				.then(async function(file_blob_object) {
 					console.log("file_blob_object: ", file_blob_object);
-					console.log("fileURL: ", URL.createObjectURL(file_blob_object));
-					var text_out = await openai_transcription(file_blob_object);
-					// var text_out = await openai_translation(file_blob_object);
+					//var text_out = await openai_transcription(file_blob_object);
+					var text_out = await openai_translation(file_blob_object);
 					// await openai_text_to_speech();
 					return text_out;
 				})
@@ -197,15 +196,12 @@ async function openai_transcription(file_blob_object2) {
 	const url = 'https://api.openai.com/v1/audio/transcriptions';
 
 	const headers = new Headers();
-	// headers.append("Content-Type", "multipart/form-data");
+	headers.append("Content-Type", "multipart/form-data");
 	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
 	headers.append("Accept", "application/json");
 	
 	const formData = new FormData();
 	formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
-	// OR
-	// formData.append('file', file_blob_object2 as unknown as Blob);
-	
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
