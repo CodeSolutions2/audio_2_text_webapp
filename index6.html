@@ -240,8 +240,8 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	formData.append("file", file_blob_object2, filename);
 	// formData.append("file", blob_object);
 	formData.append("model", "whisper-1");
-	formdata.append("response_format", "json");
-	formdata.append("temperature", "0");
+	formData.append("response_format", "json");
+	formData.append("temperature", "0");
 	formData.append("language", "en");
 	
 	const options = {method: 'POST', 
