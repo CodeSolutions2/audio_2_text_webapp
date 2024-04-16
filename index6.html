@@ -134,8 +134,8 @@ async function readaudio() {
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
 			 		console.log("blob_object: ", blob_object);
-					var text_out = await openai_transcription(blob_object);
-					// var text_out = await openai_translation(blob_object);
+					var text_out = await openai_transcription(blob_object, 'blob_object');
+					// var text_out = await openai_translation(blob_object, 'blob_object');
 					// await openai_text_to_speech();
 					return text_out;
 				})
@@ -184,7 +184,7 @@ async function readFileAsDataURL(blob_object) {
 // ----------------------------------------------------
 
 
-async function openai_transcription(file_blob_object2) {
+async function openai_transcription(file_input, which_input) {
 
 	// https://www.postman.com/devrel/workspace/openai/documentation/13183464-90abb798-cb85-43cb-ba3a-ae7941e968da
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
@@ -197,8 +197,12 @@ async function openai_transcription(file_blob_object2) {
 	headers.append("Accept", "application/json");
 	
 	const formData = new FormData();
-	// formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
-	formData.append("file", file_blob_object2);
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
@@ -223,7 +227,7 @@ async function openai_transcription(file_blob_object2) {
 
 // ----------------------------------------------------
 
-async function openai_translation(file_blob_object2) {
+async function openai_translation(file_input) {
 
 	// https://www.postman.com/devrel/workspace/openai/documentation/13183464-90abb798-cb85-43cb-ba3a-ae7941e968da
 	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
@@ -236,7 +240,12 @@ async function openai_translation(file_blob_object2) {
 	headers.append("Accept", "application/json");
 	
 	const formData = new FormData();
-	formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
