@@ -136,11 +136,15 @@ async function readaudio() {
 			 	.then(async function(blob_object) { 
 			 	console.log("blob_object: ", blob_object);
 
+				// URL.createObjectURL(blob_object); // blob:https://codesolutions2.github.io/10f72fa2-21b8-425a-af78-b9e5b40bfb5c
+
+				var file_blob_object = new File ([blob_object], "recording.mp3", {type: "audio/mp3"});
+					
 				// Create a url for the data object
-				return URL.createObjectURL(blob_object);
+				return URL.createObjectURL(file_blob_object);
 				})
 				.then(async function(fileURL) {	
-			console.log("fileURL: ", fileURL);
+			console.log("fileURL: ", fileURL); 
 			const file_blob_object2 = { uri: fileURL, name: 'recording.mp3', type: 'audio/mp3' };
 			var text_out = await openai_transcription(file_blob_object2);
 			// var text_out = await openai_translation(file_blob_object2);
@@ -206,6 +210,9 @@ async function openai_transcription(file_blob_object2) {
 	
 	const formData = new FormData();
 	formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	// OR
+	// formData.append('file', file_blob_object2 as unknown as Blob);
+	
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
