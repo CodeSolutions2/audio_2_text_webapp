@@ -163,14 +163,15 @@ async function readaudio() {
 					// console.log("bytes: ", bytes);
 					// return bytes;
 				})
-				.then(bytes => { console.log("bytes: ", bytes); 
-				 	// return new Blob(bytes, {type: "audio/mp3"});
-				 	return new Blob(bytes, {type: "audio/mpeg"});
+				.then(bytes => { 
+					console.log("bytes: ", bytes); 
+				 	return new Blob(bytes, {type: "audio/mp3"});
+				 	// return new Blob(bytes, {type: "audio/mpeg"});
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
-					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
-					return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
+					return new File ([blob_object2], 'recording.mp3', {type: "audio/mp3"});
+					// return new File ([blob_object2], 'recording.mp3', {type: "audio/mpeg"});
 				})
 			.then(async function(file_blob_object2) {	
 				 	console.log("file_blob_object2: ", file_blob_object2);
@@ -237,12 +238,14 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	console.log("filename:", filename);
 	
 	const formData = new FormData();
-	formData.append("file", file_blob_object2, filename);
+	formData.append("file", file_blob_object2, filename); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
 	// formData.append("file", blob_object);
 	formData.append("model", "whisper-1");
-	formData.append("response_format", "json");
-	formData.append("temperature", "0");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription.
+	formData.append("response_format", "json");  // json, text, srt, verbose_json, or vtt.
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
 	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
 	
 	const options = {method: 'POST', 
 		       headers: headers, 
