@@ -175,7 +175,7 @@ async function readaudio() {
 					// dict_out.push({date: [YYYY, MM, DD], time: [HH, mm, ss], text: text_out});
 					string_out =+ `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}\\n${text_out}\\n`;
 					
-					return text_out;
+					return string_out;
 				})
 				.catch(error => { console.log(error); });
 			
@@ -188,14 +188,17 @@ async function readaudio() {
 
 			// ------------------------------------------
 			
-			
-
 			// Processing information
 			outp.innerHTML = 'Processing audio';
-		  });
-
-		   outp.innerHTML = 'Processing Done'; console.log("string_out:", string_out); return string_out; 
+			
+		  });  // end of file_objects.forEach
+	})
+	.then(string_out => { 
+		outp.innerHTML = 'Processing Done'; 
+		console.log("string_out:", string_out); 
+		return string_out; 
 	});
+	
 }
 
 	
