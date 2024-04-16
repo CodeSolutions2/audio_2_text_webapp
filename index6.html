@@ -231,7 +231,7 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	const url = 'https://api.openai.com/v1/audio/transcriptions';
 
 	const headers = new Headers();
-	headers.append("Content-Type", "multipart/form-data");
+	// headers.append("Content-Type", "multipart/form-data");
 	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
 	headers.append("Accept", "application/json");
 	
@@ -239,7 +239,7 @@ async function send_a_form_w_fetch_using_formData(file_blob_object2) {
 	formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
-	formData.append("response_format", "json");  // json, text, srt, verbose_json, or vtt
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
 	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
 	formData.append("language", "en");
 	formData.append("transcription", "plain text"); // plain text, srt, vtt
