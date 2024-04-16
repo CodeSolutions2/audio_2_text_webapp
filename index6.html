@@ -169,14 +169,15 @@ async function readaudio() {
 					console.log("bytes: ", bytes); 
 				 	// return new Blob(bytes, {type: "audio/mp3"});
 				 	// return new Blob(bytes, {type: "audio/mpeg"});
-					return new Blob(bytes, {type: "mp3"});
-					// return new Blob(bytes);
+					// return new Blob(bytes, {type: "mp3"});
+					return new Blob(bytes);
 				})
 				.then(async function(blob_object2) { 
 					console.log("blob_object2: ", blob_object2); 
 					// return new File ([blob_object2], "recording.mp3", {type: "audio/mp3"});
-					return new File ([blob_object2], "recording", {type: "mp3"});
+					// return new File ([blob_object2], "recording", {type: "mp3"});
 					// return new File ([blob_object2], "recording", {type: "audio/mpeg"});
+					return new File ([blob_object2], "recording", {type: "mpeg"});
 				})
 			.then(async function(file_blob_object2) {	
 				 	console.log("file_blob_object2: ", file_blob_object2);
