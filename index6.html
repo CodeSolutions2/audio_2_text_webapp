@@ -125,69 +125,30 @@ async function readaudio() {
 			// ------------------------------------------
 			// Form submission
 			// ------------------------------------------
-			// Way 0: read in the mp3 as file_download_url --> convert to  blob_object -->  convert to bytes (arrayBuffer) --> read in arrayBuffer using a local file --> convert to blob_object again --> put blob_object into a file --> send to endpoint
 			
+
+			// ------------------------------------------
+			
+			// Way 1: 
 			// Convert the file_url to a blob
 			var text_out = await fetch(file_download_url)
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
 			 	console.log("blob_object: ", blob_object);
 
-				// Everything stored on GitHub is encoded in base64, so one needs to decode it to use the data
-				var base64_string = await readFileAsDataURL(blob_object); return base64_string;
+				// Create a url for the data object
+				return URL.createObjectURL(blob_object);
 				})
-				.then(async function(base64_string) {
-					console.log("base64_string: ", base64_string);
-
-					// Follow the process on https://www.base64encode.org/enc/map/, 
-					// to convert base64_string to ASCII
-					
-					// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
-					const regex = /data:audio\/mpeg;base64,/g;
-					base64_string = base64_string.replace(regex, '');
-					console.log("base64_string: ", base64_string);
-					
-					// Decode the Base64-encoded string --> obtain the mp3 data in binary string format
-					const binaryString = atob(base64_string);
-					console.log("binaryString: ", binaryString);
-
-					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
-					var character_array = binaryString.split('');
-					console.log("character_array: ", character_array);
-					
-					// Map each binary string character as an ASCII number
-					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
-					// console.log("byteArray: ", byteArray);
-					// return byteArray;
-
-					// bytes gives the same output as byteArray
-					const bytes = new Uint8Array(byteArray);
-					console.log("bytes: ", bytes);
-					return bytes;
-				})
-				.then(bytes => { 
-					console.log("bytes: ", bytes); 
-				 	// return new Blob(bytes, {type: "audio/mp3"});
-				 	// return new Blob(bytes, {type: "audio/mpeg"});
-					// return new Blob(bytes, {type: "mp3"});
-					return new Blob(bytes);
-				})
-				.then(async function(blob_object2) { 
-					console.log("blob_object2: ", blob_object2); 
-					// return new File ([blob_object2], "recording.mp3", {type: "audio/mp3"});
-					// return new File ([blob_object2], "recording", {type: "mp3"});
-					// return new File ([blob_object2], "recording", {type: "audio/mpeg"});
-					return new File ([blob_object2], "recording.mpeg", {type: "mpeg"});
-				})
-			.then(async function(file_blob_object2) {	
-				 	console.log("file_blob_object2: ", file_blob_object2);
-				 	// var text_out = await openai_transcription(file_blob_object2);
-					var text_out = await openai_translation(file_blob_object2);
-					// await openai_text_to_speech();
-				 	return text_out; 
-				})
-				.catch(error => { console.log(error); });
-      
+				.then(async function(fileURL) {	
+			console.log("fileURL: ", fileURL);
+			const file_blob_object2 = { uri: fileURL, name: 'recording.mp3', type: 'audio/mp3' };
+			var text_out = await openai_transcription(file_blob_object2);
+			// var text_out = await openai_translation(file_blob_object2);
+			// await openai_text_to_speech();
+			return text_out;
+		})
+		.catch(error => { console.log(error); });
+			
 			// ------------------------------------------
 
 			// Show audio element on HTML
@@ -244,7 +205,7 @@ async function openai_transcription(file_blob_object2) {
 	headers.append("Accept", "application/json");
 	
 	const formData = new FormData();
-	formData.append("file", file_blob_object2, "recording.mpeg"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	formData.append("file", file_blob_object2, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
 	formData.append("model", "whisper-1");
 	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
 	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
