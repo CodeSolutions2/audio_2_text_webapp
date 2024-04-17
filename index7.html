@@ -18,14 +18,16 @@
 <br><br>
 
 <button id="input_new_audio_into_journal" onclick="input_new_audio_into_journal()">input_new_audio_into_journal</button>
+<br><br>
 
+<button id="combine_new_and_existing_text" onclick="combine_new_and_existing_text()">combine_new_and_existing_text</button>
 
 <audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_57_51_test0.mp3" type="audio/mpeg"></audio>
 	  
 	  
 <!-- View text results -->
 <div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
-<div id="transcriptions" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+<div id="transcriptions" style="display:none;font-family:courier;font-size:24px;height:300px"></div>
 
 <!-- View journal and chatbot -->
 <div align="left">
@@ -79,12 +81,6 @@ const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 // ----------------------------------------------------
 
-// Global variables
-var existing_journal_text = "";
-var new_journal_text = "";
-  
-// ----------------------------------------------------
-
 // Train model on existing journal
 
 
@@ -107,6 +103,16 @@ async function play_an_audio() {
 	
 // ----------------------------------------------------
 
+async function combine_new_and_existing_text() {
+	
+	console.log('new_journal_text: ', outt.innerHTML);
+	console.log('existing_journal_text: ', document.getElementById("journal").value); 
+
+}
+
+	
+// ----------------------------------------------------
+
 	
 // Read in new audio (transcribe) --> add new text to existing journal 
 async function input_new_audio_into_journal() {
@@ -122,24 +128,8 @@ async function input_new_audio_into_journal() {
 		// Return a promise to force values created after readaudio to be created in sychronous order.
 		// Assure that readaudio is finished : ok so readaudio returns a little after the callback
 		.then(done_message => done_message)
-		.then(done_message => {
-			outp.innerHTML = done_message;
-			console.log('done_message: ', done_message); 
-			
-			console.log('new_journal_text: ', outt.innerHTML);
-			// Problem: it can not read the text from div element outt, yet the data is printed to the page
-			
-			console.log('existing_journal_text: ', existing_journal_text); // OK
-		})
-	
-	
-   //  .then(async function() { 
-	// 	console.log("new_journal_text: ", new_journal_text);
-      
-		// Combine new transcribed data with existing journal data, via global variables
-	// 	return await existing_journal_text.concat(`\n${new_journal_text}\n`);
-	// })
-	
+		.then(done_message => { outp.innerHTML = done_message; })
+
 }
 
 
@@ -401,10 +391,8 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		})
 		.then(response => response.text())
 		.then(async function(text_out) { 
-			// console.log("text_out: ", text_out);
-			existing_journal_text = text_out;  // Update global variable
-			document.getElementById("journal").innerHTML = existing_journal_text;  // print existing journal in text area
-			return existing_journal_text;
+			document.getElementById("journal").innerHTML = text_out;  // print existing journal in text area
+			return text_out;
 		})
 		.catch(error => { console.log(error); });
 }
