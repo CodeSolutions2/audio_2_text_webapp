@@ -18,6 +18,10 @@
 <br><br>
 
 <button id="input_new_audio_into_journal" onclick="input_new_audio_into_journal()">input_new_audio_into_journal</button>
+
+
+<audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_57_51_test0.mp3" type="audio/mpeg"></audio>
+	  
 	  
 <!-- View text results -->
 <div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
@@ -71,11 +75,6 @@ const journal_filename = "text_data.txt";
 const repoOwner = 'CodeSolutions2';
 const repoName = 'audio_2_text_webapp';
 
-// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
-var audioElement = document.createElement('audio');
-audioElement.setAttribute("controls", true);
-audioElement.setAttribute("type", "audio/mpeg");
-
 const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 // ----------------------------------------------------
@@ -91,20 +90,49 @@ var new_journal_text = "";
 
 // ----------------------------------------------------
 
+async function play_an_audio() {
+	
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
+	// var audioElement = document.createElement('audio');
+	// audioElement.setAttribute("controls", true);
+	// audioElement.setAttribute("type", "audio/mpeg");
+	
+	// audioElement.src = file_download_url;
+	// document.body.appendChild(audioElement);
+	// console.log("audioElement: ", audioElement);
+
+	document.getElementById("audio_id").style.display = "block";
+}
+
+	
+// ----------------------------------------------------
+
+	
 // Read in new audio (transcribe) --> add new text to existing journal 
 async function input_new_audio_into_journal() {
 	
-	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-		.then(async function(text_out) { return await readaudio(); })
+	await play_an_audio().
+		.then(async function() { let text_out = await GET_text_from_file_wo_auth_GitHub_RESTAPI(); return text_out; })
+		.then(async function(text_out) { 
+			// Processing information
+			outp.innerHTML = 'Processing audio';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			return await readaudio(); 
+		})
+		// Return a promise to force values created after readaudio to be created in sychronous order.
+		// Assure that readaudio is finished
 		.then(done_message => done_message)
 		.then(done_message => {
 			outp.innerHTML = done_message;
-			console.log('done_message: ', done_message);
+			console.log('done_message: ', done_message); 
+			// Problem: it can print done_message to console but can not print to outp
+			
 			console.log('new_journal_text: ', outt.innerHTML);
-			console.log('existing_journal_text: ', existing_journal_text);
+			// Problem: it can not read the text from div element outt, yet the data is printed to the page
+			
+			console.log('existing_journal_text: ', existing_journal_text); // OK
 		})
-		// it seems like readaudio returns after this last then statement, 
-		// meaning there needs to be something that assures that readaudio is finished
+	
 	
    //  .then(async function() { 
 	// 	console.log("new_journal_text: ", new_journal_text);
@@ -157,7 +185,7 @@ async function readaudio() {
 			// -----------------------------------
 
 			let file_download_url = file_object.download_url;
-			console.log("file_download_url:", file_download_url);
+			// console.log("file_download_url:", file_download_url);
 			
 			// -----------------------------------
 
@@ -176,23 +204,10 @@ async function readaudio() {
 					// return await openai_text_to_speech();
 				})
 				.catch(error => { console.log(error); });
-			
-			// ------------------------------------------
-
-			// Show audio element on HTML
-			audioElement.src = file_download_url;
-			document.body.appendChild(audioElement);
-			// console.log("audioElement: ", audioElement);
 
 			// ------------------------------------------
-			
-			// Processing information
-			// outp.innerHTML = 'Processing audio';
 			
 		  });  // end of file_objects.forEach
-		
-		  // Processing information
-		  outp.innerHTML = 'Transcription Processing Done';
 	})
 	.then(() => { return 'Transcription Processing Done'; });
 	
