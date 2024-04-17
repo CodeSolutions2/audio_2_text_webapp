@@ -204,7 +204,8 @@ async function readaudio() {
 					return 'done';
 				})
 				// true, all it is doing is waiting the timmer length, and then returning the promise
-				.then(async function(done) { new Promise(resolve => setTimeout(() => { console.log('done: ', done); resolve(done)}, Math.random()*100)); })
+				//.then(async function(done) { new Promise(resolve => setTimeout(() => { console.log('done: ', done); resolve(done)}, 9000; })
+				.then(async function(done) { await new Promise(r => setTimeout(r, 10000)); })
 				.catch(error => { console.log(error); });
 
 			// ------------------------------------------
