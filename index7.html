@@ -100,7 +100,7 @@ async function input_new_audio_into_journal() {
 		.then(done_message => {
 			outp.innerHTML = done_message;
 			console.log('done_message: ', done_message);
-			console.log('new_journal_text: ', document.getElementById("transcriptions").value);
+			console.log('new_journal_text: ', outt.innerHTML);
 			console.log('existing_journal_text: ', existing_journal_text);
 		})
 		// it seems like readaudio returns after this last then statement, 
@@ -187,7 +187,7 @@ async function readaudio() {
 			// ------------------------------------------
 			
 			// Processing information
-			outp.innerHTML = 'Processing audio';
+			// outp.innerHTML = 'Processing audio';
 			
 		  });  // end of file_objects.forEach
 		
