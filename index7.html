@@ -120,12 +120,11 @@ async function input_new_audio_into_journal() {
 			return await readaudio(); 
 		})
 		// Return a promise to force values created after readaudio to be created in sychronous order.
-		// Assure that readaudio is finished
+		// Assure that readaudio is finished : ok so readaudio returns a little after the callback
 		.then(done_message => done_message)
 		.then(done_message => {
 			outp.innerHTML = done_message;
 			console.log('done_message: ', done_message); 
-			// Problem: it can print done_message to console but can not print to outp
 			
 			console.log('new_journal_text: ', outt.innerHTML);
 			// Problem: it can not read the text from div element outt, yet the data is printed to the page
@@ -202,7 +201,10 @@ async function readaudio() {
 					await openai_transcription(blob_object, 'blob_object', date_string);
 					// return await openai_translation(blob_object, 'blob_object');
 					// return await openai_text_to_speech();
+					return 'done';
 				})
+				// true, all it is doing is waiting the timmer length, and then returning the promise
+				.then(async function(done) { new Promise(resolve => setTimeout(() => { console.log('done: ', done); resolve(done)}, Math.random()*100)); })
 				.catch(error => { console.log(error); });
 
 			// ------------------------------------------
@@ -249,12 +251,7 @@ async function openai_transcription(file_input, which_input, date_string) {
 	// Print text part of JSON response only with user message
 	await fetch(url, options)
 		.then(response => response.text())
-		.then(async function(result) { 
-			// console.log(result);
-			outt.innerHTML += `${date_string}\n${result}\n`;
-			// Global variable storage
-			new_journal_text = await new_journal_text.concat(`${date_string}\n${result}\n`);
-		})
+		.then(async function(result) { console.log(result); outt.innerHTML += `${date_string}\n${result}\n`; })
 		.catch(error => { console.log(error); });
 	
 }
