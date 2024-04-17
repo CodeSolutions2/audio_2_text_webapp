@@ -102,14 +102,19 @@ async function input_new_audio_into_journal() {
 			existing_journal_text = text_out;  // Update global variable
 			
 			document.getElementById("journal").innerHTML = existing_journal_text;  // print existing journal in text area
-			await readaudio(); // Get transcriptions from .mp3 files, and store text in global variable
+			let done_message = await readaudio(); // Get transcriptions from .mp3 files, and store text in global variable
+			outp.innerHTML = done_message;
+			return done_message;
 		})
-    .then(async function() { 
-		console.log("new_journal_text: ", new_journal_text);
+		// it seems like readaudio returns after this last then statement, 
+		// meaning there needs to be something that assures that readaudio is finished
+	
+   //  .then(async function() { 
+	// 	console.log("new_journal_text: ", new_journal_text);
       
 		// Combine new transcribed data with existing journal data, via global variables
-		return await existing_journal_text.concat(`\n${new_journal_text}\n`);
-	})
+	// 	return await existing_journal_text.concat(`\n${new_journal_text}\n`);
+	// })
 	
 }
 
@@ -195,7 +200,7 @@ async function readaudio() {
 			
 		  });  // end of file_objects.forEach
 	})
-	.then(() => { outp.innerHTML = 'Transcription Processing Done'; return 'Transcription Processing Done'; });
+	.then(() => { return 'Transcription Processing Done'; });
 	
 }
 
@@ -236,8 +241,13 @@ async function openai_transcription(file_input, which_input, date_string) {
 	await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			console.log(result); 
+			console.log(result);
+			// Global variable storage
 			new_journal_text = await new_journal_text.concat(`${date_string}\n${result}\n`);
+			// OR
+			let new_journal_text2 = await localStorage.getItem('new_journal_text2');
+			await localStorage.removeItem('new_journal_text2');
+			await localStorage.setItem('new_journal_text2', new_journal_text2.concat(`${date_string}\n${result}\n`));
 		})
 		.catch(error => { console.log(error); });
 	
