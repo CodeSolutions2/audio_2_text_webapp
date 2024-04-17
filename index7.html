@@ -96,6 +96,8 @@ async function input_new_audio_into_journal() {
 	
 	return await GET_text_from_file_wo_auth_GitHub_RESTAPI()
 		.then(async function(text_out) { 
+
+			console.log('new_journal_text: ', new_journal_text);
 			
 			// let done_message = await readaudio(); // Get transcriptions from .mp3 files, and store text in global variable
 			// OR
@@ -191,6 +193,9 @@ async function readaudio() {
 			outp.innerHTML = 'Processing audio';
 			
 		  });  // end of file_objects.forEach
+		
+		  // Processing information
+		  outp.innerHTML = 'Transcription Processing Done';
 	})
 	.then(() => { return 'Transcription Processing Done'; });
 	
@@ -234,7 +239,7 @@ async function openai_transcription(file_input, which_input, date_string) {
 		.then(response => response.text())
 		.then(async function(result) { 
 			// console.log(result);
-			outt.innerHTML += result;
+			outt.innerHTML += `${date_string}\n${result}\n`;
 			// Global variable storage
 			new_journal_text = await new_journal_text.concat(`${date_string}\n${result}\n`);
 		})
