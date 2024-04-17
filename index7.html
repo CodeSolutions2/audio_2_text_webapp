@@ -99,7 +99,9 @@ async function input_new_audio_into_journal() {
 		.then(done_message => done_message)
 		.then(done_message => {
 			outp.innerHTML = done_message;
-			console.log('new_journal_text: ', new_journal_text);
+			console.log('done_message: ', done_message);
+			console.log('new_journal_text: ', document.getElementById("transcriptions").value);
+			console.log('existing_journal_text: ', existing_journal_text);
 		})
 		// it seems like readaudio returns after this last then statement, 
 		// meaning there needs to be something that assures that readaudio is finished
