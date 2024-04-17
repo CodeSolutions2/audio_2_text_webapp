@@ -111,7 +111,7 @@ async function play_an_audio() {
 // Read in new audio (transcribe) --> add new text to existing journal 
 async function input_new_audio_into_journal() {
 	
-	await play_an_audio().
+	await play_an_audio()
 		.then(async function() { let text_out = await GET_text_from_file_wo_auth_GitHub_RESTAPI(); return text_out; })
 		.then(async function(text_out) { 
 			// Processing information
