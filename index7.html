@@ -79,35 +79,26 @@ const repoName = 'audio_2_text_webapp';
 
 const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
-// ----------------------------------------------------
-
-// Train model on existing journal
-
 
 // ----------------------------------------------------
 
 async function play_an_audio() {
-	
-	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
-	// var audioElement = document.createElement('audio');
-	// audioElement.setAttribute("controls", true);
-	// audioElement.setAttribute("type", "audio/mpeg");
-	
-	// audioElement.src = file_download_url;
-	// document.body.appendChild(audioElement);
-	// console.log("audioElement: ", audioElement);
 
 	document.getElementById("audio_id").style.display = "block";
 }
 
 	
 // ----------------------------------------------------
-
+	
 async function combine_new_and_existing_text() {
 	
-	console.log('new_journal_text: ', outt.innerHTML);
-	console.log('existing_journal_text: ', document.getElementById("journal").value); 
-
+	const new_journal_text = outt.innerHTML;
+	const existing_journal_text = document.getElementById("journal").innerHTML;
+	
+	const final_journal_text = existing_journal_text.concat(new_journal_text);
+	document.getElementById("journal").innerHTML = final_journal_text;
+	
+	return final_journal_text;
 }
 
 	
@@ -130,6 +121,7 @@ async function input_new_audio_into_journal() {
 		.then(done_message => done_message)
 		.then(done_message => { outp.innerHTML = done_message; })
 
+	// Eventhough there is a promise, readaudio values return seconds after input_new_audio_into_journal has finished.
 }
 
 
@@ -215,7 +207,6 @@ async function openai_transcription(file_input, which_input, date_string) {
 	const url = 'https://api.openai.com/v1/audio/transcriptions';
 
 	const headers = new Headers();
-	// headers.append("Content-Type", "multipart/form-data");
 	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
 	headers.append("Accept", "application/json");
 	
@@ -242,81 +233,12 @@ async function openai_transcription(file_input, which_input, date_string) {
 	// Print text part of JSON response only with user message
 	await fetch(url, options)
 		.then(response => response.text())
-		.then(async function(result) { console.log(result); outt.innerHTML += `${date_string}\n${result}\n`; })
+		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; })
 		.catch(error => { console.log(error); });
 	
 }
 	
 
-// ----------------------------------------------------
-
-
-async function openai_translation(file_input) {
-	
-	const url = 'https://api.openai.com/v1/audio/translations';
-
-	const headers = new Headers();
-	// headers.append("Content-Type", "multipart/form-data");
-	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
-	headers.append("Accept", "application/json");
-	
-	const formData = new FormData();
-	if (which_input == 'blob_object') {
-		formData.append("file", file_input);
-	} else {
-		// using a file_blob_object
-		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
-	}
-	formData.append("model", "whisper-1");
-	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
-	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
-	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
-	formData.append("language", "en");
-	formData.append("transcription", "plain text"); // plain text, srt, vtt
-	
-	const options = {method: 'POST', 
-		       headers: headers, 
-		       body: formData,
-		       redirect: "follow"
-		      };
-	
-	// Print text part of JSON response only with user message
-	return await fetch(url, options)
-		.then(response => response.text())
-		.then(result => { console.log(result); return result; })
-		.catch(error => { console.log(error); });
-	
-}
-
-  
-// ----------------------------------------------------
-
-  
-async function openai_text_to_speech() {
-	
-	const url = "https://api.openai.com/v1/audio/speech";
-	
-	var data = {"model": "tts-1-hd", 
-		    "input": "OpenAI now also supports text to speech with two models: tts-1 and tts-1-hd. For real-time applications, the standard tts-1 model provides the lowest latency but at a lower quality than the tts-1-hd model. Due to the way the audio is generated, tts-1 is likely to generate content that has more static in certain situations than tts-1-hd. In some cases, the audio may not have noticeable differences depending on your listening device and the individual person. The input to generate the audio from can be up to 4096 characters. Supported voices are alloy, echo, fable, onyx, nova, and shimmer. Supported response formats are mp3, opus, aac, and flac. It is also possible to control the speed, select a value from 0.25 to 4.0. 1.0 is the default. There is no direct mechanism to control the emotional output of the audio generated. Certain factors may influence the output audio like capitalization or grammar but OpenAI's internal tests with these have yielded mixed results. Please note that OpenAI's Usage Policies require you to provide a clear disclosure to end users that the TTS voice they are hearing is AI-generated and not a human voice.",
-    "voice": "alloy",
-    "response_format": "mp3",
-    "speed": "1.1"};
-	
-	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
-	var options = {method : 'post', headers: headers, body : JSON.stringify(data), redirect: "follow"};
-  
-	// Print text part of JSON response only with user message
-	return await fetch(url, options)
-            .then(res => res.json())
-            .then(res => {
-		    var json_response = JSON.parse(JSON.stringify(res));
-		    console.log('response: ', json_response); 
-		    return json_response;
-            })
-            .catch(error => { console.log(error); });
-	
-}
-	
 // ----------------------------------------------------
 
 	
