@@ -17,17 +17,13 @@
 	
 <br><br>
 
-<button id="readaudio" onclick="readaudio()">Transcribe audios</button>
-
-<br>
-
 <button id="input_new_audio_into_journal" onclick="input_new_audio_into_journal()">input_new_audio_into_journal</button>
 	  
-<!-- View results -->
-<div id="output" style="font-family:courier;font-size:24px;height:300px"></div>
+<!-- View text results -->
+<div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+<div id="transcriptions" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
 
-
-<!-- View results -->
+<!-- View journal and chatbot -->
 <div align="left">
     <table style='text-align: center; width: 600px; display:block'>
       <tr>
@@ -68,7 +64,8 @@ audio {position: absolute; top: 250px;}
 	  
 <script>
 
-const outp = document.getElementById('output');
+const outp = document.getElementById('progress');
+const outt = document.getElementById('transcriptions');
 
 const journal_filename = "text_data.txt";
 const repoOwner = 'CodeSolutions2';
@@ -99,10 +96,11 @@ async function input_new_audio_into_journal() {
 	
 	return await GET_text_from_file_wo_auth_GitHub_RESTAPI()
 		.then(async function(text_out) { 
-			existing_journal_text = text_out;  // Update global variable
 			
-			document.getElementById("journal").innerHTML = existing_journal_text;  // print existing journal in text area
-			let done_message = await readaudio(); // Get transcriptions from .mp3 files, and store text in global variable
+			// let done_message = await readaudio(); // Get transcriptions from .mp3 files, and store text in global variable
+			// OR
+			let done_message = await new Promise(resolve => readaudio());
+			
 			outp.innerHTML = done_message;
 			return done_message;
 		})
@@ -127,14 +125,14 @@ async function readaudio() {
 	return await get_audio_file_objects()
 	.then(file_objects => { 
 		
-		console.log("file_objects:", file_objects);
+		// console.log("file_objects:", file_objects);
 		
 		file_objects.forEach(async function(file_object, index) {
 			
 			console.log("file_object:", file_object);
 			
 			filename = file_object.name;
-			console.log("filename:", filename);
+			// console.log("filename:", filename);
 			
 			let out0 = filename.split('_');
 
@@ -154,12 +152,6 @@ async function readaudio() {
 			HH = HH.replace(regex, '');
 			mm = mm.replace(regex, '');
 			ss = ss.replace(regex, '');
-			console.log("YYYY:", YYYY);
-			console.log("MM:", MM);
-			console.log("DD:", DD);
-			console.log("HH:", HH);
-			console.log("mm:", mm);
-			console.log("ss:", ss);
 
 			let date_string = `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}`;
 
@@ -179,7 +171,7 @@ async function readaudio() {
 			await fetch(file_download_url)
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
-					console.log("blob_object: ", blob_object);
+					// console.log("blob_object: ", blob_object);
 					await openai_transcription(blob_object, 'blob_object', date_string);
 					// return await openai_translation(blob_object, 'blob_object');
 					// return await openai_text_to_speech();
@@ -191,7 +183,7 @@ async function readaudio() {
 			// Show audio element on HTML
 			audioElement.src = file_download_url;
 			document.body.appendChild(audioElement);
-			console.log("audioElement: ", audioElement);
+			// console.log("audioElement: ", audioElement);
 
 			// ------------------------------------------
 			
@@ -241,13 +233,10 @@ async function openai_transcription(file_input, which_input, date_string) {
 	await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			console.log(result);
+			// console.log(result);
+			outt.innerHTML += result;
 			// Global variable storage
 			new_journal_text = await new_journal_text.concat(`${date_string}\n${result}\n`);
-			// OR
-			let new_journal_text2 = await localStorage.getItem('new_journal_text2');
-			await localStorage.removeItem('new_journal_text2');
-			await localStorage.setItem('new_journal_text2', new_journal_text2.concat(`${date_string}\n${result}\n`));
 		})
 		.catch(error => { console.log(error); });
 	
@@ -384,10 +373,10 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 			var file_object = file_objects.at(0);
 		   
 			var file_download_url = file_object.download_url;
-			console.log("file_download_url:", file_download_url);
+			// console.log("file_download_url:", file_download_url);
 		   
 			var sha_val = file_object.sha;
-			console.log("sha_val:", sha_val);
+			// console.log("sha_val:", sha_val);
 
 			return file_download_url;
 		})
@@ -397,8 +386,10 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		})
 		.then(response => response.text())
 		.then(async function(text_out) { 
-			console.log("text_out: ", text_out);
-			return text_out;
+			// console.log("text_out: ", text_out);
+			existing_journal_text = text_out;  // Update global variable
+			document.getElementById("journal").innerHTML = existing_journal_text;  // print existing journal in text area
+			return existing_journal_text;
 		})
 		.catch(error => { console.log(error); });
 }
