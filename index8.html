@@ -106,22 +106,22 @@ async function play_an_audio() {
 	
 // ----------------------------------------------------
 
-// Fine-tune
-
-	
 async function fine_tune_text() {
 
 	return await combine_new_and_existing_text()
+		.then(async function() { PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(document.getElementById("journal").innerHTML); })
 		.then(async function(final_journal_text) {
 
-			JSON.stringify(final_journal_text);
+			const jsonl_data = JSON.stringify(final_journal_text);
+			return new Blob([jsonl_data], { type: 'application/json' });
 		})
-
-
-
+		.then(async function(blob_object) {
+		await openai_upload_file_for_finetuning(blob_object, 'blob_object')
+		})
 
 }
 
+// ----------------------------------------------------
 
 async function openai_upload_file_for_finetuning(file_input, which_input) {
 
@@ -136,7 +136,7 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 		formData.append("file", file_input);
 	} else {
 		// using a file_blob_object
-		formData.append("file", file_input, "file.jsonl"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+		formData.append("file", file_input, "file.json");
 	}
 	formData.append("purpose", "fine-tune");
 	
@@ -160,7 +160,7 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 async function combine_new_and_existing_text() {
 	
 	const new_journal_text = outt.innerHTML;
-	const existing_journal_text = document.getElementById("journal").innerHTML;
+	const existing_journal_text = document.getElementById("journal").innerHTML + "\n";
 	
 	const final_journal_text = existing_journal_text.concat(new_journal_text);
 	document.getElementById("journal").innerHTML = final_journal_text;
@@ -253,7 +253,7 @@ async function readaudio() {
 					// return await openai_translation(blob_object, 'blob_object');
 					// return await openai_text_to_speech();
 				})
-				.then(async function(done) { await new Promise(r => setTimeout(r, 10000)); })
+				.then(async function() { await new Promise(r => setTimeout(r, 10000)); })
 				.catch(error => { console.log(error); });
 
 			// ------------------------------------------
@@ -269,7 +269,11 @@ async function processEvent(event) {
 	
     if (count == total_file_to_process){
 	    // Advance to the next step, one knows exactly when the audio transcription is done despite the delay of the endpoint response (transcription responses arrive after the external async/await finishes) 
-	    await endpoint_response_delay_fixed_go_next_process();  // need to stop the eventListener, reset count/count_prev, run fine_tune_text
+	    count = 0;
+	    total_file_to_process = 0;
+	    await stop_eventlister()
+		    .then(async function() { await new Promise(r => setTimeout(r, 10000)); })
+		    .then(async function() {  await fine_tune_text(); })
     }
 
 }
@@ -279,6 +283,9 @@ async function start_eventlister() {
   document.getElementById("input_new_audio_into_journal").addEventListener("click", processEvent, false);
 }
 
+async function stop_eventlister() {
+  document.getElementById("input_new_audio_into_journal").removeEventListener("click", processEvent);
+}
 
 // ----------------------------------------------------
 
@@ -413,14 +420,35 @@ async function get_audio_file_objects() {
 // ----------------------------------------------------
 
 
-async function PUT_add_to_a_file_wo_auth_GitHub_RESTAPI() {
+async function PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(text_data) {
 	
-   // PUT text into an existing file
-   var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
+   var url0 = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+   var url1 = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
 
-   return await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-	   .then(async function(text_out) { })
-	   .catch(error => { console.log(error); });
+	await fetch(url0)
+		.then(res => res.json())
+		.then(data => { 
+			data.forEach(async function(file) {
+				var regexp = new RegExp(`${journal_filename}`, 'g');
+				if (file.type === 'file' && file.name.match(regexp)) {
+					file_objects.push(file);
+				}
+			});
+			return file_objects;
+		})
+		.then(async function (file_objects) {
+			var file_object = file_objects.at(0);
+			return file_object.sha;
+		})
+		.then(async function (sha_val) {
+			var data = {"message": "insert new journal entry", "committer":{"name":"App name","email":"App email"}, "content": text_data, "sha": sha_val};
+			var headers = {"Accept": "application/vnd.github+json"}; // "Accept", "application/json"
+			var options = {method : 'PUT', headers: headers, body : JSON.stringify(data)};
+			var out1 = await fetch(url1, options); return out1;
+		})
+		.then(res => res.json())
+		.then(res => { console.log('PUT request: ', res); })
+		.catch(error => { console.log(error); });
 	
 }
 
