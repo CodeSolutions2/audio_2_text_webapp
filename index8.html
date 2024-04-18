@@ -202,7 +202,9 @@ async function readaudio() {
 	.then(file_objects => { 
 		
 		// console.log("file_objects:", file_objects);
+		
 		total_file_to_process = file_objects.length;
+		console.log("total_file_to_process:", total_file_to_process);
     
 		file_objects.forEach(async function(file_object, index) {
 			
@@ -253,7 +255,7 @@ async function readaudio() {
 					// return await openai_translation(blob_object, 'blob_object');
 					// return await openai_text_to_speech();
 				})
-				.then(async function() { await new Promise(r => setTimeout(r, 10000)); })
+				.then(async function() { await new Promise(r => setTimeout(r, 200)); })
 				.catch(error => { console.log(error); });
 
 			// ------------------------------------------
@@ -272,7 +274,7 @@ async function processEvent(event) {
 	    count = 0;
 	    total_file_to_process = 0;
 	    await stop_eventlister()
-		    .then(async function() { await new Promise(r => setTimeout(r, 10000)); })
+		    .then(async function() { await new Promise(r => setTimeout(r, 200)); })
 		    .then(async function() {  await fine_tune_text(); })
     }
 
@@ -280,10 +282,12 @@ async function processEvent(event) {
 
 
 async function start_eventlister() {
+	console.log('Eventlistener started');
   document.getElementById("input_new_audio_into_journal").addEventListener("click", processEvent, false);
 }
 
 async function stop_eventlister() {
+	console.log('Eventlistener stopped');
   document.getElementById("input_new_audio_into_journal").removeEventListener("click", processEvent);
 }
 
@@ -321,7 +325,7 @@ async function openai_transcription(file_input, which_input, date_string) {
 	// Print text part of JSON response only with user message
 	await fetch(url, options)
 		.then(response => response.text())
-		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; count = count + 1; })
+		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; count = count + 1; console.log("count:", count); })
 		.catch(error => { console.log(error); });
 	
 }
