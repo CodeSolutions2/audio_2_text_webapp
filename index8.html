@@ -11,7 +11,7 @@
 	  
 <br>
 
-<!-- ----------------------------------- --> 
+<!-- ----------------------------------- -->
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 <!-- ----------------------------------- -->
 	
@@ -111,15 +111,14 @@ async function play_an_audio() {
 async function fine_tune_text() {
 
 	return await combine_new_and_existing_text()
-		.then(async function() { PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(document.getElementById("journal").innerHTML); })
 		.then(async function(final_journal_text) {
 
-			const jsonl_data = JSON.stringify(final_journal_text);
+			const jsonl_data = JSON.stringify(final_journal_text, null, 2);
+			console.log('jsonl_data: ', jsonl_data);
+			
 			return new Blob([jsonl_data], { type: 'application/json' });
 		})
-		.then(async function(blob_object) {
-		await openai_upload_file_for_finetuning(blob_object, 'blob_object')
-		})
+		.then(async function(blob_object) { await openai_upload_file_for_finetuning(blob_object, 'blob_object') })
 
 }
 
@@ -276,7 +275,7 @@ async function processEvent(event) {
 	    count = 0;
 	    total_file_to_process = 0;
 	    await stop_eventlister()
-		    .then(async function() { await new Promise(r => setTimeout(r, 1000)); })
+		    .then(async function() { await new Promise(r => setTimeout(r, 300)); })
 		    .then(async function() {  await combine_new_and_existing_text(); })
     }
 
@@ -420,28 +419,6 @@ async function get_audio_file_objects() {
     	console.log('file_objects: ', file_objects);
 	
 	return file_objects;
-}
-
-
-// ----------------------------------------------------
-
-
-async function PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(text_data) {
-	
-   var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
-
-	
-	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-		.then(async function(text_out) {
-			var data = {"message": "insert new journal entry", "committer":{"name":"App name","email":"App email"}, "content": text_out, "sha": sha_val};
-			var headers = {"Accept": "application/vnd.github+json"}; // "Accept", "application/json"
-			var options = {method : 'PUT', headers: headers, body : JSON.stringify(data)};
-			var out1 = await fetch(url, options); return out1;
-		})
-		.then(res => res.json())
-		.then(res => { console.log('PUT request: ', res); })
-		.catch(error => { console.log(error); });
-	
 }
 
 	
