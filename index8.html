@@ -187,6 +187,7 @@ async function input_new_audio_into_journal() {
 		// Assure that readaudio is finished : ok so readaudio returns a little after the callback
 		.then(done_message => done_message)
 		.then(done_message => { outp.innerHTML = done_message; })
+		.then(async function() { await combine_new_and_existing_text(); })
 
 	// Eventhough there is a promise, readaudio values return seconds after input_new_audio_into_journal has finished. 
 }
