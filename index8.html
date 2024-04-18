@@ -281,10 +281,10 @@ async function processEvent(event) {
 }
 
 
-async function start_eventlister() {
-	console.log('Eventlistener started');
+// async function start_eventlister() {
+//	console.log('Eventlistener started');
   document.getElementById("input_new_audio_into_journal").addEventListener("click", processEvent, false);
-}
+//}
 
 async function stop_eventlister() {
 	console.log('Eventlistener stopped');
@@ -428,7 +428,8 @@ async function PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(text_data) {
 	
    var url0 = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
    var url1 = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
-
+var file_objects = [];
+	
 	await fetch(url0)
 		.then(res => res.json())
 		.then(data => { 
