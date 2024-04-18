@@ -81,7 +81,9 @@ const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 var total_file_to_process = 0;
 var count = 0;
-
+	
+var sha_val = "";
+	
 // ----------------------------------------------------
 
 // Train model on existing journal
@@ -187,7 +189,6 @@ async function input_new_audio_into_journal() {
 		// Assure that readaudio is finished : ok so readaudio returns a little after the callback
 		.then(done_message => done_message)
 		.then(done_message => { outp.innerHTML = done_message; })
-		.then(async function() { await combine_new_and_existing_text(); })
 
 	// Eventhough there is a promise, readaudio values return seconds after input_new_audio_into_journal has finished. 
 }
@@ -275,8 +276,8 @@ async function processEvent(event) {
 	    count = 0;
 	    total_file_to_process = 0;
 	    await stop_eventlister()
-		    .then(async function() { await new Promise(r => setTimeout(r, 200)); })
-		    .then(async function() {  await fine_tune_text(); })
+		    .then(async function() { await new Promise(r => setTimeout(r, 1000)); })
+		    .then(async function() {  await combine_new_and_existing_text(); })
     }
 
 }
@@ -427,30 +428,15 @@ async function get_audio_file_objects() {
 
 async function PUT_add_to_a_file_wo_auth_GitHub_RESTAPI(text_data) {
 	
-   var url0 = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
-   var url1 = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
-var file_objects = [];
+   var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${journal_filename}`;
+
 	
-	await fetch(url0)
-		.then(res => res.json())
-		.then(data => { 
-			data.forEach(async function(file) {
-				var regexp = new RegExp(`${journal_filename}`, 'g');
-				if (file.type === 'file' && file.name.match(regexp)) {
-					file_objects.push(file);
-				}
-			});
-			return file_objects;
-		})
-		.then(async function (file_objects) {
-			var file_object = file_objects.at(0);
-			return file_object.sha;
-		})
-		.then(async function (sha_val) {
-			var data = {"message": "insert new journal entry", "committer":{"name":"App name","email":"App email"}, "content": text_data, "sha": sha_val};
+	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+		.then(async function(text_out) {
+			var data = {"message": "insert new journal entry", "committer":{"name":"App name","email":"App email"}, "content": text_out, "sha": sha_val};
 			var headers = {"Accept": "application/vnd.github+json"}; // "Accept", "application/json"
 			var options = {method : 'PUT', headers: headers, body : JSON.stringify(data)};
-			var out1 = await fetch(url1, options); return out1;
+			var out1 = await fetch(url, options); return out1;
 		})
 		.then(res => res.json())
 		.then(res => { console.log('PUT request: ', res); })
@@ -485,7 +471,7 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 			var file_download_url = file_object.download_url;
 			// console.log("file_download_url:", file_download_url);
 		   
-			var sha_val = file_object.sha;
+			sha_val = file_object.sha;
 			// console.log("sha_val:", sha_val);
 
 			return file_download_url;
