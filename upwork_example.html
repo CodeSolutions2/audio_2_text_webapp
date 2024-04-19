@@ -22,7 +22,7 @@
 
 <button id="fine_tune_text" onclick="fine_tune_text()">fine_tune_text</button>
 
-<audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_58_13_test1.mp3" type="audio/mpeg"></audio>
+<!-- <audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_58_13_test1.mp3" type="audio/mpeg"></audio> -->
 	  
 	  
 <!-- View text results -->
@@ -78,14 +78,14 @@ const repoName = 'audio_2_text_webapp';
 
 const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
-var month = {01: 'january', 02: 'february', 03: 'march', 04: 'april', 05: 'may', 06: 'june', 07: 'july', 08: 'august', 09: 'september', 10: 'october', 11: 'november', 12: 'december'};
+var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
 // ----------------------------------------------------
 
 async function play_an_audio() {
 	
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
-	document.getElementById("audio_id").style.display = "block";
+	// document.getElementById("audio_id").style.display = "block";
 }
 
 	
