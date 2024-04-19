@@ -143,7 +143,7 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 
 	
 // Read in new audio (transcribe) --> add new text to existing journal 
-async function input_new_audio_into_journal() {
+async function transcribe_audio_files() {
 	
 	await play_an_audio()
 		.then(async function() { 
@@ -217,6 +217,7 @@ async function readaudio() {
 			 	.then(async function(blob_object) { 
 					// console.log("blob_object: ", blob_object);
 					await openai_transcription(blob_object, 'blob_object', date_string);
+					// OR
 					// return await openai_translation(blob_object, 'blob_object');
 				})
 				.then(async function() { await new Promise(r => setTimeout(r, 200)); })
