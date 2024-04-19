@@ -91,6 +91,44 @@ async function play_an_audio() {
 	
 // ----------------------------------------------------
 
+async function string_2_arrarydictionary(regexp, str, dict_item0_name, dict_item1_name) {
+
+	// regexp is the repeated item to find in the text and make as dict_item0_name
+	let matches = [...str.matchAll(regexp)];
+	// console.log('matches: ', matches);
+	
+	let text_st = 0;
+	let text_end = 0;
+	let arr_dict = [];
+
+	let dict_item0_name_value = 0;
+	
+	// next: get array of start and end values to cut string
+	matches.forEach(async function(row, index) {
+		dict_item0_name_value = row.at(0);
+		// console.log('dict_item0_name_value: ', dict_item0_name_value);
+		text_st = dict_item0_name_value.length + text_end;
+			
+		if (matches.length > (index+1)){
+			text_end = matches[index+1].index - 1;
+		} else {
+			text_end = str.length;
+		}
+		// console.log('text_st: ', text_st, 'text_end: ', text_end);
+		
+		// Option 0: array dictionary
+		// arr_dict.push({${dict_item0_name}: dict_item0_name_value, ${dict_item1_name}: str.slice(text_st, text_end)});
+		
+		Q_str.push(dict_item0_name_value);
+		Q_str.push(dict_item0_name_value);
+	});
+	
+	console.log('arr_dict: ', arr_dict);
+	
+	return arr_dict;
+}
+
+	
 async function fine_tune_text() {
 
   var transcribed_text = outt.innerHTML;
@@ -98,7 +136,6 @@ async function fine_tune_text() {
 
   // Sorting
 	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
-
 	let matches = [...transcribed_text.matchAll(regexp)];
 	// console.log('matches: ', matches);
 	
@@ -108,7 +145,7 @@ async function fine_tune_text() {
 	
 	// next: get array of start and end values to cut string
 	matches.forEach(async function(row, index) {
-		date = row.at(0);
+		let date = row.at(0);
 		// console.log('date: ', date);
 		text_st = date.length + text_end;
 			
@@ -145,7 +182,7 @@ async function fine_tune_text() {
 		// const prompt = `Create ${num_of_QA_pairs} questions about the given text: ${row.text}, and then answer the created questions using the given text. Each question should begin with: 'For ${month_name} ${year},'.`;
 		// Creates questions only
 		
-		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'For ${month_name} ${year},' and each answer should begin with 'A:'.`;
+		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
 		  // ------------------------------------------
 		  var system_content = "You are a helpful assistant"
 		  var assistant_content = "Respond concisely"
@@ -156,17 +193,28 @@ async function fine_tune_text() {
 		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
 		  
 		  // Print text part of JSON response only with user message
-		  var QA_pairs = await fetch(url, options)
+		  await fetch(url, options)
 		            .then(res => res.json())
 		            .then(res => { const QA = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
 		                          console.log('QA: ', QA); 
 		                          return QA;
 		            })
+		            .then(async function(QA_str) { var arr_dict = await string_2_arrarydictionary(/Q:(.*?)A:/g, QA_str, 'Q', 'A'); 
+							 Q.push(arr_dict['Q']);
+		A.push(arr_dict['A']);
+		            })
 		            .catch(error => { console.log(error); });
 
+		// -----------------------------------
+		
+		// Cut the QA string
+		
+
+		
 	});
 	
 	// -----------------------------------
+
 
 	// Prepare to fine tune
 
