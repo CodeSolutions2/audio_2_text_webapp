@@ -78,6 +78,8 @@ const repoName = 'audio_2_text_webapp';
 
 const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
+var month = {01: 'january', 02: 'february', 03: 'march', 04: 'april', 05: 'may', 06: 'june', 07: 'july', 08: 'august', 09: 'september', 10: 'october', 11: 'november', 12: 'december'};
+
 // ----------------------------------------------------
 
 async function play_an_audio() {
@@ -98,47 +100,74 @@ async function fine_tune_text() {
 	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
 
 	let matches = [...transcribed_text.matchAll(regexp)];
-	console.log('matches: ', matches);
-
-	// let st = [];
-	// OR
+	// console.log('matches: ', matches);
+	
 	let text_st = 0;
-	
-	// let ender = [];
-	// OR
 	let text_end = 0;
-	
 	let text_by_date = [];
+	
 	// next: get array of start and end values to cut string
 	matches.forEach(async function(row, index) {
-		// st.push(row.index);
-		// OR
-		// st = row.index;
-
 		date = row.at(0);
-		console.log('date: ', date);
-
+		// console.log('date: ', date);
 		text_st = date.length + text_end;
 			
 		if (matches.length > (index+1)){
-			// ender.push(matches[index+1].index - 1);
-			// OR
 			text_end = matches[index+1].index - 1;
 		} else {
-			// ender.push(transcribed_text.length)
-			// OR
 			text_end = transcribed_text.length;
 		}
-		console.log('text_st: ', text_st, 'text_end: ', text_end);
-		
-		// let out = transcribed_text.slice(st.at(index), ender.at(index));
-		// console.log('out: ', out);
+		// console.log('text_st: ', text_st, 'text_end: ', text_end);
 		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
 	});
 	console.log('text_by_date: ', text_by_date);
 
- // Creation of Questions and Answers 
+	// -----------------------------------
+	
+	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
 
+	// -----------------------------------
+	
+	// Creation of Questions and Answers from text: create 10 questions and answers about each text
+	let num_of_QA_pairs = 5;
+	var Q = [];
+	var A = [];
+	text_by_date.forEach(async function(row, index) {
+		let year = row.date.slice(0,4);
+		console.log('year: ', year);
+		
+		let month_number = row.date.slice(4,6); 
+		console.log('month_number: ', month_number);
+		
+		let month_name = month[month_number];
+		console.log('month_name: ', month_name);
+		
+		const prompt = `Create ${num_of_QA_pairs} questions about the given text: ${row.text}, and then answer the created questions using the given text. Each question should begin with: 'For ${month_name} ${year},'.`;
+		  // ------------------------------------------
+		  var system_content = "You are a helpful assistant"
+		  var assistant_content = "Respond concisely"
+		  var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+		  var data = {"model": 'gpt-3.5-turbo', 'messages': messages, 'temperature': 0};
+		  var url = 'https://api.openai.com/v1/chat/completions'
+		  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+		  
+		  // Print text part of JSON response only with user message
+		  var QA_pairs = await fetch(url, options)
+		            .then(res => res.json())
+		            .then(res => { const QA = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+		                          console.log('QA: ', QA); 
+		                          return QA;
+		            })
+		            .catch(error => { console.log(error); });
+
+	});
+	
+	// -----------------------------------
+
+	// Prepare to fine tune
+
+	// system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
 
 
 // 
