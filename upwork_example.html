@@ -22,7 +22,7 @@
 
 <button id="fine_tune_text" onclick="fine_tune_text()">fine_tune_text</button>
 
-<audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_57_51_test0.mp3" type="audio/mpeg"></audio>
+<audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_58_13_test1.mp3" type="audio/mpeg"></audio>
 	  
 	  
 <!-- View text results -->
@@ -136,13 +136,16 @@ async function fine_tune_text() {
 		let year = row.date.slice(0,4);
 		console.log('year: ', year);
 		
-		let month_number = row.date.slice(4,6); 
+		let month_number = row.date.slice(5,7); 
 		console.log('month_number: ', month_number);
 		
 		let month_name = month[month_number];
 		console.log('month_name: ', month_name);
 		
-		const prompt = `Create ${num_of_QA_pairs} questions about the given text: ${row.text}, and then answer the created questions using the given text. Each question should begin with: 'For ${month_name} ${year},'.`;
+		// const prompt = `Create ${num_of_QA_pairs} questions about the given text: ${row.text}, and then answer the created questions using the given text. Each question should begin with: 'For ${month_name} ${year},'.`;
+		// Creates questions only
+		
+		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'For ${month_name} ${year},' and each answer should begin with 'A:'.`;
 		  // ------------------------------------------
 		  var system_content = "You are a helpful assistant"
 		  var assistant_content = "Respond concisely"
