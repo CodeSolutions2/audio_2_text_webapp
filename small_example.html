@@ -94,12 +94,8 @@ async function fine_tune_text() {
 
 	// -----------------------------------
 	
-	// const regexp = /Q:(.*?)A:/g;
-	const regexp = new RegExp(`Q:(.*?)A:`, 'g');
-	
-	QA_str = QA_str.toString();
-	let matches = [...QA_str.matchAll(regexp)];
-	console.log('matches: ', matches);
+	var out = QA_str.split('Q:');
+	console.log('out: ', out);
 	
 	// var Q = [];
 	// var A = [];
