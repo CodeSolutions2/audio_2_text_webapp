@@ -99,7 +99,9 @@ async function fine_tune_text() {
 
 	let matches = [...transcribed_text.matchAll(regexp)];
 	console.log('matches: ', matches);
-	
+
+	let st = [];
+	let ender = [];
 	// next: get array of start and end values to cut string
 	matches.forEach(async function(row, index) {
 		st.push(row.index);
