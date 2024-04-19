@@ -100,23 +100,41 @@ async function fine_tune_text() {
 	let matches = [...transcribed_text.matchAll(regexp)];
 	console.log('matches: ', matches);
 
-	let st = [];
-	let ender = [];
+	// let st = [];
+	// OR
+	let text_st = 0;
+	
+	// let ender = [];
+	// OR
+	let text_end = 0;
+	
+	let text_by_date = [];
 	// next: get array of start and end values to cut string
 	matches.forEach(async function(row, index) {
-		st.push(row.index);
+		// st.push(row.index);
+		// OR
+		// st = row.index;
 
+		date = row.0;
+		console.log('date: ', date);
+
+		text_st = date.length;
+			
 		if (matches.length > (index+1)){
-			ender.push(matches[index+1].index -1);
+			// ender.push(matches[index+1].index - 1);
+			// OR
+			text_end = matches[index+1].index - 1;
 		} else {
-			ender.push(transcribed_text.length)
+			// ender.push(transcribed_text.length)
+			// OR
+			text_end = transcribed_text.length;
 		}
 		
-		let out = transcribed_text.slice(st.at(index), ender.at(index));
-		console.log('out: ', out);
+		// let out = transcribed_text.slice(st.at(index), ender.at(index));
+		// console.log('out: ', out);
+		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
 	});
-	console.log('st: ', st);
-	console.log('ender: ', ender);
+	console.log('text_by_date: ', text_by_date);
 
  // Creation of Questions and Answers 
 
