@@ -31,7 +31,7 @@
 
 <!-- View transcribed_text and chatbot -->
 <div align="left">
-    <table style='text-align: center; width: 600px; display:block'>
+    <table style='text-align: center; width: 300px; display:block'>
       <tr>
         <td>
 		<label id="transcribed_text_label" style="display:block">Transcribed text</label>
@@ -91,10 +91,16 @@ async function play_an_audio() {
 
 async function fine_tune_text() {
 
-  document.getElementById("transcribed_text").innerHTML = outt.innerHTML;
+  var transcribed_text = outt.innerHTML;
+  document.getElementById("transcribed_text").innerHTML = transcribed_text;
 
   // Sorting
+	const regex = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]/g; // pattern to look for
 
+	let matches = [...transcribed_text.matchAll(regexp)];
+	console.log('matches: ', matches);
+	
+	// next: get array of start and end values to cut string
 
 
 
