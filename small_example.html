@@ -16,18 +16,18 @@
 <!-- ----------------------------------- -->
 	
 <br><br>
-
-<button id="transcribe_audio_files" onclick="transcribe_audio_files()">transcribe_audio_files</button>
+<button id="transcribe_audio_files" onclick="transcribe_audio_files()">[Step 0] transcribe_audio_files</button>
 <br><br>
-
-<button id="fine_tune_text" onclick="fine_tune_text()">fine_tune_text</button>
+<button id="create_Q_and_As_for_finetuning" onclick="create_Q_and_As_for_finetuning()">[Step 1] create_Q_and_As_for_finetuning</button>
+<br><br>
+<button id="fine_tune_text" onclick="fine_tune_text()">[Step 2] fine_tune_text</button>
 
 <!-- <audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_58_13_test1.mp3" type="audio/mpeg"></audio> -->
 	  
 	  
 <!-- View text results -->
 <div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
-<div id="transcriptions" style="display:none;font-family:courier;font-size:24px;height:300px"></div>
+<div id="transcriptions" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
 
 <!-- View transcribed_text and chatbot -->
 <div align="left">
@@ -80,115 +80,44 @@ const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
-// ----------------------------------------------------
-
-async function play_an_audio() {
-	
-	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
-	// document.getElementById("audio_id").style.display = "block";
-}
-
 	
 // ----------------------------------------------------
 
-	
+// Step 2
 async function fine_tune_text() {
 
-	var transcribed_text = outt.innerHTML;
-	document.getElementById("transcribed_text").innerHTML = transcribed_text;
-
-	// Sorting
-	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
-	let matches = [...transcribed_text.matchAll(regexp)];
-	// console.log('matches: ', matches);
+	// -----------------------------------
 	
+	var QA_str = outt.innerHTML;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+
+	// -----------------------------------
+	
+	var Q = [];
+	var A = [];
+	
+	const regexp = /Q:(.*?)A:/g;
+	let matches = [...QA_str.matchAll(regexp)];
+	console.log('matches: ', matches);
+
 	let text_st = 0;
 	let text_end = 0;
-	let text_by_date = [];
-	
-	// next: get array of start and end values to cut string
+	let arr_dict = [];
 	matches.forEach(async function(row, index) {
-		let date = row.at(0);
-		// console.log('date: ', date);
-		text_st = date.length + text_end;
+		let Q_value = row.at(0);
+		console.log('Q_value: ', Q_value);
+		text_st = Q_value.length + text_end;
 			
 		if (matches.length > (index+1)){
 			text_end = matches[index+1].index - 1;
 		} else {
-			text_end = transcribed_text.length;
+			text_end = str.length;
 		}
-		// console.log('text_st: ', text_st, 'text_end: ', text_end);
-		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
+		console.log('text_st: ', text_st, 'text_end: ', text_end);
+		Q.push(`"${Q_value}"`);
+		A.push(`"${QA_str.slice(text_st, text_end)}"`);
 	});
-	console.log('text_by_date: ', text_by_date);
 
-	// -----------------------------------
-	
-	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
-
-	// -----------------------------------
-	
-	// Creation of Questions and Answers from text: create 10 questions and answers about each text
-	let num_of_QA_pairs = 5;
-	var Q = [];
-	var A = [];
-	text_by_date.forEach(async function(row, index) {
-		let year = row.date.slice(0,4);
-		console.log('year: ', year);
-		
-		let month_number = row.date.slice(5,7); 
-		console.log('month_number: ', month_number);
-		
-		let month_name = month[month_number];
-		console.log('month_name: ', month_name);
-		
-		// const prompt = `Create ${num_of_QA_pairs} questions about the given text: ${row.text}, and then answer the created questions using the given text. Each question should begin with: 'For ${month_name} ${year},'.`;
-		
-		// Creates questions only
-		
-		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
-		  // ------------------------------------------
-		  var system_content = "You are a helpful assistant"
-		  var assistant_content = "Respond concisely"
-		  var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
-		  var data = {"model": 'gpt-3.5-turbo', 'messages': messages, 'temperature': 0};
-		  var url = 'https://api.openai.com/v1/chat/completions'
-		  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
-		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
-		  
-		  // Print text part of JSON response only with user message
-		  await fetch(url, options)
-		            .then(res => res.json())
-		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		                          console.log('QA_str: ', QA_str);
-					  // QA_str:  For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nFor april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nFor april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nFor april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nFor april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
-
-					  // regexp is the repeated item to find in the text and make as dict_item0_name
-					  const regexp = /Q:(.*?)A:/g;
-					  let matches = [...QA_str.matchAll(regexp)];
-					  console.log('matches: ', matches);
-	
-					  let text_st = 0;
-					  let text_end = 0;
-					  let arr_dict = [];
-					  matches.forEach(async function(row, index) {
-						let Q_value = row.at(0);
-						console.log('Q_value: ', Q_value);
-						text_st = Q_value.length + text_end;
-							
-						if (matches.length > (index+1)){
-							text_end = matches[index+1].index - 1;
-						} else {
-							text_end = str.length;
-						}
-						console.log('text_st: ', text_st, 'text_end: ', text_end);
-						Q.push(`"${Q_value}"`);
-						A.push(`"${QA_str.slice(text_st, text_end)}"`);
-					  }); 
-		            })
-		            .catch(error => { console.log(error); });
-	});
-	
 	console.log("Q: ", Q);
 	console.log("A: ", A);
 	
@@ -210,13 +139,12 @@ async function fine_tune_text() {
 	const jsonl_data = JSON.stringify(line_out, null, 2);
 	console.log('jsonl_data: ', jsonl_data);
 			
-	// return new Blob([jsonl_data], { type: 'application/json' });
+	// const blob_object = new Blob([jsonl_data], { type: 'application/json' });
 		
-	//.then(async function(blob_object) { await openai_upload_file_for_finetuning(blob_object, 'blob_object') })
-
+	// await openai_upload_file_for_finetuning(blob_object, 'blob_object')
 }
 
-// ----------------------------------------------------
+	
 
 async function openai_upload_file_for_finetuning(file_input, which_input) {
 
@@ -250,9 +178,116 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 	
 }
 	
+
 // ----------------------------------------------------
 
+// Step 1
+async function create_Q_and_As_for_finetuning() {
 
+	// -----------------------------------
+	
+	var transcribed_text = outt.innerHTML;
+	document.getElementById("transcribed_text").innerHTML = transcribed_text;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+
+	// -----------------------------------
+
+	await sort_text_by_timestamp(transcribed_text)
+		.then(async function(text_by_date) { 
+			// Processing information
+			outp.innerHTML = 'Processing transcribed text';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			return await create_Q_and_As_from_text(text_by_date); 
+		})
+		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
+		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
+		// Assure that create_Q_and_As_from_text is finished : ok so create_Q_and_As_from_text returns a little after the callback
+		.then(() => { outp.innerHTML = 'Transcribed Text Processing Done'; })
+
+	// Eventhough there is a promise, values are returned seconds after this function finishes. 
+}
+
+
+
+async function sort_text_by_timestamp(transcribed_text) {
+	// Sorting
+	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
+	let matches = [...transcribed_text.matchAll(regexp)];
+	// console.log('matches: ', matches);
+	
+	let text_st = 0;
+	let text_end = 0;
+	let text_by_date = [];
+	
+	// next: get array of start and end values to cut string
+	matches.forEach(async function(row, index) {
+		let date = row.at(0);
+		// console.log('date: ', date);
+		text_st = date.length + text_end;
+			
+		if (matches.length > (index+1)){
+			text_end = matches[index+1].index - 1;
+		} else {
+			text_end = transcribed_text.length;
+		}
+		// console.log('text_st: ', text_st, 'text_end: ', text_end);
+		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
+	});
+	
+	console.log('text_by_date: ', text_by_date);
+
+	// -----------------------------------
+	
+	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
+	
+	// -----------------------------------
+	
+	return text_by_date;
+}
+	
+
+async function create_Q_and_As_from_text(text_by_date) {
+	
+	// Creation of Questions and Answers from text: create 10 questions and answers about each text
+	let num_of_QA_pairs = 5;
+	text_by_date.forEach(async function(row, index) {
+		let year = row.date.slice(0,4);
+		console.log('year: ', year);
+		
+		let month_number = row.date.slice(5,7); 
+		console.log('month_number: ', month_number);
+		
+		let month_name = month[month_number];
+		console.log('month_name: ', month_name);
+		
+		// Creates questions only
+		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
+		  // ------------------------------------------
+		  var system_content = "You are a helpful assistant"
+		  var assistant_content = "Respond concisely"
+		  var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+		  var data = {"model": 'gpt-3.5-turbo', 'messages': messages, 'temperature': 0};
+		  var url = 'https://api.openai.com/v1/chat/completions'
+		  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+		  
+		  // Print text part of JSON response only with user message
+		  await fetch(url, options)
+		            .then(res => res.json())
+		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+		                          // console.log('QA_str: ', QA_str);
+					  outt.innerHTML += `${QA_str}\n`;
+					  // QA_str:  For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nFor april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nFor april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nFor april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nFor april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
+		            })
+		            .catch(error => { console.log(error); });
+	});
+	
+}
+
+	
+// ----------------------------------------------------
+
+// Step 0
 async function transcribe_audio_files() {
 	
 	await play_an_audio()
@@ -267,11 +302,15 @@ async function transcribe_audio_files() {
 		.then(done_message => done_message)
 		.then(done_message => { outp.innerHTML = done_message; })
 
-	// Eventhough there is a promise, readaudio values return seconds after transcribe_audio_files has finished. 
+	// Eventhough there is a promise, values are returned seconds after this function finishes. 
 }
 
 
-// ----------------------------------------------------
+async function play_an_audio() {
+	
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
+	// document.getElementById("audio_id").style.display = "block";
+}
 
 
 async function readaudio() {
@@ -342,8 +381,26 @@ async function readaudio() {
 }
 
 
-// ----------------------------------------------------
 
+async function get_audio_file_objects() {
+	
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	var file_objects = [];
+	await fetch(url).then(res => res.json()).then(data => {
+		    data.forEach(file => {
+		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
+            file_objects.push(file);
+		      }
+		    });
+		  }).catch(error => { outp.innerHTML += error; });
+	
+    	console.log('file_objects: ', file_objects);
+	
+	return file_objects;
+}
+
+	
 
 async function openai_transcription(file_input, which_input, date_string) {
 
@@ -382,8 +439,6 @@ async function openai_transcription(file_input, which_input, date_string) {
 }
 	
 
-// ----------------------------------------------------
-
 
 async function openai_translation(file_input) {
 	
@@ -420,28 +475,7 @@ async function openai_translation(file_input) {
 		.catch(error => { console.log(error); });
 	
 }
-
-  
-// ----------------------------------------------------
-
 	
-async function get_audio_file_objects() {
-	
-	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
-
-	var file_objects = [];
-	await fetch(url).then(res => res.json()).then(data => {
-		    data.forEach(file => {
-		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
-            file_objects.push(file);
-		      }
-		    });
-		  }).catch(error => { outp.innerHTML += error; });
-	
-    	console.log('file_objects: ', file_objects);
-	
-	return file_objects;
-}
 
 // ----------------------------------------------------
   
