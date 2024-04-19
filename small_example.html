@@ -91,50 +91,13 @@ async function play_an_audio() {
 	
 // ----------------------------------------------------
 
-async function string_2_arrarydictionary(regexp, str, dict_item0_name, dict_item1_name) {
-
-	// regexp is the repeated item to find in the text and make as dict_item0_name
-	let matches = [...str.matchAll(regexp)];
-	// console.log('matches: ', matches);
-	
-	let text_st = 0;
-	let text_end = 0;
-	let arr_dict = [];
-
-	let dict_item0_name_value = 0;
-	
-	// next: get array of start and end values to cut string
-	matches.forEach(async function(row, index) {
-		dict_item0_name_value = row.at(0);
-		// console.log('dict_item0_name_value: ', dict_item0_name_value);
-		text_st = dict_item0_name_value.length + text_end;
-			
-		if (matches.length > (index+1)){
-			text_end = matches[index+1].index - 1;
-		} else {
-			text_end = str.length;
-		}
-		// console.log('text_st: ', text_st, 'text_end: ', text_end);
-		
-		// Option 0: array dictionary
-		// arr_dict.push({${dict_item0_name}: dict_item0_name_value, ${dict_item1_name}: str.slice(text_st, text_end)});
-		
-		Q_str.push(dict_item0_name_value);
-		Q_str.push(dict_item0_name_value);
-	});
-	
-	console.log('arr_dict: ', arr_dict);
-	
-	return arr_dict;
-}
-
 	
 async function fine_tune_text() {
 
-  var transcribed_text = outt.innerHTML;
-  document.getElementById("transcribed_text").innerHTML = transcribed_text;
+	var transcribed_text = outt.innerHTML;
+	document.getElementById("transcribed_text").innerHTML = transcribed_text;
 
-  // Sorting
+	// Sorting
 	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
 	let matches = [...transcribed_text.matchAll(regexp)];
 	// console.log('matches: ', matches);
@@ -180,6 +143,7 @@ async function fine_tune_text() {
 		console.log('month_name: ', month_name);
 		
 		// const prompt = `Create ${num_of_QA_pairs} questions about the given text: ${row.text}, and then answer the created questions using the given text. Each question should begin with: 'For ${month_name} ${year},'.`;
+		
 		// Creates questions only
 		
 		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
@@ -195,40 +159,62 @@ async function fine_tune_text() {
 		  // Print text part of JSON response only with user message
 		  await fetch(url, options)
 		            .then(res => res.json())
-		            .then(res => { const QA = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		                          console.log('QA: ', QA); 
-		                          return QA;
+		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+		                          console.log('QA_str: ', QA_str); 
+		                          return QA_str;
 		            })
-		            .then(async function(QA_str) { var arr_dict = await string_2_arrarydictionary(/Q:(.*?)A:/g, QA_str, 'Q', 'A'); 
-							 Q.push(arr_dict['Q']);
-		A.push(arr_dict['A']);
+		            .then(async function(QA_str) { 
+				    // QA_str:  For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nFor april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nFor april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nFor april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nFor april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
+				    // regexp is the repeated item to find in the text and make as dict_item0_name
+				    const regexp = /Q:(.*?)A:/g;
+				    let matches = [...QA_str.matchAll(regexp)];
+				    console.log('matches: ', matches);
+	
+				    let text_st = 0;
+				    let text_end = 0;
+				    let arr_dict = [];
+				    matches.forEach(async function(row, index) {
+					let Q_value = row.at(0);
+					console.log('Q_value: ', Q_value);
+					text_st = Q_value.length + text_end;
+						
+					if (matches.length > (index+1)){
+						text_end = matches[index+1].index - 1;
+					} else {
+						text_end = str.length;
+					}
+					console.log('text_st: ', text_st, 'text_end: ', text_end);
+					Q.push(`"${Q_value}"`);
+					A.push(`"${QA_str.slice(text_st, text_end)}"`);
+				    });    
 		            })
 		            .catch(error => { console.log(error); });
-
-		// -----------------------------------
-		
-		// Cut the QA string
-		
-
-		
 	});
 	
+	console.log("Q: ", Q);
+	console.log("A: ", A);
+	
 	// -----------------------------------
-
-
+	
 	// Prepare to fine tune
 
-	// system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
+	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
 
+	// prompt_Q = [Q.join(',')];
+	// assistant_content_A = [A.join(',')];
 
-// 
-  
-			// const jsonl_data = JSON.stringify(data, null, 2);
-			// console.log('jsonl_data: ', jsonl_data);
+	// OR
+	var line_out = [];
+	A.forEach(async function(desired_A, index) {
+		line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Q[index]}, {"role": "assistant", "content": desired_A}]});
+	});
+	
+	const jsonl_data = JSON.stringify(line_out, null, 2);
+	console.log('jsonl_data: ', jsonl_data);
 			
-			// return new Blob([jsonl_data], { type: 'application/json' });
+	// return new Blob([jsonl_data], { type: 'application/json' });
 		
-		//.then(async function(blob_object) { await openai_upload_file_for_finetuning(blob_object, 'blob_object') })
+	//.then(async function(blob_object) { await openai_upload_file_for_finetuning(blob_object, 'blob_object') })
 
 }
 
