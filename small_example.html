@@ -94,33 +94,33 @@ async function fine_tune_text() {
 
 	// -----------------------------------
 	
-	var Q = [];
-	var A = [];
+	const regexp = /Q:(.*?)A:/;
 	
-	const regexp = /Q:(.*?)A:/g;
+	QA_str = QA_str.toString();
 	let matches = [...QA_str.matchAll(regexp)];
 	console.log('matches: ', matches);
-
-	let text_st = 0;
-	let text_end = 0;
-	let arr_dict = [];
-	matches.forEach(async function(row, index) {
-		let Q_value = row.at(0);
-		console.log('Q_value: ', Q_value);
-		text_st = Q_value.length + text_end;
+	
+	// var Q = [];
+	// var A = [];
+	// let text_st = 0;
+	// let text_end = 0;
+	// matches.forEach(async function(row, index) {
+	// 	let Q_value = row.at(0);
+		// console.log('Q_value: ', Q_value);
+		// text_st = Q_value.length + text_end;
 			
-		if (matches.length > (index+1)){
-			text_end = matches[index+1].index - 1;
-		} else {
-			text_end = str.length;
-		}
-		console.log('text_st: ', text_st, 'text_end: ', text_end);
-		Q.push(`"${Q_value}"`);
-		A.push(`"${QA_str.slice(text_st, text_end)}"`);
-	});
+		// if (matches.length > (index+1)){
+		// 	text_end = matches[index+1].index - 1;
+		// } else {
+		// 	text_end = str.length;
+		// }
+		// console.log('text_st: ', text_st, 'text_end: ', text_end);
+		// Q.push(`"${Q_value}"`);
+		// A.push(`"${QA_str.slice(text_st, text_end)}"`);
+	// });
 
-	console.log("Q: ", Q);
-	console.log("A: ", A);
+	// console.log("Q: ", Q);
+	// console.log("A: ", A);
 	
 	// -----------------------------------
 	
@@ -132,13 +132,13 @@ async function fine_tune_text() {
 	// assistant_content_A = [A.join(',')];
 
 	// OR
-	var line_out = [];
-	A.forEach(async function(desired_A, index) {
-		line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Q[index]}, {"role": "assistant", "content": desired_A}]});
-	});
+	// var line_out = [];
+	// A.forEach(async function(desired_A, index) {
+	// 	line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Q[index]}, {"role": "assistant", "content": desired_A}]});
+	// });
 	
-	const jsonl_data = JSON.stringify(line_out, null, 2);
-	console.log('jsonl_data: ', jsonl_data);
+	// const jsonl_data = JSON.stringify(line_out, null, 2);
+	// console.log('jsonl_data: ', jsonl_data);
 			
 	// const blob_object = new Blob([jsonl_data], { type: 'application/json' });
 		
