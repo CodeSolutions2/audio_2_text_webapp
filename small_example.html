@@ -160,33 +160,31 @@ async function fine_tune_text() {
 		  await fetch(url, options)
 		            .then(res => res.json())
 		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		                          console.log('QA_str: ', QA_str); 
-		                          return QA_str;
-		            })
-		            .then(async function(QA_str) { 
-				    // QA_str:  For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nFor april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nFor april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nFor april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nFor april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
-				    // regexp is the repeated item to find in the text and make as dict_item0_name
-				    const regexp = /Q:(.*?)A:/g;
-				    let matches = [...QA_str.matchAll(regexp)];
-				    console.log('matches: ', matches);
+		                          console.log('QA_str: ', QA_str);
+					  // QA_str:  For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nFor april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nFor april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nFor april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nFor april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
+
+					  // regexp is the repeated item to find in the text and make as dict_item0_name
+					  const regexp = /Q:(.*?)A:/g;
+					  let matches = [...QA_str.matchAll(regexp)];
+					  console.log('matches: ', matches);
 	
-				    let text_st = 0;
-				    let text_end = 0;
-				    let arr_dict = [];
-				    matches.forEach(async function(row, index) {
-					let Q_value = row.at(0);
-					console.log('Q_value: ', Q_value);
-					text_st = Q_value.length + text_end;
-						
-					if (matches.length > (index+1)){
-						text_end = matches[index+1].index - 1;
-					} else {
-						text_end = str.length;
-					}
-					console.log('text_st: ', text_st, 'text_end: ', text_end);
-					Q.push(`"${Q_value}"`);
-					A.push(`"${QA_str.slice(text_st, text_end)}"`);
-				    });    
+					  let text_st = 0;
+					  let text_end = 0;
+					  let arr_dict = [];
+					  matches.forEach(async function(row, index) {
+						let Q_value = row.at(0);
+						console.log('Q_value: ', Q_value);
+						text_st = Q_value.length + text_end;
+							
+						if (matches.length > (index+1)){
+							text_end = matches[index+1].index - 1;
+						} else {
+							text_end = str.length;
+						}
+						console.log('text_st: ', text_st, 'text_end: ', text_end);
+						Q.push(`"${Q_value}"`);
+						A.push(`"${QA_str.slice(text_st, text_end)}"`);
+					  }); 
 		            })
 		            .catch(error => { console.log(error); });
 	});
