@@ -95,7 +95,7 @@ async function fine_tune_text() {
   document.getElementById("transcribed_text").innerHTML = transcribed_text;
 
   // Sorting
-	const regex = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]/g; // pattern to look for
+	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]/g; // pattern to look for
 
 	let matches = [...transcribed_text.matchAll(regexp)];
 	console.log('matches: ', matches);
