@@ -6,8 +6,7 @@
   <body>
     
 
-<h1>Example framework for audio-to-text with/without Q&A on text</h1>
-<br>  
+<h1>Example framework for audio-to-text with/without Q&A on text</h1> 
 <label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
 	  
 <br>
@@ -92,7 +91,7 @@ async function play_an_audio() {
 
 async function fine_tune_text() {
 
-  document.getElementById("journal").innerHTML = outt.innerHTML;
+  document.getElementById("transcribed_text").innerHTML = outt.innerHTML;
 
   // Sorting
 
@@ -105,7 +104,7 @@ async function fine_tune_text() {
 
 // 
   
-			// const jsonl_data = JSON.stringify(final_journal_text, null, 2);
+			// const jsonl_data = JSON.stringify(data, null, 2);
 			// console.log('jsonl_data: ', jsonl_data);
 			
 			// return new Blob([jsonl_data], { type: 'application/json' });
@@ -150,8 +149,7 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 	
 // ----------------------------------------------------
 
-	
-// Read in new audio (transcribe) --> add new text to existing journal 
+
 async function transcribe_audio_files() {
 	
 	await play_an_audio()
@@ -166,7 +164,7 @@ async function transcribe_audio_files() {
 		.then(done_message => done_message)
 		.then(done_message => { outp.innerHTML = done_message; })
 
-	// Eventhough there is a promise, readaudio values return seconds after input_new_audio_into_journal has finished. 
+	// Eventhough there is a promise, readaudio values return seconds after transcribe_audio_files has finished. 
 }
 
 
