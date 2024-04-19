@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+
+	  
+<label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
+	  
+<br>
+
+<!-- ----------------------------------- -->
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+<!-- ----------------------------------- -->
+	
+<br><br>
+
+<button id="input_new_audio_into_journal" onclick="input_new_audio_into_journal()">input_new_audio_into_journal</button>
+<br><br>
+
+<button id="fine_tune_text" onclick="fine_tune_text()">fine_tune_text</button>
+
+<audio controls id="audio_id" style="display:none"><source src="2024_03_13_09_57_51_test0.mp3" type="audio/mpeg"></audio>
+	  
+	  
+<!-- View text results -->
+<div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+<div id="transcriptions" style="display:none;font-family:courier;font-size:24px;height:300px"></div>
+
+<!-- View journal and chatbot -->
+<div align="left">
+    <table style='text-align: center; width: 600px; display:block'>
+      <tr>
+        <td>
+		<label id="journal_label" style="display:block">Journal text</label>
+      		<br>
+      		<textarea id="journal" rows="35" cols="100" placeholder="Journal text" style="display:block"></textarea>
+	</td>
+        <td>
+		<label id="chatbot_label" style="display:block">Chatbot area</label>
+      		<br>
+      		<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+	</td>
+      </tr>
+    </table>
+</div>  
+    
+
+
+
+	  
+<!-- --------------------------------------------------- -->
+
+<!-- CSS -->
+<style>
+div {position: relative; z-index: 2;},
+  table {border-collapse: collapse; position: absolute;}
+  td,
+  th {border: 1px solid black;padding: 10px 20px;}
+audio {position: absolute; top: 250px;}
+</style>
+
+	  
+<!-- --------------------------------------------------- -->
+	  
+
+
+	  
+<script>
+
+const outp = document.getElementById('progress');
+const outt = document.getElementById('transcriptions');
+
+const journal_filename = "text_data.txt";
+const repoOwner = 'CodeSolutions2';
+const repoName = 'audio_2_text_webapp';
+
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+
+var total_file_to_process = 0;
+var count = 0;
+	
+var sha_val = "";
+	
+// ----------------------------------------------------
+
+// Train model on existing journal
+
+
+// ----------------------------------------------------
+
+async function play_an_audio() {
+	
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
+	// var audioElement = document.createElement('audio');
+	// audioElement.setAttribute("controls", true);
+	// audioElement.setAttribute("type", "audio/mpeg");
+	
+	// audioElement.src = file_download_url;
+	// document.body.appendChild(audioElement);
+	// console.log("audioElement: ", audioElement);
+
+	document.getElementById("audio_id").style.display = "block";
+}
+
+	
+// ----------------------------------------------------
+
+async function fine_tune_text() {
+
+	return await combine_new_and_existing_text()
+		.then(async function(final_journal_text) {
+
+			const jsonl_data = JSON.stringify(final_journal_text, null, 2);
+			console.log('jsonl_data: ', jsonl_data);
+			
+			return new Blob([jsonl_data], { type: 'application/json' });
+		})
+		.then(async function(blob_object) { await openai_upload_file_for_finetuning(blob_object, 'blob_object') })
+
+}
+
+// ----------------------------------------------------
+
+async function openai_upload_file_for_finetuning(file_input, which_input) {
+
+	const url = "https://api.openai.com/v1/files";
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "file.json");
+	}
+	formData.append("purpose", "fine-tune");
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	await fetch(url, options)
+		.then(response => response.text())
+		.then(async function(result) { 
+			console.log(result);
+		})
+		.catch(error => { console.log(error); });
+	
+}
+
+// ----------------------------------------------------
+	
+async function combine_new_and_existing_text() {
+	
+	const new_journal_text = outt.innerHTML;
+	const existing_journal_text = document.getElementById("journal").innerHTML + "\n";
+	
+	const final_journal_text = existing_journal_text.concat(new_journal_text);
+	document.getElementById("journal").innerHTML = final_journal_text;
+	
+	return final_journal_text;
+}
+
+	
+// ----------------------------------------------------
+
+	
+// Read in new audio (transcribe) --> add new text to existing journal 
+async function input_new_audio_into_journal() {
+	
+	await play_an_audio()
+		.then(async function() { let text_out = await GET_text_from_file_wo_auth_GitHub_RESTAPI(); return text_out; })
+		.then(async function(text_out) { 
+			// Processing information
+			outp.innerHTML = 'Processing audio';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			return await readaudio(); 
+		})
+		// Return a promise to force values created after readaudio to be created in sychronous order.
+		// Assure that readaudio is finished : ok so readaudio returns a little after the callback
+		.then(done_message => done_message)
+		.then(done_message => { outp.innerHTML = done_message; })
+
+	// Eventhough there is a promise, readaudio values return seconds after input_new_audio_into_journal has finished. 
+}
+
+
+// ----------------------------------------------------
+
+
+async function readaudio() {
+
+  
+	return await get_audio_file_objects()
+	.then(file_objects => { 
+		
+		// console.log("file_objects:", file_objects);
+		
+		total_file_to_process = file_objects.length;
+		console.log("total_file_to_process:", total_file_to_process);
+    
+		file_objects.forEach(async function(file_object, index) {
+			
+			console.log("file_object:", file_object);
+			
+			filename = file_object.name;
+			// console.log("filename:", filename);
+			
+			let out0 = filename.split('_');
+
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+			let YYYY = out0.slice(0,1).toString();
+			let MM = out0.slice(1,2).toString();
+			let DD = out0.slice(2,3).toString();
+			let HH = out0.slice(3,4).toString();
+			let mm = out0.slice(4,5).toString();
+			let ss = out0.slice(5,6).toString();
+
+			const regex = /(,)+/g;
+			
+			YYYY = YYYY.replace(regex, '');
+			MM = MM.replace(regex, '');
+			DD = DD.replace(regex, '');
+			HH = HH.replace(regex, '');
+			mm = mm.replace(regex, '');
+			ss = ss.replace(regex, '');
+
+			let date_string = `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}`;
+
+			// -----------------------------------
+
+			let file_download_url = file_object.download_url;
+			// console.log("file_download_url:", file_download_url);
+			
+			// -----------------------------------
+
+			// REST API to convert .mp3 to text
+			
+			// ------------------------------------------
+			// Form submission
+			// ------------------------------------------
+			// Way 2: read in the mp3 as file_download_url --> convert to  blob_object
+			await fetch(file_download_url)
+  				.then(response => response.blob())
+			 	.then(async function(blob_object) { 
+					// console.log("blob_object: ", blob_object);
+					await openai_transcription(blob_object, 'blob_object', date_string);
+					// return await openai_translation(blob_object, 'blob_object');
+					// return await openai_text_to_speech();
+				})
+				.then(async function() { await new Promise(r => setTimeout(r, 200)); })
+				.catch(error => { console.log(error); });
+
+			// ------------------------------------------
+			
+		  });  // end of file_objects.forEach
+	})
+	.then(() => { return 'Transcription Processing Done'; });
+	
+}
+
+
+async function processEvent(event) {
+	
+    if (count == total_file_to_process){
+	    // Advance to the next step, one knows exactly when the audio transcription is done despite the delay of the endpoint response (transcription responses arrive after the external async/await finishes) 
+	    count = 0;
+	    total_file_to_process = 0;
+	    await stop_eventlister()
+		    .then(async function() { await new Promise(r => setTimeout(r, 300)); })
+		    .then(async function() {  await combine_new_and_existing_text(); })
+    }
+
+}
+
+
+// async function start_eventlister() {
+//	console.log('Eventlistener started');
+  document.getElementById("input_new_audio_into_journal").addEventListener("click", processEvent, false);
+//}
+
+async function stop_eventlister() {
+	console.log('Eventlistener stopped');
+  document.getElementById("input_new_audio_into_journal").removeEventListener("click", processEvent);
+}
+
+// ----------------------------------------------------
+
+
+async function openai_transcription(file_input, which_input, date_string) {
+
+	const url = 'https://api.openai.com/v1/audio/transcriptions';
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
+	formData.append("model", "whisper-1");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
+	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	// Print text part of JSON response only with user message
+	await fetch(url, options)
+		.then(response => response.text())
+		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; count = count + 1; console.log("count:", count); })
+		.catch(error => { console.log(error); });
+	
+}
+	
+
+// ----------------------------------------------------
+
+
+async function openai_translation(file_input) {
+	
+	const url = 'https://api.openai.com/v1/audio/translations';
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
+	formData.append("model", "whisper-1");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
+	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	// Print text part of JSON response only with user message
+	return await fetch(url, options)
+		.then(response => response.text())
+		.then(result => { console.log(result); return result; })
+		.catch(error => { console.log(error); });
+	
+}
+
+  
+// ----------------------------------------------------
+
+  
+async function openai_text_to_speech() {
+	
+	const url = "https://api.openai.com/v1/audio/speech";
+	
+	var data = {"model": "tts-1-hd", 
+		    "input": "OpenAI now also supports text to speech with two models: tts-1 and tts-1-hd. For real-time applications, the standard tts-1 model provides the lowest latency but at a lower quality than the tts-1-hd model. Due to the way the audio is generated, tts-1 is likely to generate content that has more static in certain situations than tts-1-hd. In some cases, the audio may not have noticeable differences depending on your listening device and the individual person. The input to generate the audio from can be up to 4096 characters. Supported voices are alloy, echo, fable, onyx, nova, and shimmer. Supported response formats are mp3, opus, aac, and flac. It is also possible to control the speed, select a value from 0.25 to 4.0. 1.0 is the default. There is no direct mechanism to control the emotional output of the audio generated. Certain factors may influence the output audio like capitalization or grammar but OpenAI's internal tests with these have yielded mixed results. Please note that OpenAI's Usage Policies require you to provide a clear disclosure to end users that the TTS voice they are hearing is AI-generated and not a human voice.",
+    "voice": "alloy",
+    "response_format": "mp3",
+    "speed": "1.1"};
+	
+	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+	var options = {method : 'post', headers: headers, body : JSON.stringify(data), redirect: "follow"};
+  
+	// Print text part of JSON response only with user message
+	return await fetch(url, options)
+            .then(res => res.json())
+            .then(res => {
+		    var json_response = JSON.parse(JSON.stringify(res));
+		    console.log('response: ', json_response); 
+		    return json_response;
+            })
+            .catch(error => { console.log(error); });
+	
+}
+	
+// ----------------------------------------------------
+
+	
+async function get_audio_file_objects() {
+	
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	var file_objects = [];
+	await fetch(url).then(res => res.json()).then(data => {
+		    data.forEach(file => {
+		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
+            file_objects.push(file);
+		      }
+		    });
+		  }).catch(error => { outp.innerHTML += error; });
+	
+    	console.log('file_objects: ', file_objects);
+	
+	return file_objects;
+}
+
+	
+// ----------------------------------------------------
+
+	
+async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
+	
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	var file_objects = [];
+	
+	return await fetch(url)
+		.then(res => res.json())
+		.then(data => { 
+			data.forEach(async function(file) {
+				var regexp = new RegExp(`${journal_filename}`, 'g');
+				if (file.type === 'file' && file.name.match(regexp)) {
+					file_objects.push(file);
+				}
+			});
+			return file_objects;
+		})
+		.then(async function (file_objects) {
+			var file_object = file_objects.at(0);
+		   
+			var file_download_url = file_object.download_url;
+			// console.log("file_download_url:", file_download_url);
+		   
+			sha_val = file_object.sha;
+			// console.log("sha_val:", sha_val);
+
+			return file_download_url;
+		})
+		.then(async function (file_download_url) {
+			// Way 1: to get text from file
+			var text_out = await fetch(file_download_url); return text_out
+		})
+		.then(response => response.text())
+		.then(async function(text_out) { 
+			document.getElementById("journal").innerHTML = text_out;  // print existing journal in text area
+			return text_out;
+		})
+		.catch(error => { console.log(error); });
+}
+
+
+
+
+
+// ----------------------------------------------------
+  
+</script>
+
+  </body>
+</html>
