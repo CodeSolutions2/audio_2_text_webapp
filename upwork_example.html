@@ -101,8 +101,20 @@ async function fine_tune_text() {
 	console.log('matches: ', matches);
 	
 	// next: get array of start and end values to cut string
+	matches.forEach(async function(row, index) {
+		st.push(row.index);
 
+		if (matches.length < (index+1)){
+			ender.push(matches[index+1].index -1);
+		} else {
+			ender.push(transcribed_text.length)
+		}
 
+		let out = transcribed_text.slice(st.at(index), ender.at(index));
+		console.log('out: ', out);
+	});
+
+	
 
  // Creation of Questions and Answers 
 
