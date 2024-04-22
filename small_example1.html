@@ -21,6 +21,8 @@
 <button id="create_Q_and_As_for_finetuning" onclick="create_Q_and_As_for_finetuning()">[Step 1] create_Q_and_As_for_finetuning</button>
 <br><br>
 <button id="fine_tune_text" onclick="fine_tune_text()">[Step 2] fine_tune_text</button>
+<br><br>
+<button id="use_chatbot" onclick="use_chatbot()">[Step 3] use_chatbot</button>
 
 <audio controls id="audio_id" style="display:block"><source src="2024_04_14_09_44_50_1.mp3" type="audio/mpeg"></audio>
 	  
@@ -42,7 +44,9 @@
         <td>
 		<label id="chatbot_label" style="display:block">Chatbot area</label>
       		<br>
-      		<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+      		<textarea id="chatbot" rows="30" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+		<br>
+		<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 	</td>
       </tr>
     </table>
@@ -82,7 +86,21 @@ const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
 
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
+
+
+// ----------------------------------------------------
+
+// Step 3
+async function use_chatbot(){
+
+	var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
+	// var prompt = "what topics are you trained to chat about?";
+	// OR
+	const prompt = document.getElementById("prompt_input").value;
 	
+	await openai_use_finetunned_model(model_name, prompt);
+}
+
 // ----------------------------------------------------
 
 // Step 2
@@ -97,7 +115,7 @@ async function fine_tune_text() {
 			console.log("blob_object: ", blob_object);
 			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
 		})
-		.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
+		.then(async function(file_id) { await openai_finetune_a_model(file_id); })
 
 
 	// Way 1: WITH naming the file with the date and time
@@ -111,7 +129,7 @@ async function fine_tune_text() {
  		//.then(async function(blob_object) { 
 			// return await openai_upload_file_for_finetuning(file_blob_object, outt.innerHTML, 'file_blob_object'); 
 		//})
-		//.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
+		//.then(async function(file_id) { await openai_finetune_a_model(file_id); })
 
 	
 }
@@ -169,11 +187,11 @@ async function transform_blob_into_fileblob() {
 
 	
 
-async function openai_client_fine_tuning_job(file_id) {
+async function openai_finetune_a_model(file_id) {
 
 	const url = "https://api.openai.com/v1/fine-tunes";
 
-	var data = {"training_file": file_id, "model": "gpt-3.5-turbo"};
+	var data = {training_file: file_id, model: 'gpt-3.5-turbo'};
 	
 	const headers = new Headers();
 	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
@@ -245,7 +263,25 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 // }
 	
 }
+
+
+async function openai_use_finetunned_model(model_name, prompt) {
 	
+	var data = {"model": model_name, 'prompt': prompt, 'temperature': 0};
+	var url = 'https://api.openai.com/v1/completions'
+	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+	const options = {method: "POST", headers: headers, body : JSON.stringify(data), redirect: "follow"};
+	
+	await fetch(url, options)
+	  .then(res => res.json())
+	  .then(res => {
+		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message'];
+		  document.getElementById("chatbot").innerHTML = out;
+		  console.log("out: ", out);
+	  })
+	  .catch((error) => console.error(error));
+
+}
 
 // ----------------------------------------------------
 
