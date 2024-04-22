@@ -198,9 +198,7 @@ async function openai_finetune_a_model(file_id) {
 	headers.append("Accept", "application/json");
 	
 
-	const options = {method: "POST",
-			 body: JSON.stringify(data),
-			 redirect: "follow"};
+	const options = {method: "POST", headers: headers, body: JSON.stringify(data), redirect: "follow"};
 
 	await fetch(url, options)
 		.then((response) => response.json())
@@ -281,7 +279,8 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	await fetch(url, options)
 	  .then(res => res.json())
 	  .then(res => {
-		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message'];
+		  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
+		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
 		  document.getElementById("chatbot").innerHTML = out;
 		  console.log("out: ", out);
 	  })
