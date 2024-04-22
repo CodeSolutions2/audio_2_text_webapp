@@ -95,13 +95,19 @@ async function fine_tune_text() {
 	// -----------------------------------
 	
 	var rows = QA_str.split('Q:');
+
+	// Filter out empty fields
+	const isNotEmpty = (num) => num.length > 0
+	rows = rows.filter(isNotEmpty);
+	
 	console.log('rows: ', rows);
 
   system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
 
+
+	
   var line_out = [];
   rows.forEach(async function(row, index) {
-    if (rows.length > 0) {
       let rows_QA = row.split('A:');
 
       let Questions = rows_QA[0];
@@ -111,8 +117,7 @@ async function fine_tune_text() {
       console.log('Answsers: ', Answsers);
         
       line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]});
-    }
-	});
+  });
 
 	console.log("line_out: ", line_out);
 	
