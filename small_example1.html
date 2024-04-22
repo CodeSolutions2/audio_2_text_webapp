@@ -113,36 +113,59 @@ async function fine_tune_text() {
 		
 		let Answsers = rows_QA[1];
 		// console.log('Answsers: ', Answsers);
-
 		
-		// Handle contents with an array
-		// line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]});
-
 		// Handle contents with a string
 		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
-
-		
 	});
 	
-	// Remove array notation such that it is '{}\n{}'
-	//need to put each dictionary into a file
-	//console.log("line_out: ", line_out);
-
-	 
-	
-	// const jsonl_data = JSON.stringify(line_out, null, 2);
 	console.log('jsonl_data: ', jsonl_data);
-			
+
+	let filetimestamp = currentTime_string();
+	var filename = `${filetimestamp}.json`;
 	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
-		
-	await openai_upload_file_for_finetuning(blob_object, 'blob_object')
-	// {"error": {"message": "Expected file to have JSONL format, where every line is a valid JSON dictionary. Line 1 is not a dictionary (HINT: line starts with: \"[...\").", "type": "invalid_request_error", "param": null, "code": null}}}
+	const file_blob_object = new File ([blob_object], filename, {type: "application/json"});
+	
+	const file_id = await openai_upload_file_for_finetuning(file_blob_object, filename, 'file_blob_object');
+	
+	await openai_client_fine_tuning_job(file_id);
 
 }
 
+
+async function openai_client_fine_tuning_job(file_id) {
+
+	const url = "https://api.openai.com/v1/fine-tunes";
+
+	var data = {"training_file": file_id, "model": "gpt-3.5-turbo"};
+	
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
 	
 
-async function openai_upload_file_for_finetuning(file_input, which_input) {
+	const options = {method: "POST",
+			 body: JSON.stringify(data),
+			 redirect: "follow"
+			};
+
+	await fetch(url, options)
+		.then((response) => response.json())
+		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result))); })
+		.catch((error) => console.error(error));
+
+}
+	
+	
+async function currentTime_string() { 
+	let date = new Date(); 
+	let hh = date.getHours(); 
+	let mm = date.getMinutes(); 
+	let ss = date.getSeconds();
+	return `${hh}_${mm}_${ss}`;
+}
+
+
+async function openai_upload_file_for_finetuning(file_input, filename, which_input) {
 
 	const url = "https://api.openai.com/v1/files";
 
@@ -152,10 +175,11 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 	
 	const formData = new FormData();
 	if (which_input == 'blob_object') {
+		// WORKS: but filename is 'blob', one can not specifically name the file
 		formData.append("file", file_input);
 	} else {
-		// using a file_blob_object
-		formData.append("file", file_input, "file.json");
+		// file_blob_object: specifically name the file
+		formData.append("file", file_input, filename);
 	}
 	formData.append("purpose", "fine-tune");
 	
@@ -166,11 +190,25 @@ async function openai_upload_file_for_finetuning(file_input, which_input) {
 		      };
 	
 	await fetch(url, options)
-		.then(response => response.text())
-		.then(async function(result) { 
-			console.log(result);
-		})
+		.then(response => response.json())
+		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
+					     let file_id = JSON.parse(JSON.stringify(result))['id'];
+					      console.log('file_id: ', file_id);
+					      return file_id;
+					     })
 		.catch(error => { console.log(error); });
+
+// Typical result
+// {
+// "object": "file",
+// "id": "file-TQJX4r2rYL18ivhp5imjcj9N",
+// "purpose": "fine-tune",
+// "filename": "blob",
+// "bytes": 2342,
+// "created_at": 1713781853,
+// "status": "processed",
+// "status_details": null
+// }
 	
 }
 	
