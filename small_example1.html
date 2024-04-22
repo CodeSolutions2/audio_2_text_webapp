@@ -128,10 +128,7 @@ async function fine_tune_text() {
 		.then(async function(filetimestamp) { var filename = `${filetimestamp}.json`; outt.innerHTML = filename; })
 	
 	await transform_blob_into_fileblob(blob_object)
-		.then(async function(file_blob_object) { 
-			let filename = outt.innerHTML;
-			return await openai_upload_file_for_finetuning(file_blob_object, filename, 'file_blob_object'); 
-		})
+		.then(async function(file_blob_object) { return await openai_upload_file_for_finetuning(file_blob_object, outt.innerHTML, 'file_blob_object'); })
 		.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
 
 }
