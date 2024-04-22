@@ -347,9 +347,14 @@ async function readaudio() {
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
 					// console.log("blob_object: ", blob_object);
-					await openai_transcription(blob_object, 'blob_object', date_string);
+					
+					// With model transcription: rate limit for the month exceeded
+					// await openai_transcription(blob_object, 'blob_object', date_string);
 					// OR
-					// return await openai_translation(blob_object, 'blob_object');
+					return await openai_translation(blob_object, 'blob_object');
+					// OR
+					// Test output of text to finish workflow
+					// return await output_of_text(date_string);
 				})
 				.then(async function() { await new Promise(r => setTimeout(r, 200)); })
 				.catch(error => { console.log(error); });
@@ -422,7 +427,7 @@ async function openai_transcription(file_input, which_input, date_string) {
 	
 
 
-async function openai_translation(file_input) {
+async function openai_translation(file_input, which_input, date_string) {
 	
 	const url = 'https://api.openai.com/v1/audio/translations';
 
@@ -453,12 +458,18 @@ async function openai_translation(file_input) {
 	// Print text part of JSON response only with user message
 	return await fetch(url, options)
 		.then(response => response.text())
-		.then(result => { console.log(result); return result; })
+		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; })
 		.catch(error => { console.log(error); });
 	
 }
-	
 
+
+async function output_of_text(date_string) {
+	var result = "";
+	outt.innerHTML += `${date_string}\n${result}\n`;
+}
+
+	
 // ----------------------------------------------------
   
 </script>
