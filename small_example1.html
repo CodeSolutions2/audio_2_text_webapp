@@ -41,12 +41,12 @@
       		<br>
       		<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block"></textarea>
 	</td>
-        <td>
+        <td id="chatbot_output_table">	
 		<label id="chatbot_label" style="display:block">Chatbot area</label>
-      		<br>
-      		<textarea id="chatbot" rows="30" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
 		<br>
-		<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+		<td scope="chatarea" id="chatbot_textarea_table">
+		</td>
+	    <input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 	</td>
       </tr>
     </table>
@@ -65,6 +65,12 @@ div {position: relative; z-index: 2;},
   td,
   th {border: 1px solid black;padding: 10px 20px;}
 audio {position: absolute; top: 350px;}
+
+	th[scope='chatarea'] {
+  background-color: #FFFFFF;
+  color: #fff;
+}
+	
 </style>
 
 	  
@@ -94,6 +100,8 @@ var month = {"01": "january", "02": "february", "03": "march", "04": "april", "0
 async function use_chatbot(){
 
 	var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
+	// look at postman example about how to create this string
+	
 	// var prompt = "what topics are you trained to chat about?";
 	// OR
 	const prompt = document.getElementById("prompt_input").value;
@@ -191,7 +199,7 @@ async function openai_finetune_a_model(file_id) {
 
 	const url = "https://api.openai.com/v1/fine_tuning/jobs";
 
-	var data = {training_file: file_id, model: 'gpt-3.5-turbo'};
+	var data = {"training_file": file_id, "model": "gpt-3.5-turbo"};
 	
 	const headers = new Headers();
 	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
@@ -208,11 +216,18 @@ async function openai_finetune_a_model(file_id) {
 	
 	
 async function currentTime_string() { 
-	let date = new Date(); 
-	let hh = date.getHours(); 
-	let mm = date.getMinutes(); 
-	let ss = date.getSeconds();
-	return `${hh}_${mm}_${ss}`;
+	
+	return await new Date()
+		.then((response) => response)
+		.then(async function(date) {
+			let hh = date.getHours(); 
+			let mm = date.getMinutes(); 
+			let ss = date.getSeconds();
+			return `${hh}_${mm}_${ss}`;
+		})
+		.catch((error) => console.error(error));
+	
+	
 }
 
 
@@ -265,8 +280,6 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 
 async function openai_use_finetunned_model(model_name, prompt) {
 	
-	// var data = {"model": model_name, 'prompt': prompt, 'temperature': 0};
-	// OR
 	var system_content = "You are a helpful assistant"
 	var assistant_content = "Respond concisely"
 	var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
@@ -281,7 +294,17 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	  .then(res => {
 		  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
 		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		  document.getElementById("chatbot").innerHTML = out;
+		  
+		  let textareaElement = document.createElement('textarea');
+		  let timestamp = await currentTime_string;
+		  textareaElement.setAttribute("id", timestamp);
+		  textareaElement.setAttribute("rows", 2);
+		  textareaElement.setAttribute("cols", 100);
+		  textareaElement.style.backgroundColor = "yellow";
+		  // document.getElementById("elementId").style.backgroundColor = "red";
+		  document.getElementById(timestamp).innerHTML = out;
+		  document.getElementById("chatbot_textarea_table").appendChild(textareaElement);
+		  
 		  console.log("out: ", out);
 	  })
 	  .catch((error) => console.error(error));
