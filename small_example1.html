@@ -102,25 +102,25 @@ async function fine_tune_text() {
 	
 	console.log('rows: ', rows);
 
-  system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
+	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
 
-
+	var line_out = [];
+	rows.forEach(async function(row, index) {
+		let rows_QA = row.split('A:');
+		let Questions = rows_QA[0];
+		// console.log('Questions: ', Questions);
+		
+		let Answsers = rows_QA[1];
+		// console.log('Answsers: ', Answsers);
+		
+		line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]});
+	});
 	
-  var line_out = [];
-  rows.forEach(async function(row, index) {
-      let rows_QA = row.split('A:');
-
-      let Questions = rows_QA[0];
-      console.log('Questions: ', Questions);
-      
-      let Answsers = rows_QA[1];
-      console.log('Answsers: ', Answsers);
-        
-      line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]});
-  });
-
+	// Remove square bracket
+	line_out = line_out[0];
 	console.log("line_out: ", line_out);
-	
+
+	 
 	
 	const jsonl_data = JSON.stringify(line_out, null, 2);
 	console.log('jsonl_data: ', jsonl_data);
@@ -128,8 +128,7 @@ async function fine_tune_text() {
 	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
 		
 	await openai_upload_file_for_finetuning(blob_object, 'blob_object')
-	
-}
+	// {"error": {"message": "Expected file to have JSONL format, where every line is a valid JSON dictionary. Line 1 is not a dictionary (HINT: line starts with: \"[...\").", "type": "invalid_request_error", "param": null, "code": null}}}
 
 	
 
