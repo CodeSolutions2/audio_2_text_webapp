@@ -179,7 +179,14 @@ async function create_Q_and_As_for_finetuning() {
 			// Processing information
 			outp.innerHTML = 'Processing transcribed text';
 			// readaudio values are delayed becuse of processing with OpenAI endpoint
-			return await create_Q_and_As_from_text(text_by_date); 
+			// ----------------------------------------------------
+			// Obtain output
+			// ----------------------------------------------------
+			// return await create_Q_and_As_from_text(text_by_date); 
+			// OR
+			// Save on using the model: to test other part of the workflow
+			return await step1_text_output();
+			// ----------------------------------------------------
 		})
 		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
 		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
@@ -266,6 +273,13 @@ async function create_Q_and_As_from_text(text_by_date) {
 	
 }
 
+
+
+async function step1_text_output() {
+	var QA_str = "For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nFor april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nFor april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nFor april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nFor april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.";
+	outt.innerHTML += `${QA_str}\n`;
+}
+
 	
 // ----------------------------------------------------
 
@@ -347,14 +361,23 @@ async function readaudio() {
   				.then(response => response.blob())
 			 	.then(async function(blob_object) { 
 					// console.log("blob_object: ", blob_object);
-					
-					// With model transcription: rate limit for the month exceeded
+
+					// ----------------------------------------------------
+					// Obtain output
+					// ----------------------------------------------------
+					// Easy to use model to start off: disadvantage is that it is expensive
+					// Could use a more accessable model : can only use the model 1 time per minute, up to 3 times. And can only use whisper 50 time a month, not realistic usage for large amounts of data.
 					// await openai_transcription(blob_object, 'blob_object', date_string);
 					// OR
-					return await openai_translation(blob_object, 'blob_object');
+					// return await openai_translation(blob_object, 'blob_object');
+					// ----------------------------------------------------
+					// Unlimited usage model needed: Tensorflow.js
+					// https://www.tensorflow.org/js/models
+					// ----------------------------------------------------
 					// OR
 					// Test output of text to finish workflow
-					// return await output_of_text(date_string);
+					return await step0_text_output(date_string);
+					// ----------------------------------------------------
 				})
 				.then(async function() { await new Promise(r => setTimeout(r, 200)); })
 				.catch(error => { console.log(error); });
@@ -464,7 +487,7 @@ async function openai_translation(file_input, which_input, date_string) {
 }
 
 
-async function output_of_text(date_string) {
+async function step0_text_output(date_string) {
 	var result = "";
 	outt.innerHTML += `${date_string}\n${result}\n`;
 }
