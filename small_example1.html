@@ -105,6 +105,7 @@ async function fine_tune_text() {
 	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
 
 	var line_out = [];
+	var jsonl_data = '';
 	rows.forEach(async function(row, index) {
 		let rows_QA = row.split('A:');
 		let Questions = rows_QA[0];
@@ -112,17 +113,24 @@ async function fine_tune_text() {
 		
 		let Answsers = rows_QA[1];
 		// console.log('Answsers: ', Answsers);
+
 		
-		line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]});
+		// Handle contents with an array
+		// line_out.push({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]});
+
+		// Handle contents with a string
+		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
+
+		
 	});
 	
-	// Remove square bracket
-	line_out = line_out[0];
-	console.log("line_out: ", line_out);
+	// Remove array notation such that it is '{}\n{}'
+	//need to put each dictionary into a file
+	//console.log("line_out: ", line_out);
 
 	 
 	
-	const jsonl_data = JSON.stringify(line_out, null, 2);
+	// const jsonl_data = JSON.stringify(line_out, null, 2);
 	console.log('jsonl_data: ', jsonl_data);
 			
 	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
