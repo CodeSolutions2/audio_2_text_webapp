@@ -189,7 +189,7 @@ async function transform_blob_into_fileblob() {
 
 async function openai_finetune_a_model(file_id) {
 
-	const url = "https://api.openai.com/v1/fine-tunes";
+	const url = "https://api.openai.com/v1/fine_tuning/jobs";
 
 	var data = {training_file: file_id, model: 'gpt-3.5-turbo'};
 	
@@ -267,8 +267,14 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 
 async function openai_use_finetunned_model(model_name, prompt) {
 	
-	var data = {"model": model_name, 'prompt': prompt, 'temperature': 0};
-	var url = 'https://api.openai.com/v1/completions'
+	// var data = {"model": model_name, 'prompt': prompt, 'temperature': 0};
+	// OR
+	var system_content = "You are a helpful assistant"
+	var assistant_content = "Respond concisely"
+	var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+	var data = {"model": model_name, 'messages': messages, 'temperature': 0};
+	
+	var url = 'https://api.openai.com/v1/chat/completions';
 	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
 	const options = {method: "POST", headers: headers, body : JSON.stringify(data), redirect: "follow"};
 	
