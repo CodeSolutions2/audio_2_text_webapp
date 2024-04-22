@@ -91,17 +91,19 @@ async function fine_tune_text() {
 	// Way 0: without out naming the file with the date and time
 	await process_QA_into_json_string()
 		.then(async function(jsonl_data) { 
-			const blob_object = new Blob([jsonl_data], { type: 'application/json' });
+			return new Blob([jsonl_data], { type: 'application/json' });
 		})
+		// .then(response => response)
  		.then(async function(blob_object) { 
-			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
+			console.log("blob_object: ", blob_object);
+			// return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
 		})
-		.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
+		// .then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
 
 
 	// Way 1: WITH naming the file with the date and time
 	//await process_QA_into_json_string()
-		//.then(async function() { let filetimestamp = await currentTime_string(); console.log("filetimestamp: ", filetimestamp); return filetimestamp; }); 
+		//.then(async function(jsonl_data) { let filetimestamp = await currentTime_string(); console.log("filetimestamp: ", filetimestamp); return filetimestamp; }); 
 		//.then(response => response)
 		//.then(async function(filetimestamp) { var filename = `${filetimestamp}.json`; console.log("filename: ", filename); outt.innerHTML = filename; })
 		//.then(async function() { 
@@ -122,7 +124,7 @@ async function process_QA_into_json_string() {
 	
 	var QA_str = outt.innerHTML;
 	outt.innerHTML = ""; // clear page area, for future collection of text quickly
-	console.log('QA_str: ', QA_str);
+	// console.log('QA_str: ', QA_str);
 
 	// -----------------------------------
 	
@@ -131,7 +133,7 @@ async function process_QA_into_json_string() {
 	// Filter out empty fields
 	const isNotEmpty = (num) => num.length > 0
 	rows = rows.filter(isNotEmpty);
-	console.log('rows: ', rows);
+	// console.log('rows: ', rows);
 
 	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
 
@@ -149,10 +151,11 @@ async function process_QA_into_json_string() {
 		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
 	});
 	
-	// console.log('jsonl_data: ', jsonl_data);
+	console.log('jsonl_data: ', jsonl_data);
+	
+	// -----------------------------------
+	// Output
 	// out_text2.innerHTML = jsonl_data;
-
-	// OR
 
 	return jsonl_data;
 }
