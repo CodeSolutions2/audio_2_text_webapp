@@ -28,6 +28,7 @@
 <!-- View text results -->
 <div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
 <div id="transcriptions" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+<div id="process_text2" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
 
 <!-- View transcribed_text and chatbot -->
 <div align="left">
@@ -72,6 +73,7 @@ audio {position: absolute; top: 350px;}
 
 const outp = document.getElementById('progress');
 const outt = document.getElementById('transcriptions');
+const out_text2 = document.getElementById('process_text2');
 
 const repoOwner = 'CodeSolutions2';
 const repoName = 'audio_2_text_webapp';
@@ -86,7 +88,20 @@ var month = {"01": "january", "02": "february", "03": "march", "04": "april", "0
 // Step 2
 async function fine_tune_text() {
 
-	// -----------------------------------
+	await process_QA_into_json_string()
+		.then(async function() { let filetimestamp = await currentTime_string(); console.log("filetimestamp: ", filetimestamp); return filetimestamp; }); 
+		.then(response => response)
+		.then(async function(filetimestamp) { var filename = `${filetimestamp}.json`; console.log("filename: ", filename); outt.innerHTML = filename; })
+		.then(async function() { let file_blob_object = transform_blob_into_fileblob(blob_object); return file_blob_object; })
+ 		.then(async function(file_blob_object) { return await openai_upload_file_for_finetuning(file_blob_object, outt.innerHTML, 'file_blob_object'); })
+		.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
+
+}
+
+
+
+
+async function process_QA_into_json_string() {
 	
 	var QA_str = outt.innerHTML;
 	outt.innerHTML = ""; // clear page area, for future collection of text quickly
@@ -99,7 +114,6 @@ async function fine_tune_text() {
 	// Filter out empty fields
 	const isNotEmpty = (num) => num.length > 0
 	rows = rows.filter(isNotEmpty);
-	
 	console.log('rows: ', rows);
 
 	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
@@ -118,24 +132,15 @@ async function fine_tune_text() {
 		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
 	});
 	
-	console.log('jsonl_data: ', jsonl_data);
-
-	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
-
-	
-	await currentTime_string()
-		.then(response => response)
-		.then(async function(filetimestamp) { var filename = `${filetimestamp}.json`; outt.innerHTML = filename; })
-	
-	await transform_blob_into_fileblob(blob_object)
-		.then(async function(file_blob_object) { return await openai_upload_file_for_finetuning(file_blob_object, outt.innerHTML, 'file_blob_object'); })
-		.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
-
+	// console.log('jsonl_data: ', jsonl_data);
+	out_text2.innerHTML = jsonl_data;
 }
 
-
 	
-async function transform_blob_into_fileblob(blob_object) {
+	
+async function transform_blob_into_fileblob() {
+	let jsonl_data = out_text2.innerHTML;
+	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
 	return new File ([blob_object], filename, {type: "application/json"});
 }
 
@@ -154,14 +159,12 @@ async function openai_client_fine_tuning_job(file_id) {
 
 	const options = {method: "POST",
 			 body: JSON.stringify(data),
-			 redirect: "follow"
-			};
+			 redirect: "follow"};
 
 	await fetch(url, options)
 		.then((response) => response.json())
 		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result))); })
 		.catch((error) => console.error(error));
-
 }
 	
 	
@@ -195,8 +198,7 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 	const options = {method: 'POST', 
 		       headers: headers, 
 		       body: formData,
-		       redirect: "follow"
-		      };
+		       redirect: "follow"};
 	
 	await fetch(url, options)
 		.then(response => response.json())
