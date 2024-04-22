@@ -138,6 +138,8 @@ async function fine_tune_text() {
 	await openai_upload_file_for_finetuning(blob_object, 'blob_object')
 	// {"error": {"message": "Expected file to have JSONL format, where every line is a valid JSON dictionary. Line 1 is not a dictionary (HINT: line starts with: \"[...\").", "type": "invalid_request_error", "param": null, "code": null}}}
 
+}
+
 	
 
 async function openai_upload_file_for_finetuning(file_input, which_input) {
