@@ -296,7 +296,7 @@ async function openai_use_finetunned_model(model_name, prompt) {
 		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
 		  
 		  let textareaElement = document.createElement('textarea');
-		  let timestamp = await currentTime_string;
+		  let timestamp = async () => { await currentTime_string; }
 		  textareaElement.setAttribute("id", timestamp);
 		  textareaElement.setAttribute("rows", 2);
 		  textareaElement.setAttribute("cols", 100);
