@@ -120,17 +120,29 @@ async function fine_tune_text() {
 	
 	console.log('jsonl_data: ', jsonl_data);
 
-	let filetimestamp = currentTime_string();
-	var filename = `${filetimestamp}.json`;
 	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
-	const file_blob_object = new File ([blob_object], filename, {type: "application/json"});
+
 	
-	const file_id = await openai_upload_file_for_finetuning(file_blob_object, filename, 'file_blob_object');
+	await currentTime_string()
+		.then(response => response)
+		.then(async function(filetimestamp) { var filename = `${filetimestamp}.json`; outt.innerHTML = filename; })
 	
-	await openai_client_fine_tuning_job(file_id);
+	await transform_blob_into_fileblob(blob_object)
+		.then(async function(file_blob_object) { 
+			let filename = outt.innerHTML;
+			return await openai_upload_file_for_finetuning(file_blob_object, filename, 'file_blob_object'); 
+		})
+		.then(async function(file_id) { await openai_client_fine_tuning_job(file_id); })
 
 }
 
+
+	
+async function transform_blob_into_fileblob(blob_object) {
+	return new File ([blob_object], filename, {type: "application/json"});
+}
+
+	
 
 async function openai_client_fine_tuning_job(file_id) {
 
