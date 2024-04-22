@@ -41,11 +41,10 @@
       		<br>
       		<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block"></textarea>
 	</td>
-        <td id="chatbot_output_table">	
 		<label id="chatbot_label" style="display:block">Chatbot area</label>
 		<br>
-		<td scope="chatarea" id="chatbot_textarea_table">
-		</td>
+      		<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+	      <br>
 	    <input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 	</td>
       </tr>
@@ -65,10 +64,6 @@ div {position: relative; z-index: 2;},
   td,
   th {border: 1px solid black;padding: 10px 20px;}
 audio {position: absolute; top: 350px;}
-
-	th[scope='chatarea'] {
-  background-color: #FFFFFF;
-  color: #fff;
 }
 	
 </style>
@@ -123,23 +118,7 @@ async function fine_tune_text() {
 			console.log("blob_object: ", blob_object);
 			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
 		})
-		.then(async function(file_id) { await openai_finetune_a_model(file_id); })
 
-
-	// Way 1: WITH naming the file with the date and time
-	//await process_QA_into_json_string()
-		//.then(async function(jsonl_data) { let filetimestamp = await currentTime_string(); console.log("filetimestamp: ", filetimestamp); return filetimestamp; }); 
-		//.then(response => response)
-		//.then(async function(filetimestamp) { var filename = `${filetimestamp}.json`; console.log("filename: ", filename); outt.innerHTML = filename; })
-		//.then(async function() { 
-			// let file_blob_object = transform_blob_into_fileblob(blob_object); return file_blob_object; 
-		//})
- 		//.then(async function(blob_object) { 
-			// return await openai_upload_file_for_finetuning(file_blob_object, outt.innerHTML, 'file_blob_object'); 
-		//})
-		//.then(async function(file_id) { await openai_finetune_a_model(file_id); })
-
-	
 }
 
 
@@ -194,25 +173,6 @@ async function transform_blob_into_fileblob() {
 }
 
 	
-
-async function openai_finetune_a_model(file_id) {
-
-	const url = "https://api.openai.com/v1/fine_tuning/jobs";
-
-	var data = {"training_file": file_id, "model": "gpt-3.5-turbo"};
-	
-	const headers = new Headers();
-	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
-	headers.append("Accept", "application/json");
-	
-
-	const options = {method: "POST", headers: headers, body: JSON.stringify(data), redirect: "follow"};
-
-	await fetch(url, options)
-		.then((response) => response.json())
-		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result))); })
-		.catch((error) => console.error(error));
-}
 	
 	
 async function currentTime_string() { 
@@ -294,17 +254,7 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	  .then(res => {
 		  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
 		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		  
-		  let textareaElement = document.createElement('textarea');
-		  let timestamp = async () => { await currentTime_string; }
-		  textareaElement.setAttribute("id", timestamp);
-		  textareaElement.setAttribute("rows", 2);
-		  textareaElement.setAttribute("cols", 100);
-		  textareaElement.style.backgroundColor = "yellow";
-		  // document.getElementById("elementId").style.backgroundColor = "red";
-		  document.getElementById(timestamp).innerHTML = out;
-		  document.getElementById("chatbot_textarea_table").appendChild(textareaElement);
-		  
+		  document.getElementById("chatbot").innerHTML = out;
 		  console.log("out: ", out);
 	  })
 	  .catch((error) => console.error(error));
