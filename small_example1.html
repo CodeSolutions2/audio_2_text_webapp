@@ -125,9 +125,9 @@ async function fine_tune_text() {
 	const jsonl_data = JSON.stringify(line_out, null, 2);
 	console.log('jsonl_data: ', jsonl_data);
 			
-	// const blob_object = new Blob([jsonl_data], { type: 'application/json' });
+	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
 		
-	// await openai_upload_file_for_finetuning(blob_object, 'blob_object')
+	await openai_upload_file_for_finetuning(blob_object, 'blob_object')
 	
 }
 
