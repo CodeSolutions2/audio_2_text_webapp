@@ -307,10 +307,10 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	
 	// Add chatbot output to Frontend: Create a cellText OR textarea
 	var out = "Print this text here";
-	let row = document.createElement("tr");
-	let cell = document.createElement("td");
+	row = document.createElement("tr");
+	cell = document.createElement("td");
 	cell.style.backgroundColor = "orange";
-	let cellText = document.createTextNode(`${out}`);
+	cellText = document.createTextNode(`${out}`);
 	cell.appendChild(cellText);
 	row.appendChild(cell);
 	tblBody.appendChild(row);
