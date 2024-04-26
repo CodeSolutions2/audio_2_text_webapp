@@ -3,7 +3,9 @@
 <head></head>
 <body>    
 
-<h1>Example framework for audio-to-text with/without Q&A on text</h1> 
+<h1>Productivity webapp that uses audio-to-text and Q&A finetuning</h1>
+
+
 <label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>  
 <br>
 <!-- ----------------------------------- -->
@@ -19,7 +21,7 @@
 <br>
 <button id="fine_tune_text" onclick="fine_tune_text()">[Step 2] fine_tune_text</button>
 <!-- ---------------------------------------- -->
-<br>
+<br><br>
 <!-- ---------------------------------------- -->
 <!-- View two split window -->
 <div align="left">
@@ -31,9 +33,11 @@
 <!-- View additional information -->
 <label id="additional_information_label" style="display:block">Additional information</label>
 <audio controls id="audio_id" style="display:block"><source src="2024_04_14_09_44_50_1.mp3" type="audio/mpeg"></audio>
+<br>
 <div id="progress" style="display:block;font-family:courier;font-size:24px;"></div>
 <div id="transcriptions" style="display:none;font-family:courier;font-size:24px;"></div>
 <div id="process_text2" style="display:none;font-family:courier;font-size:24px;"></div>
+<br>
 <!-- ---------------------------------------- -->
 </td>
 </tr>
@@ -77,7 +81,7 @@ div {position: relative; z-index: 0;}
 
 audio {position: relative;}
 
-table {vertical-align:top; border: 1px solid black; border-collapse: collapse;}
+table {vertical-align:top; border: 0px solid black; border-collapse: collapse;}
   
 td {vertical-align: top;}
 
@@ -287,23 +291,31 @@ async function openai_use_finetunned_model(model_name, prompt) {
 
 
 	// Print response to Frontend here
-	var out = "Print this text here";
-	
-	// Create a cellText OR textarea
 	let tbl = document.getElementById("chatbot_output");
-	const tblBody = document.createElement("tbody");
-	const row = document.createElement("tr");
-	const cell = document.createElement("td");
-	const cellText = document.createTextNode(`${out}`);
+	let tblBody = document.createElement("tbody");
+	
+	// Add prompt to Frontend: Create a cellText OR textarea
+	
+	let row = document.createElement("tr");
+	let cell = document.createElement("td");
+	cell.style.backgroundColor = "blue";
+	let cellText = document.createTextNode(`${prompt}`);
 	cell.appendChild(cellText);
 	row.appendChild(cell);
 	tblBody.appendChild(row);
 	tbl.appendChild(tblBody);
-	// OR
-	// const textarea_text = document.createElement("textarea");
-	// textarea_text.setAttribute("id", 'chatbot_textarea');
-	// document.getElementById("chatbot_textarea").innerHTML = out;
-	// document.getElementById("chatbot_output").appendChild(textarea_text);  // append textarea to the cell/td
+	
+	// Add chatbot output to Frontend: Create a cellText OR textarea
+	var out = "Print this text here";
+	let row = document.createElement("tr");
+	let cell = document.createElement("td");
+	cell.style.backgroundColor = "orange";
+	let cellText = document.createTextNode(`${out}`);
+	cell.appendChild(cellText);
+	row.appendChild(cell);
+	tblBody.appendChild(row);
+	tbl.appendChild(tblBody);
+	
 
 }
 
