@@ -203,6 +203,7 @@ async function readaudio() {
 					// ----------------------------------------------------
 					// Obtain output
 					// ----------------------------------------------------
+					// [ ***** For debugging Step 3 : do not call model everytime ***** ]
 					// Easy to use model to start off: disadvantage is that it is expensive
 					// Could use a more accessable model : can only use the model 1 time per minute, up to 3 times. And can only use whisper 50 time a month, not realistic usage for large amounts of data.
 					// await openai_transcription(blob_object, 'blob_object', date_string);
@@ -281,7 +282,10 @@ async function openai_transcription(file_input, which_input, date_string) {
 	// Print text part of JSON response only with user message
 	await fetch(url, options)
 		.then(response => response.text())
-		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; })
+		.then(async function(result) { 
+			// Show data from file and new transcribed data to [transcriptions]
+			outt.innerHTML += `${date_string}\n${result}\n`; 
+		})
 		.catch(error => { console.log(error); });
 	
 }
@@ -319,14 +323,19 @@ async function openai_translation(file_input, which_input, date_string) {
 	// Print text part of JSON response only with user message
 	return await fetch(url, options)
 		.then(response => response.text())
-		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; })
+		.then(async function(result) { 
+			// Show data from file and new transcribed data to [transcriptions]
+			outt.innerHTML += `${date_string}\n${result}\n`; 
+		})
 		.catch(error => { console.log(error); });
 	
 }
 
-
+// Temporary until I get another model: I attach nothing onto the data I GET from the file 
 async function step0_text_output(date_string) {
-	var result = "";
+	var result = "Transcribed text is printed to the Transcribed text area with the time stamp. This audio file talks about someone's perspective of Data Science.";
+
+	// Show data from file and new transcribed data to [transcriptions]
 	outt.innerHTML += `${date_string}\n${result}\n`;
 }
 
@@ -339,8 +348,11 @@ async function step0_text_output(date_string) {
 async function create_Q_and_As_for_finetuning() {
 
 	// -----------------------------------
-	
+
+	// Read transcribed data from [transcriptions] 
 	var transcribed_text = outt.innerHTML;
+
+	// Show transcribed data in [Transcribed text] textarea
 	document.getElementById("transcribed_text").innerHTML = transcribed_text;
 	outt.innerHTML = ""; // clear page area, for future collection of text quickly
 
@@ -354,6 +366,7 @@ async function create_Q_and_As_for_finetuning() {
 			// ----------------------------------------------------
 			// Obtain output
 			// ----------------------------------------------------
+			// [ ***** For debugging Step 3 : do not call model everytime ***** ]
 			// return await create_Q_and_As_from_text(text_by_date); 
 			// OR
 			// Save on using the model: to test other part of the workflow
@@ -437,7 +450,7 @@ async function create_Q_and_As_from_text(text_by_date) {
 		            .then(res => res.json())
 		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
 		                          // console.log('QA_str: ', QA_str);
-					  outt.innerHTML += `${QA_str}\n`;
+					  outqa.innerHTML += `${QA_str}\n`;
 					  // QA_str:  Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
 		            })
 		            .catch(error => { console.log(error); });
@@ -470,6 +483,7 @@ async function fine_tune_text() {
 			console.log("blob_object: ", blob_object);
 			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
 		})
+		.then(async function(file_id) { await openai_finetune_a_model(file_id); })
 
 }
 
@@ -478,8 +492,8 @@ async function fine_tune_text() {
 
 async function process_QA_into_json_string() {
 	
-	var QA_str = outt.innerHTML;
-	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+	var QA_str = outqa.innerHTML;
+	outqa.innerHTML = ""; // clear page area, for future collection of text quickly
 	// console.log('QA_str: ', QA_str);
 
 	// -----------------------------------
@@ -518,29 +532,6 @@ async function process_QA_into_json_string() {
 
 	
 	
-async function transform_blob_into_fileblob() {
-	let jsonl_data = out_text2.innerHTML;
-	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
-	return new File ([blob_object], filename, {type: "application/json"});
-}
-
-	
-	
-	
-async function currentTime_string() { 
-	
-	return await new Date()
-		.then((response) => response)
-		.then(async function(date) {
-			let hh = date.getHours(); 
-			let mm = date.getMinutes(); 
-			let ss = date.getSeconds();
-			return `${hh}_${mm}_${ss}`;
-		})
-		.catch((error) => console.error(error));
-	
-	
-}
 
 
 async function openai_upload_file_for_finetuning(file_input, filename, which_input) {
@@ -565,16 +556,19 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 		       headers: headers, 
 		       body: formData,
 		       redirect: "follow"};
-	
-	await fetch(url, options)
-		.then(response => response.json())
-		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
-					     let file_id = JSON.parse(JSON.stringify(result))['id'];
-					      console.log('file_id: ', file_id);
-					      return file_id;
-					     })
-		.catch(error => { console.log(error); });
 
+	// [ ***** For debugging Step 3 : do not call model everytime ***** ]
+	// await fetch(url, options)
+	// 	.then(response => response.json())
+	// 	.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
+	// 				     let file_id = JSON.parse(JSON.stringify(result))['id'];
+	// 				      console.log('file_id: ', file_id);
+	// 				      return file_id;
+	// 				     })
+	// 	.catch(error => { console.log(error); });
+
+	return "file-TQJX4r2rYL18ivhp5imjcj9N";
+	
 // Typical result
 // {
 // "object": "file",
@@ -588,17 +582,44 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 // }
 	
 }
+
 	
+
+async function openai_finetune_a_model(file_id) {
+
+	const url = "https://api.openai.com/v1/fine_tuning/jobs";
+
+	var data = {"training_file": file_id, "model": "gpt-3.5-turbo"};
+	
+	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: JSON.stringify(data),
+		       redirect: "follow"};
+
+	await fetch(url, options)
+		.then((response) => response.json())
+		.then(async function(result) { 
+			console.log(JSON.parse(JSON.stringify(result))); 
+			
+			// Figure out what this return: need to save the model_name for use_chatbot
+			// outt.innerHTML = ;
+		})
+		.catch((error) => console.error(error));
+}
+
 // ----------------------------------------------------
 
-
+	
 // ----------------------------------------------------
 // Step 3
 // ----------------------------------------------------
 async function use_chatbot(){
 
-	var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
-	// look at postman example about how to create this string
+	var model_name = outt.innerHTML;
+	// OR
+	// var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
 	
 	// var prompt = "what topics are you trained to chat about?";
 	// OR
