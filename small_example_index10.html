@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+
+<h1>Example framework for audio-to-text with/without Q&A on text</h1> 
+<label id="directions" style="display:block">Enter OpenAI key to transcribe the audio files to text. All audio files in the repository will be transcribed.</label>
+	  
+<br>
+
+<!-- ----------------------------------- -->
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+<!-- ----------------------------------- -->
+	
+<br><br>
+<button id="transcribe_audio_files" onclick="transcribe_audio_files()">[Step 0] transcribe_audio_files</button>
+<br><br>
+<button id="create_Q_and_As_for_finetuning" onclick="create_Q_and_As_for_finetuning()">[Step 1] create_Q_and_As_for_finetuning</button>
+<br><br>
+<button id="fine_tune_text" onclick="fine_tune_text()">[Step 2] fine_tune_text</button>
+<br><br>
+<button id="use_chatbot" onclick="use_chatbot()">[Step 3] use_chatbot</button>
+
+<audio controls id="audio_id" style="display:block"><source src="2024_04_14_09_44_50_1.mp3" type="audio/mpeg"></audio>
+	  
+	  
+<!-- View text results -->
+<div id="progress" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+<div id="transcriptions" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+<div id="process_text2" style="display:block;font-family:courier;font-size:24px;height:300px"></div>
+
+
+<!-- View transcribed_text and chatbot -->
+<div align="left">
+    <table style='text-align: center; width: 300px; display:block'>
+      <tr>
+        <td>
+		<label id="transcribed_text_label" style="display:block">Transcribed text</label>
+      		<br>
+      		<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block"></textarea>
+</td>
+
+<td id="chatbot_output">
+<label id="chatbot_label" style="display:block">Chatbot area</label>
+<br>
+<textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
+<br>
+
+<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 20px; width: 500px;">
+</td>
+
+</tr>
+</table>
+</div>  
+    
+
+	  
+<!-- --------------------------------------------------- -->
+
+<!-- CSS -->
+<style>
+div {position: relative; z-index: 0;}
+  
+table {vertical-align: top; border-collapse: collapse; position: relative; z-index: 0;}
+  
+td {vertical-align: top;}
+
+th {border: 1px solid black;padding: 10px 20px;}
+
+input#prompt_input {background-color: #7b93b8; border: 0.5px grey; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
+
+audio {position: absolute; top: 350px;}
+}
+	
+</style>
+
+	  
+<!-- --------------------------------------------------- -->
+	  
+
+
+	  
+<script>
+
+const outp = document.getElementById('progress');
+const outt = document.getElementById('transcriptions');
+const out_text2 = document.getElementById('process_text2');
+
+const repoOwner = 'CodeSolutions2';
+const repoName = 'audio_2_text_webapp';
+
+const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+
+var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
+
+
+
+// ----------------------------------------------------
+
+// Step 3
+async function use_chatbot(){
+
+	var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
+	// look at postman example about how to create this string
+	
+	// var prompt = "what topics are you trained to chat about?";
+	// OR
+	const prompt = document.getElementById("prompt_input").value;
+	
+	await openai_use_finetunned_model(model_name, prompt);
+}
+
+// ----------------------------------------------------
+
+// Step 2
+async function fine_tune_text() {
+
+	// Way 0: without out naming the file with the date and time
+	await process_QA_into_json_string()
+		.then(async function(jsonl_data) { 
+			return new Blob([jsonl_data], { type: 'application/json' });
+		})
+ 		.then(async function(blob_object) { 
+			console.log("blob_object: ", blob_object);
+			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
+		})
+
+}
+
+
+
+
+async function process_QA_into_json_string() {
+	
+	var QA_str = outt.innerHTML;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+	// console.log('QA_str: ', QA_str);
+
+	// -----------------------------------
+	
+	var rows = QA_str.split('Q:');
+
+	// Filter out empty fields
+	const isNotEmpty = (num) => num.length > 0
+	rows = rows.filter(isNotEmpty);
+	// console.log('rows: ', rows);
+
+	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
+
+	var line_out = [];
+	var jsonl_data = '';
+	rows.forEach(async function(row, index) {
+		let rows_QA = row.split('A:');
+		let Questions = rows_QA[0];
+		// console.log('Questions: ', Questions);
+		
+		let Answsers = rows_QA[1];
+		// console.log('Answsers: ', Answsers);
+		
+		// Handle contents with a string
+		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
+	});
+	
+	console.log('jsonl_data: ', jsonl_data);
+	
+	// -----------------------------------
+	// Output
+	// out_text2.innerHTML = jsonl_data;
+
+	return jsonl_data;
+}
+
+	
+	
+async function transform_blob_into_fileblob() {
+	let jsonl_data = out_text2.innerHTML;
+	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
+	return new File ([blob_object], filename, {type: "application/json"});
+}
+
+	
+	
+	
+async function currentTime_string() { 
+	
+	return await new Date()
+		.then((response) => response)
+		.then(async function(date) {
+			let hh = date.getHours(); 
+			let mm = date.getMinutes(); 
+			let ss = date.getSeconds();
+			return `${hh}_${mm}_${ss}`;
+		})
+		.catch((error) => console.error(error));
+	
+	
+}
+
+
+async function openai_upload_file_for_finetuning(file_input, filename, which_input) {
+
+	const url = "https://api.openai.com/v1/files";
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		// WORKS: but filename is 'blob', one can not specifically name the file
+		formData.append("file", file_input);
+	} else {
+		// file_blob_object: specifically name the file
+		formData.append("file", file_input, filename);
+	}
+	formData.append("purpose", "fine-tune");
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"};
+	
+	await fetch(url, options)
+		.then(response => response.json())
+		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
+					     let file_id = JSON.parse(JSON.stringify(result))['id'];
+					      console.log('file_id: ', file_id);
+					      return file_id;
+					     })
+		.catch(error => { console.log(error); });
+
+// Typical result
+// {
+// "object": "file",
+// "id": "file-TQJX4r2rYL18ivhp5imjcj9N",
+// "purpose": "fine-tune",
+// "filename": "blob",
+// "bytes": 2342,
+// "created_at": 1713781853,
+// "status": "processed",
+// "status_details": null
+// }
+	
+}
+
+
+async function openai_use_finetunned_model(model_name, prompt) {
+	
+	var system_content = "You are a helpful assistant"
+	var assistant_content = "Respond concisely"
+	var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+	var data = {"model": model_name, 'messages': messages, 'temperature': 0};
+	
+	var url = 'https://api.openai.com/v1/chat/completions';
+	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+	const options = {method: "POST", headers: headers, body : JSON.stringify(data), redirect: "follow"};
+	
+	await fetch(url, options)
+	  .then(res => res.json())
+	  .then(res => {
+		  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
+		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+
+      // Print response to Frontend
+
+      // Create a cellText OR textarea
+      // const cellText = document.createTextNode(`${rowArray[i][j]}`);
+      // OR
+      const textarea_text = document.createElement("textarea");
+      textarea_text.setAttribute("id", 'chatbot_textarea');
+      document.getElementById("chatbot_textarea").innerHTML = out;
+			document.getElementById("chatbot_output").appendChild(textarea_text);  // append textarea to the cell/td
+
+      // previous output: text to the textarea
+		  document.getElementById("chatbot").innerHTML = out;
+  
+		  console.log("out: ", out);
+	  })
+	  .catch((error) => console.error(error));
+
+}
+
+// ----------------------------------------------------
+
+// Step 1
+async function create_Q_and_As_for_finetuning() {
+
+	// -----------------------------------
+	
+	var transcribed_text = outt.innerHTML;
+	document.getElementById("transcribed_text").innerHTML = transcribed_text;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+
+	// -----------------------------------
+
+	await sort_text_by_timestamp(transcribed_text)
+		.then(async function(text_by_date) { 
+			// Processing information
+			outp.innerHTML = 'Processing transcribed text';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			// ----------------------------------------------------
+			// Obtain output
+			// ----------------------------------------------------
+			// return await create_Q_and_As_from_text(text_by_date); 
+			// OR
+			// Save on using the model: to test other part of the workflow
+			return await step1_text_output();
+			// ----------------------------------------------------
+		})
+		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
+		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
+		// Assure that create_Q_and_As_from_text is finished : ok so create_Q_and_As_from_text returns a little after the callback
+		.then(() => { outp.innerHTML = 'Transcribed Text Processing Done'; })
+
+	// Eventhough there is a promise, values are returned seconds after this function finishes. 
+}
+
+
+
+async function sort_text_by_timestamp(transcribed_text) {
+	// Sorting
+	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
+	let matches = [...transcribed_text.matchAll(regexp)];
+	// console.log('matches: ', matches);
+	
+	let text_st = 0;
+	let text_end = 0;
+	let text_by_date = [];
+	
+	// next: get array of start and end values to cut string
+	matches.forEach(async function(row, index) {
+		let date = row.at(0);
+		// console.log('date: ', date);
+		text_st = date.length + text_end;
+			
+		if (matches.length > (index+1)){
+			text_end = matches[index+1].index - 1;
+		} else {
+			text_end = transcribed_text.length;
+		}
+		// console.log('text_st: ', text_st, 'text_end: ', text_end);
+		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
+	});
+	
+	console.log('text_by_date: ', text_by_date);
+
+	// -----------------------------------
+	
+	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
+	
+	// -----------------------------------
+	
+	return text_by_date;
+}
+	
+
+async function create_Q_and_As_from_text(text_by_date) {
+	
+	// Creation of Questions and Answers from text: create 10 questions and answers about each text
+	let num_of_QA_pairs = 5;
+	text_by_date.forEach(async function(row, index) {
+		let year = row.date.slice(0,4);
+		console.log('year: ', year);
+		
+		let month_number = row.date.slice(5,7); 
+		console.log('month_number: ', month_number);
+		
+		let month_name = month[month_number];
+		console.log('month_name: ', month_name);
+		
+		// Creates questions only
+		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
+		  // ------------------------------------------
+		  var system_content = "You are a helpful assistant"
+		  var assistant_content = "Respond concisely"
+		  var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+		  var data = {"model": 'gpt-3.5-turbo', 'messages': messages, 'temperature': 0};
+		  var url = 'https://api.openai.com/v1/chat/completions'
+		  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+		  
+		  // Print text part of JSON response only with user message
+		  await fetch(url, options)
+		            .then(res => res.json())
+		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+		                          // console.log('QA_str: ', QA_str);
+					  outt.innerHTML += `${QA_str}\n`;
+					  // QA_str:  Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
+		            })
+		            .catch(error => { console.log(error); });
+	});
+	
+}
+
+
+
+async function step1_text_output() {
+	var QA_str = "Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.";
+	outt.innerHTML += `${QA_str}\n`;
+}
+
+	
+// ----------------------------------------------------
+
+// Step 0
+async function transcribe_audio_files() {
+	
+	await play_an_audio()
+		.then(async function() { 
+			// Processing information
+			outp.innerHTML = 'Processing audio';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			return await readaudio(); 
+		})
+		// Return a promise to force values created after readaudio to be created in sychronous order.
+		// Assure that readaudio is finished : ok so readaudio returns a little after the callback
+		.then(done_message => done_message)
+		.then(done_message => { outp.innerHTML = done_message; })
+
+	// Eventhough there is a promise, values are returned seconds after this function finishes. 
+}
+
+
+async function play_an_audio() {
+	
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
+	// document.getElementById("audio_id").style.display = "block";
+}
+
+
+async function readaudio() {
+
+	return await get_audio_file_objects()
+	.then(file_objects => { 
+		
+		// console.log("file_objects:", file_objects);
+    
+		file_objects.forEach(async function(file_object, index) {
+			
+			console.log("file_object:", file_object);
+			
+			filename = file_object.name;
+			// console.log("filename:", filename);
+			
+			let out0 = filename.split('_');
+
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+			let YYYY = out0.slice(0,1).toString();
+			let MM = out0.slice(1,2).toString();
+			let DD = out0.slice(2,3).toString();
+			let HH = out0.slice(3,4).toString();
+			let mm = out0.slice(4,5).toString();
+			let ss = out0.slice(5,6).toString();
+
+			const regex = /(,)+/g;
+			
+			YYYY = YYYY.replace(regex, '');
+			MM = MM.replace(regex, '');
+			DD = DD.replace(regex, '');
+			HH = HH.replace(regex, '');
+			mm = mm.replace(regex, '');
+			ss = ss.replace(regex, '');
+
+			let date_string = `${YYYY}_${MM}_${DD}_${HH}_${mm}_${ss}`;
+
+			// -----------------------------------
+
+			let file_download_url = file_object.download_url;
+			// console.log("file_download_url:", file_download_url);
+			
+			// -----------------------------------
+
+			// REST API to convert .mp3 to text
+			
+			// ------------------------------------------
+			// Form submission
+			// ------------------------------------------
+			// Way 2: read in the mp3 as file_download_url --> convert to  blob_object
+			await fetch(file_download_url)
+  				.then(response => response.blob())
+			 	.then(async function(blob_object) { 
+					// console.log("blob_object: ", blob_object);
+
+					// ----------------------------------------------------
+					// Obtain output
+					// ----------------------------------------------------
+					// Easy to use model to start off: disadvantage is that it is expensive
+					// Could use a more accessable model : can only use the model 1 time per minute, up to 3 times. And can only use whisper 50 time a month, not realistic usage for large amounts of data.
+					// await openai_transcription(blob_object, 'blob_object', date_string);
+					// OR
+					// return await openai_translation(blob_object, 'blob_object');
+					// ----------------------------------------------------
+					// Unlimited usage model needed: Tensorflow.js
+					// https://www.tensorflow.org/js/models
+					// ----------------------------------------------------
+					// OR
+					// Test output of text to finish workflow
+					return await step0_text_output(date_string);
+					// ----------------------------------------------------
+				})
+				.then(async function() { await new Promise(r => setTimeout(r, 200)); })
+				.catch(error => { console.log(error); });
+
+			// ------------------------------------------
+			
+		  });  // end of file_objects.forEach
+	})
+	.then(() => { return 'Transcription Processing Done'; });
+	
+}
+
+
+
+async function get_audio_file_objects() {
+	
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	var file_objects = [];
+	await fetch(url).then(res => res.json()).then(data => {
+		    data.forEach(file => {
+		      if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
+            file_objects.push(file);
+		      }
+		    });
+		  }).catch(error => { outp.innerHTML += error; });
+	
+    	console.log('file_objects: ', file_objects);
+	
+	return file_objects;
+}
+
+	
+
+async function openai_transcription(file_input, which_input, date_string) {
+
+	const url = 'https://api.openai.com/v1/audio/transcriptions';
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
+	formData.append("model", "whisper-1");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
+	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	// Print text part of JSON response only with user message
+	await fetch(url, options)
+		.then(response => response.text())
+		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; })
+		.catch(error => { console.log(error); });
+	
+}
+	
+
+
+async function openai_translation(file_input, which_input, date_string) {
+	
+	const url = 'https://api.openai.com/v1/audio/translations';
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
+	formData.append("model", "whisper-1");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
+	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	// Print text part of JSON response only with user message
+	return await fetch(url, options)
+		.then(response => response.text())
+		.then(async function(result) { outt.innerHTML += `${date_string}\n${result}\n`; })
+		.catch(error => { console.log(error); });
+	
+}
+
+
+async function step0_text_output(date_string) {
+	var result = "";
+	outt.innerHTML += `${date_string}\n${result}\n`;
+}
+
+	
+// ----------------------------------------------------
+  
+</script>
+
+  </body>
+</html>
