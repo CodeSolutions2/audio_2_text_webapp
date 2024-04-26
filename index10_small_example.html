@@ -295,14 +295,12 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	let tblBody = document.createElement("tbody");
 	
 	// Add prompt to Frontend: Create a cellText OR textarea
-	
 	let row = document.createElement("tr");
 	let cell = document.createElement("td");
-	cell.style.backgroundColor = "gray";
-	cell.style.width = "100%";
-	cell.style.height = "100%";
-	let cellText = document.createTextNode(`${prompt}`);
+	cell.style.backgroundColor = "#cacccf";
+	let cellText = document.createTextNode(`User: ${prompt}`);
 	cell.appendChild(cellText);
+	cell.style.border = "4px solid rgba(0, 0, 0, 0)";
 	row.appendChild(cell);
 	tblBody.appendChild(row);
 	tbl.appendChild(tblBody);
@@ -311,11 +309,10 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	var out = "Print this text here";
 	row = document.createElement("tr");
 	cell = document.createElement("td");
-	cell.style.backgroundColor = "orange";
-	cell.style.width = "100%";
-	cell.style.height = "100%";
-	cellText = document.createTextNode(`${out}`);
+	cell.style.backgroundColor = "#dbc49e";
+	cellText = document.createTextNode(`Chatbot: ${out}`);
 	cell.appendChild(cellText);
+	cell.style.border = "4px solid rgba(0, 0, 0, 0)";
 	row.appendChild(cell);
 	tblBody.appendChild(row);
 	tbl.appendChild(tblBody);
