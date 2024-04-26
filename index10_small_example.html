@@ -557,17 +557,18 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 		       body: formData,
 		       redirect: "follow"};
 
-	// [ ***** For debugging Step 3 : do not call model everytime ***** ]
-	// await fetch(url, options)
-	// 	.then(response => response.json())
-	// 	.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
-	// 				     let file_id = JSON.parse(JSON.stringify(result))['id'];
-	// 				      console.log('file_id: ', file_id);
-	// 				      return file_id;
-	// 				     })
-	// 	.catch(error => { console.log(error); });
+	
+	await fetch(url, options)
+	 	.then(response => response.json())
+	 	.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
+	 				     let file_id = JSON.parse(JSON.stringify(result))['id'];
+					      console.log('file_id: ', file_id);
+	 				      return file_id;
+	 				     })
+	 	.catch(error => { console.log(error); });
 
-	return "file-TQJX4r2rYL18ivhp5imjcj9N";
+	// [ ***** For debugging Step 3 : do not call model everytime ***** ]
+	// return "file-TQJX4r2rYL18ivhp5imjcj9N";
 	
 // Typical result
 // {
