@@ -34,20 +34,20 @@
 
 <!-- View transcribed_text and chatbot -->
 <div align="left">
-<table style='text-align: left; width: 200px; display:block'>
+<table style='text-align: left; width: 600px; display:block'>
 <tr>
 
 <td>
 <label id="transcribed_text_label" style="display:block">Transcribed text</label>
 <br>
-<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block"></textarea>
+<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block" width: 300px; height: 200px;></textarea>
 </td>
 
 <td id="chatbot_outer_output">
 <label id="chatbot_label" style="display:block">Chatbot area</label>
 <br>
 <!-- ---------------------------------------- -->
-<table id="chatbot_output" style='text-align: left; width: 100px; display:block'>
+<table id="chatbot_output" style='text-align: left; width: 300px; display:block'>
 <!-- dynamically add rows here -->
 </table>
 <!-- ---------------------------------------- -->
@@ -67,11 +67,11 @@
 <style>
 div {position: relative; z-index: 0;}
   
-table {vertical-align: top; border-collapse: collapse; position: relative; z-index: 0;}
+table {vertical-align: top; border: 1px solid black; border-collapse: collapse; position: relative; z-index: 0;}
   
 td {vertical-align: top;}
 
-th {border: 1px solid black;padding: 10px 20px;}
+th {border: 1px solid black; padding: 10px 20px;}
 
 input#prompt_input {background-color: #7b93b8; border: 0.5px grey; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
 
