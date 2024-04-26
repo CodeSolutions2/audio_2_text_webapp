@@ -19,7 +19,9 @@
 <br>
 <button id="create_Q_and_As_for_finetuning" onclick="create_Q_and_As_for_finetuning()">[Step 1] create_Q_and_As_for_finetuning</button>
 <br>
-<button id="fine_tune_text" onclick="fine_tune_text()">[Step 2] fine_tune_text</button>
+<button id="prepare_fine_tune_textfile" onclick="prepare_fine_tune_textfile()">[Step 2] prepare_fine_tune_textfile</button>
+<br>
+<button id="openai_finetune_a_model" onclick="openai_finetune_a_model()">[Step 3] openai_finetune_a_model</button>
 <!-- ---------------------------------------- -->
 <br><br>
 <!-- ---------------------------------------- -->
@@ -56,7 +58,7 @@
 <!-- ---------------------------------------- -->
 <!-- View chatbot -->
 <label id="chatbot_label" style="display:block">Chatbot area</label>
-<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 50px; width:300px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 3] Ask chatbot</button>
+<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 50px; width:300px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 4] Ask chatbot</button>
 <table id="chatbot_output" style='text-align: left; width: 300px; display:block'>
 <!-- dynamically add rows here -->
 </table>
@@ -472,7 +474,7 @@ async function step1_text_output() {
 // ----------------------------------------------------
 // Step 2
 // ----------------------------------------------------
-async function fine_tune_text() {
+async function prepare_fine_tune_textfile() {
 
 	// Way 0: without out naming the file with the date and time
 	await process_QA_into_json_string()
@@ -481,9 +483,8 @@ async function fine_tune_text() {
 		})
  		.then(async function(blob_object) { 
 			console.log("blob_object: ", blob_object);
-			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
+			await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
 		})
-		.then(async function(file_id) { await openai_finetune_a_model(file_id); })
 
 }
 
@@ -563,31 +564,23 @@ async function openai_upload_file_for_finetuning(file_input, filename, which_inp
 	 	.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
 	 				     let file_id = JSON.parse(JSON.stringify(result))['id'];
 					      console.log('file_id: ', file_id);
-	 				      return file_id;
+	 				      outt.innerHTML = file_id;
 	 				     })
 	 	.catch(error => { console.log(error); });
-
-	// [ ***** For debugging Step 3 : do not call model everytime ***** ]
-	// return "file-TQJX4r2rYL18ivhp5imjcj9N";
-	
-// Typical result
-// {
-// "object": "file",
-// "id": "file-TQJX4r2rYL18ivhp5imjcj9N",
-// "purpose": "fine-tune",
-// "filename": "blob",
-// "bytes": 2342,
-// "created_at": 1713781853,
-// "status": "processed",
-// "status_details": null
-// }
 	
 }
 
 	
+// ----------------------------------------------------
+// Step 3
+// ----------------------------------------------------
+async function openai_finetune_a_model() {
 
-async function openai_finetune_a_model(file_id) {
-
+	var file_id = "file-GeEs4ZbQXSJDiSeFA2yvirQf";
+	// OR
+	// var file_id = outt.innerHTML;
+	// outt.innerHTML = ""; // clear page area, for future collection of text quickly
+	
 	const url = "https://api.openai.com/v1/fine_tuning/jobs";
 
 	var data = {"training_file": file_id, "model": "gpt-3.5-turbo"};
@@ -614,7 +607,7 @@ async function openai_finetune_a_model(file_id) {
 
 	
 // ----------------------------------------------------
-// Step 3
+// Step 4
 // ----------------------------------------------------
 async function use_chatbot(){
 
