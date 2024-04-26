@@ -48,11 +48,12 @@
 <textarea id="chatbot" rows="35" cols="100" placeholder="Chatbot text" style="display:block"></textarea>
 <br>
 
-<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 20px; width: 500px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 3] use_chatbot</button>
 </td>
 
 </tr>
 </table>
+
+<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 20px; width: 700px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 3] Ask chatbot</button>
 </div>  
     
 
@@ -259,15 +260,20 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
 	const options = {method: "POST", headers: headers, body : JSON.stringify(data), redirect: "follow"};
 	
-	await fetch(url, options)
-	  .then(res => res.json())
-	  .then(res => {
-		  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
-		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		  console.log("out: ", out);
+	// await fetch(url, options)
+	//   .then(res => res.json())
+	//   .then(res => {
+	// 	  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
+	// 	  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+	// 	  console.log("out: ", out);
 
-      // Print response to Frontend
+         //})
+	  //.catch((error) => console.error(error));
 
+
+	// Print response to Frontend
+	var out = "Print this text here";
+	
       // Create a cellText OR textarea
       const cellText = document.createTextNode(`${out}`);
       document.getElementById("chatbot_output").appendChild(cellText);  // append cellText to the cell/td
@@ -279,11 +285,6 @@ async function openai_use_finetunned_model(model_name, prompt) {
 
       // previous output: text to the textarea
 		  document.getElementById("chatbot").innerHTML = out;
-  
-		  
-	  })
-	  .catch((error) => console.error(error));
-
 }
 
 // ----------------------------------------------------
