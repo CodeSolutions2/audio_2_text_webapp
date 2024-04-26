@@ -89,7 +89,7 @@ tr {border: 0px solid black; padding: 10px 20px;}
 	
 th {border: 1px solid black; padding: 10px 20px;}
 
-input#prompt_input {background-color: #7b93b8; border: 0.5px grey; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
+input#prompt_input {background-color: #acbdac; border: 0.5px grey; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
 
 }
 	
@@ -298,7 +298,9 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	
 	let row = document.createElement("tr");
 	let cell = document.createElement("td");
-	cell.style.backgroundColor = "blue";
+	cell.style.backgroundColor = "gray";
+	cell.style.width = "100%";
+	cell.style.height = "100%";
 	let cellText = document.createTextNode(`${prompt}`);
 	cell.appendChild(cellText);
 	row.appendChild(cell);
@@ -310,6 +312,8 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	row = document.createElement("tr");
 	cell = document.createElement("td");
 	cell.style.backgroundColor = "orange";
+	cell.style.width = "100%";
+	cell.style.height = "100%";
 	cellText = document.createTextNode(`${out}`);
 	cell.appendChild(cellText);
 	row.appendChild(cell);
