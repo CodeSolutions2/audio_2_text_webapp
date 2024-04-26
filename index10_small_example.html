@@ -32,11 +32,11 @@
 <!-- ---------------------------------------- -->
 <!-- View additional information -->
 <label id="additional_information_label" style="display:block">Additional information</label>
-<audio controls id="audio_id" style="display:block"><source src="2024_04_14_09_44_50_1.mp3" type="audio/mpeg"></audio>
+<audio controls id="audio_id" style="display:none"><source src="2024_04_14_09_44_50_1.mp3" type="audio/mpeg"></audio>
 <br>
 <div id="progress" style="display:block;font-family:courier;font-size:24px;"></div>
 <div id="transcriptions" style="display:none;font-family:courier;font-size:24px;"></div>
-<div id="process_text2" style="display:none;font-family:courier;font-size:24px;"></div>
+<div id="question_answers" style="display:none;font-family:courier;font-size:24px;"></div>
 <br>
 <!-- ---------------------------------------- -->
 </td>
@@ -105,7 +105,7 @@ input#prompt_input {background-color: #acbdac; border: 0.5px grey; -webkit-borde
 
 const outp = document.getElementById('progress');
 const outt = document.getElementById('transcriptions');
-const out_text2 = document.getElementById('process_text2');
+const outqa = document.getElementById('question_answers');
 
 const repoOwner = 'CodeSolutions2';
 const repoName = 'audio_2_text_webapp';
@@ -118,330 +118,10 @@ var month = {"01": "january", "02": "february", "03": "march", "04": "april", "0
 
 // ----------------------------------------------------
 
-// Step 3
-async function use_chatbot(){
-
-	var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
-	// look at postman example about how to create this string
-	
-	// var prompt = "what topics are you trained to chat about?";
-	// OR
-	const prompt = document.getElementById("prompt_input").value;
-	
-	await openai_use_finetunned_model(model_name, prompt);
-}
 
 // ----------------------------------------------------
-
-// Step 2
-async function fine_tune_text() {
-
-	// Way 0: without out naming the file with the date and time
-	await process_QA_into_json_string()
-		.then(async function(jsonl_data) { 
-			return new Blob([jsonl_data], { type: 'application/json' });
-		})
- 		.then(async function(blob_object) { 
-			console.log("blob_object: ", blob_object);
-			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
-		})
-
-}
-
-
-
-
-async function process_QA_into_json_string() {
-	
-	var QA_str = outt.innerHTML;
-	outt.innerHTML = ""; // clear page area, for future collection of text quickly
-	// console.log('QA_str: ', QA_str);
-
-	// -----------------------------------
-	
-	var rows = QA_str.split('Q:');
-
-	// Filter out empty fields
-	const isNotEmpty = (num) => num.length > 0
-	rows = rows.filter(isNotEmpty);
-	// console.log('rows: ', rows);
-
-	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
-
-	var line_out = [];
-	var jsonl_data = '';
-	rows.forEach(async function(row, index) {
-		let rows_QA = row.split('A:');
-		let Questions = rows_QA[0];
-		// console.log('Questions: ', Questions);
-		
-		let Answsers = rows_QA[1];
-		// console.log('Answsers: ', Answsers);
-		
-		// Handle contents with a string
-		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
-	});
-	
-	console.log('jsonl_data: ', jsonl_data);
-	
-	// -----------------------------------
-	// Output
-	// out_text2.innerHTML = jsonl_data;
-
-	return jsonl_data;
-}
-
-	
-	
-async function transform_blob_into_fileblob() {
-	let jsonl_data = out_text2.innerHTML;
-	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
-	return new File ([blob_object], filename, {type: "application/json"});
-}
-
-	
-	
-	
-async function currentTime_string() { 
-	
-	return await new Date()
-		.then((response) => response)
-		.then(async function(date) {
-			let hh = date.getHours(); 
-			let mm = date.getMinutes(); 
-			let ss = date.getSeconds();
-			return `${hh}_${mm}_${ss}`;
-		})
-		.catch((error) => console.error(error));
-	
-	
-}
-
-
-async function openai_upload_file_for_finetuning(file_input, filename, which_input) {
-
-	const url = "https://api.openai.com/v1/files";
-
-	const headers = new Headers();
-	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
-	headers.append("Accept", "application/json");
-	
-	const formData = new FormData();
-	if (which_input == 'blob_object') {
-		// WORKS: but filename is 'blob', one can not specifically name the file
-		formData.append("file", file_input);
-	} else {
-		// file_blob_object: specifically name the file
-		formData.append("file", file_input, filename);
-	}
-	formData.append("purpose", "fine-tune");
-	
-	const options = {method: 'POST', 
-		       headers: headers, 
-		       body: formData,
-		       redirect: "follow"};
-	
-	await fetch(url, options)
-		.then(response => response.json())
-		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
-					     let file_id = JSON.parse(JSON.stringify(result))['id'];
-					      console.log('file_id: ', file_id);
-					      return file_id;
-					     })
-		.catch(error => { console.log(error); });
-
-// Typical result
-// {
-// "object": "file",
-// "id": "file-TQJX4r2rYL18ivhp5imjcj9N",
-// "purpose": "fine-tune",
-// "filename": "blob",
-// "bytes": 2342,
-// "created_at": 1713781853,
-// "status": "processed",
-// "status_details": null
-// }
-	
-}
-
-
-async function openai_use_finetunned_model(model_name, prompt) {
-
-	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
-	
-	var system_content = "You are a helpful assistant"
-	var assistant_content = "Respond concisely"
-	var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
-	var data = {"model": model_name, 'messages': messages, 'temperature': 0};
-	
-	var url = 'https://api.openai.com/v1/chat/completions';
-	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
-	const options = {method: "POST", headers: headers, body : JSON.stringify(data), redirect: "follow"};
-	
-	await fetch(url, options)
-		.then(res => res.json())
-		.then(res => {
-			console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
-			let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-			// console.log("out: ", out);
-
-			// Print response to Frontend here
-			let tbl = document.getElementById("chatbot_output");
-			let tblBody = document.createElement("tbody");
-			
-			// Add prompt to Frontend: Create a cellText OR textarea
-			let row = document.createElement("tr");
-			let cell = document.createElement("td");
-			cell.style.backgroundColor = "#cacccf";
-			let cellText = document.createTextNode(`User: ${prompt}`);
-			cell.appendChild(cellText);
-			cell.style.border = "10px solid rgba(0, 0, 0, 0)";
-			row.appendChild(cell);
-			tblBody.appendChild(row);
-			tbl.appendChild(tblBody);
-			
-			// Add chatbot output to Frontend: Create a cellText OR textarea
-			row = document.createElement("tr");
-			cell = document.createElement("td");
-			cell.style.backgroundColor = "#dbc49e";
-			cellText = document.createTextNode(`Chatbot: ${out}`);
-			cell.appendChild(cellText);
-			cell.style.border = "10px solid rgba(0, 0, 0, 0)";
-			row.appendChild(cell);
-			tblBody.appendChild(row);
-			tbl.appendChild(tblBody);
-		})
-		.catch((error) => console.error(error));
-
-
-	
-	
-
-}
-
-// ----------------------------------------------------
-
-// Step 1
-async function create_Q_and_As_for_finetuning() {
-
-	// -----------------------------------
-	
-	var transcribed_text = outt.innerHTML;
-	document.getElementById("transcribed_text").innerHTML = transcribed_text;
-	outt.innerHTML = ""; // clear page area, for future collection of text quickly
-
-	// -----------------------------------
-
-	await sort_text_by_timestamp(transcribed_text)
-		.then(async function(text_by_date) { 
-			// Processing information
-			outp.innerHTML = 'Processing transcribed text';
-			// readaudio values are delayed becuse of processing with OpenAI endpoint
-			// ----------------------------------------------------
-			// Obtain output
-			// ----------------------------------------------------
-			// return await create_Q_and_As_from_text(text_by_date); 
-			// OR
-			// Save on using the model: to test other part of the workflow
-			return await step1_text_output();
-			// ----------------------------------------------------
-		})
-		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
-		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
-		// Assure that create_Q_and_As_from_text is finished : ok so create_Q_and_As_from_text returns a little after the callback
-		.then(() => { outp.innerHTML = 'Transcribed Text Processing Done'; })
-
-	// Eventhough there is a promise, values are returned seconds after this function finishes. 
-}
-
-
-
-async function sort_text_by_timestamp(transcribed_text) {
-	// Sorting
-	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
-	let matches = [...transcribed_text.matchAll(regexp)];
-	// console.log('matches: ', matches);
-	
-	let text_st = 0;
-	let text_end = 0;
-	let text_by_date = [];
-	
-	// next: get array of start and end values to cut string
-	matches.forEach(async function(row, index) {
-		let date = row.at(0);
-		// console.log('date: ', date);
-		text_st = date.length + text_end;
-			
-		if (matches.length > (index+1)){
-			text_end = matches[index+1].index - 1;
-		} else {
-			text_end = transcribed_text.length;
-		}
-		// console.log('text_st: ', text_st, 'text_end: ', text_end);
-		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
-	});
-	
-	console.log('text_by_date: ', text_by_date);
-
-	// -----------------------------------
-	
-	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
-	
-	// -----------------------------------
-	
-	return text_by_date;
-}
-	
-
-async function create_Q_and_As_from_text(text_by_date) {
-	
-	// Creation of Questions and Answers from text: create 10 questions and answers about each text
-	let num_of_QA_pairs = 5;
-	text_by_date.forEach(async function(row, index) {
-		let year = row.date.slice(0,4);
-		console.log('year: ', year);
-		
-		let month_number = row.date.slice(5,7); 
-		console.log('month_number: ', month_number);
-		
-		let month_name = month[month_number];
-		console.log('month_name: ', month_name);
-		
-		// Creates questions only
-		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
-		  // ------------------------------------------
-		  var system_content = "You are a helpful assistant"
-		  var assistant_content = "Respond concisely"
-		  var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
-		  var data = {"model": 'gpt-3.5-turbo', 'messages': messages, 'temperature': 0};
-		  var url = 'https://api.openai.com/v1/chat/completions'
-		  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
-		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
-		  
-		  // Print text part of JSON response only with user message
-		  await fetch(url, options)
-		            .then(res => res.json())
-		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
-		                          // console.log('QA_str: ', QA_str);
-					  outt.innerHTML += `${QA_str}\n`;
-					  // QA_str:  Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
-		            })
-		            .catch(error => { console.log(error); });
-	});
-	
-}
-
-
-
-async function step1_text_output() {
-	var QA_str = "Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.";
-	outt.innerHTML += `${QA_str}\n`;
-}
-
-	
-// ----------------------------------------------------
-
 // Step 0
+// ----------------------------------------------------
 async function transcribe_audio_files() {
 	
 	await play_an_audio()
@@ -463,7 +143,7 @@ async function transcribe_audio_files() {
 async function play_an_audio() {
 	
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#controls
-	// document.getElementById("audio_id").style.display = "block";
+	document.getElementById("audio_id").style.display = "block";
 }
 
 
@@ -650,7 +330,334 @@ async function step0_text_output(date_string) {
 	outt.innerHTML += `${date_string}\n${result}\n`;
 }
 
+// ----------------------------------------------------
+
+
+// ----------------------------------------------------
+// Step 1
+// ----------------------------------------------------
+async function create_Q_and_As_for_finetuning() {
+
+	// -----------------------------------
 	
+	var transcribed_text = outt.innerHTML;
+	document.getElementById("transcribed_text").innerHTML = transcribed_text;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+
+	// -----------------------------------
+
+	await sort_text_by_timestamp(transcribed_text)
+		.then(async function(text_by_date) { 
+			// Processing information
+			outp.innerHTML = 'Processing transcribed text';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			// ----------------------------------------------------
+			// Obtain output
+			// ----------------------------------------------------
+			// return await create_Q_and_As_from_text(text_by_date); 
+			// OR
+			// Save on using the model: to test other part of the workflow
+			return await step1_text_output();
+			// ----------------------------------------------------
+		})
+		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
+		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
+		// Assure that create_Q_and_As_from_text is finished : ok so create_Q_and_As_from_text returns a little after the callback
+		.then(() => { outp.innerHTML = 'Transcribed Text Processing Done'; })
+
+	// Eventhough there is a promise, values are returned seconds after this function finishes. 
+}
+
+
+
+async function sort_text_by_timestamp(transcribed_text) {
+	// Sorting
+	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
+	let matches = [...transcribed_text.matchAll(regexp)];
+	// console.log('matches: ', matches);
+	
+	let text_st = 0;
+	let text_end = 0;
+	let text_by_date = [];
+	
+	// next: get array of start and end values to cut string
+	matches.forEach(async function(row, index) {
+		let date = row.at(0);
+		// console.log('date: ', date);
+		text_st = date.length + text_end;
+			
+		if (matches.length > (index+1)){
+			text_end = matches[index+1].index - 1;
+		} else {
+			text_end = transcribed_text.length;
+		}
+		// console.log('text_st: ', text_st, 'text_end: ', text_end);
+		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
+	});
+	
+	console.log('text_by_date: ', text_by_date);
+
+	// -----------------------------------
+	
+	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
+	
+	// -----------------------------------
+	
+	return text_by_date;
+}
+	
+
+async function create_Q_and_As_from_text(text_by_date) {
+	
+	// Creation of Questions and Answers from text: create 10 questions and answers about each text
+	let num_of_QA_pairs = 5;
+	text_by_date.forEach(async function(row, index) {
+		let year = row.date.slice(0,4);
+		console.log('year: ', year);
+		
+		let month_number = row.date.slice(5,7); 
+		console.log('month_number: ', month_number);
+		
+		let month_name = month[month_number];
+		console.log('month_name: ', month_name);
+		
+		// Creates questions only
+		const prompt = `Create ${num_of_QA_pairs} questions and answers about the given text: ${row.text}. Each question should begin with: 'Q: For ${month_name} ${year},' and each answer should begin with 'A:'.`;
+		  // ------------------------------------------
+		  var system_content = "You are a helpful assistant"
+		  var assistant_content = "Respond concisely"
+		  var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+		  var data = {"model": 'gpt-3.5-turbo', 'messages': messages, 'temperature': 0};
+		  var url = 'https://api.openai.com/v1/chat/completions'
+		  var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+		  var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+		  
+		  // Print text part of JSON response only with user message
+		  await fetch(url, options)
+		            .then(res => res.json())
+		            .then(res => { const QA_str = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+		                          // console.log('QA_str: ', QA_str);
+					  outt.innerHTML += `${QA_str}\n`;
+					  // QA_str:  Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.
+		            })
+		            .catch(error => { console.log(error); });
+	});
+	
+}
+
+
+
+async function step1_text_output() {
+	var QA_str = "Q: For april 2024, what was the author's initial attraction to the data science craze?\nA: The author was drawn to the idea of being flawless like a robot and the beauty of coding fast and thinking like a robot.\n\nQ: For april 2024, why did many people strive to achieve a high level in data science?\nA: Many people tried hard to excel in data science because they found it beautiful to try to be like a robot and code flawlessly.\n\nQ: For april 2024, what led to some people feeling disappointed and eventually giving up on pursuing data science?\nA: Some individuals felt disappointed when they couldn't achieve the level of proficiency they desired in data science, leading them to stop pursuing it.\n\nQ: For april 2024, according to the text, what was the beauty that motivated people to code and create amazing things in data science?\nA: The beauty of coding fast, thinking like a robot, and creating amazing things motivated many individuals to excel in data science.\n\nQ: For april 2024, why does the author emphasize the importance of beauty in pursuing challenging tasks like data science?\nA: The author highlights the beauty in data science as a motivating factor for individuals to tackle difficult tasks and persevere in their pursuits.";
+	outqa.innerHTML += `${QA_str}\n`;
+	console.log('inside outqa: ', QA_str);
+}
+
+// ----------------------------------------------------
+
+	
+// ----------------------------------------------------
+// Step 2
+// ----------------------------------------------------
+async function fine_tune_text() {
+
+	// Way 0: without out naming the file with the date and time
+	await process_QA_into_json_string()
+		.then(async function(jsonl_data) { 
+			return new Blob([jsonl_data], { type: 'application/json' });
+		})
+ 		.then(async function(blob_object) { 
+			console.log("blob_object: ", blob_object);
+			return await openai_upload_file_for_finetuning(blob_object, "", 'blob_object'); 
+		})
+
+}
+
+
+
+
+async function process_QA_into_json_string() {
+	
+	var QA_str = outt.innerHTML;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+	// console.log('QA_str: ', QA_str);
+
+	// -----------------------------------
+	
+	var rows = QA_str.split('Q:');
+
+	// Filter out empty fields
+	const isNotEmpty = (num) => num.length > 0
+	rows = rows.filter(isNotEmpty);
+	// console.log('rows: ', rows);
+
+	system_content = "You are a helpful personal assistant. You answer questions about events and ideas for a specific month and year.";
+
+	var line_out = [];
+	var jsonl_data = '';
+	rows.forEach(async function(row, index) {
+		let rows_QA = row.split('A:');
+		let Questions = rows_QA[0];
+		// console.log('Questions: ', Questions);
+		
+		let Answsers = rows_QA[1];
+		// console.log('Answsers: ', Answsers);
+		
+		// Handle contents with a string
+		jsonl_data = jsonl_data + JSON.stringify({"messages": [{"role": "system", "content": system_content}, {"role": "user", "content": Questions}, {"role": "assistant", "content": Answsers}]}) + '\n';
+	});
+	
+	console.log('jsonl_data: ', jsonl_data);
+	
+	// -----------------------------------
+	// Output
+	// outqa.innerHTML = jsonl_data;
+
+	return jsonl_data;
+}
+
+	
+	
+async function transform_blob_into_fileblob() {
+	let jsonl_data = out_text2.innerHTML;
+	const blob_object = new Blob([jsonl_data], { type: 'application/json' });
+	return new File ([blob_object], filename, {type: "application/json"});
+}
+
+	
+	
+	
+async function currentTime_string() { 
+	
+	return await new Date()
+		.then((response) => response)
+		.then(async function(date) {
+			let hh = date.getHours(); 
+			let mm = date.getMinutes(); 
+			let ss = date.getSeconds();
+			return `${hh}_${mm}_${ss}`;
+		})
+		.catch((error) => console.error(error));
+	
+	
+}
+
+
+async function openai_upload_file_for_finetuning(file_input, filename, which_input) {
+
+	const url = "https://api.openai.com/v1/files";
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		// WORKS: but filename is 'blob', one can not specifically name the file
+		formData.append("file", file_input);
+	} else {
+		// file_blob_object: specifically name the file
+		formData.append("file", file_input, filename);
+	}
+	formData.append("purpose", "fine-tune");
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"};
+	
+	await fetch(url, options)
+		.then(response => response.json())
+		.then(async function(result) { console.log(JSON.parse(JSON.stringify(result)));
+					     let file_id = JSON.parse(JSON.stringify(result))['id'];
+					      console.log('file_id: ', file_id);
+					      return file_id;
+					     })
+		.catch(error => { console.log(error); });
+
+// Typical result
+// {
+// "object": "file",
+// "id": "file-TQJX4r2rYL18ivhp5imjcj9N",
+// "purpose": "fine-tune",
+// "filename": "blob",
+// "bytes": 2342,
+// "created_at": 1713781853,
+// "status": "processed",
+// "status_details": null
+// }
+	
+}
+	
+// ----------------------------------------------------
+
+
+// ----------------------------------------------------
+// Step 3
+// ----------------------------------------------------
+async function use_chatbot(){
+
+	var model_name = "ft:gpt-3.5-turbo-0613:personal::8S37UCQM";
+	// look at postman example about how to create this string
+	
+	// var prompt = "what topics are you trained to chat about?";
+	// OR
+	const prompt = document.getElementById("prompt_input").value;
+	
+	await openai_use_finetunned_model(model_name, prompt);
+}
+
+
+async function openai_use_finetunned_model(model_name, prompt) {
+
+	const OPENAI_API_KEY = document.getElementById("OPENAI_API_KEY").value;
+	
+	var system_content = "You are a helpful assistant"
+	var assistant_content = "Respond concisely"
+	var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+	var data = {"model": model_name, 'messages': messages, 'temperature': 0};
+	
+	var url = 'https://api.openai.com/v1/chat/completions';
+	var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY}
+	const options = {method: "POST", headers: headers, body : JSON.stringify(data), redirect: "follow"};
+	
+	await fetch(url, options)
+		.then(res => res.json())
+		.then(res => {
+			console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
+			let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+			// console.log("out: ", out);
+
+			// Print response to Frontend here
+			let tbl = document.getElementById("chatbot_output");
+			let tblBody = document.createElement("tbody");
+			
+			// Add prompt to Frontend: Create a cellText OR textarea
+			let row = document.createElement("tr");
+			let cell = document.createElement("td");
+			cell.style.backgroundColor = "#cacccf";
+			let cellText = document.createTextNode(`User: ${prompt}`);
+			cell.appendChild(cellText);
+			cell.style.border = "10px solid rgba(0, 0, 0, 0)";
+			row.appendChild(cell);
+			tblBody.appendChild(row);
+			tbl.appendChild(tblBody);
+			
+			// Add chatbot output to Frontend: Create a cellText OR textarea
+			row = document.createElement("tr");
+			cell = document.createElement("td");
+			cell.style.backgroundColor = "#dbc49e";
+			cellText = document.createTextNode(`Chatbot: ${out}`);
+			cell.appendChild(cellText);
+			cell.style.border = "10px solid rgba(0, 0, 0, 0)";
+			row.appendChild(cell);
+			tblBody.appendChild(row);
+			tbl.appendChild(tblBody);
+		})
+		.catch((error) => console.error(error));
+
+}
+
 // ----------------------------------------------------
   
 </script>
