@@ -21,7 +21,14 @@
 <!-- ---------------------------------------- -->
 <br>
 <!-- ---------------------------------------- -->
-<!-- View text results -->
+<!-- View two split window -->
+<div align="left">
+<table style='text-align: left; width: 300px; display:block'>
+<tr>
+        
+<td>
+<!-- ---------------------------------------- -->
+<!-- View additional information -->
 <!-- <audio controls id="audio_id" style="display:block"><source src="2024_04_14_09_44_50_1.mp3" type="audio/mpeg"></audio> -->
 <div id="progress" style="display:block;font-family:courier;font-size:24px;"></div>
 <div id="transcriptions" style="display:block;font-family:courier;font-size:24px;"></div>
@@ -29,21 +36,26 @@
 <!-- ---------------------------------------- -->
 <br>
 <!-- ---------------------------------------- -->
+<!-- View transcribed_text -->
+<label id="transcribed_text_label" style="display:block">Transcribed text</label>
+<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block" width: 300px; height: 200px;></textarea>
+<!-- ---------------------------------------- -->
+</td>
+	
+<td>
+<!-- ---------------------------------------- -->
 <!-- View chatbot -->
 <label id="chatbot_label" style="display:block">Chatbot area</label>
-<br>
-<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 20px; width: 700px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 3] Ask chatbot</button>
+<input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 50px; width:200px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 3] Ask chatbot</button>
 <table id="chatbot_output" style='text-align: left; width: 300px; display:block'>
 <!-- dynamically add rows here -->
 </table>
 <!-- ---------------------------------------- -->
-<br>
-<!-- ---------------------------------------- -->
-<!-- View transcribed_text -->
-<label id="transcribed_text_label" style="display:block">Transcribed text</label>
-<br>
-<textarea id="transcribed_text" rows="35" cols="100" placeholder="Transcribed text" style="display:block" width: 300px; height: 200px;></textarea>
-<!-- ---------------------------------------- -->
+</td>
+        
+</tr>
+</table>
+</div>  
 
 
     
