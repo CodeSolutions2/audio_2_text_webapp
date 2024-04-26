@@ -34,7 +34,7 @@
 
 <!-- View transcribed_text and chatbot -->
 <div align="left">
-<table style='text-align: left; width: 300px; display:block'>
+<table style='text-align: left; width: 200px; display:block'>
 <tr>
 
 <td>
@@ -46,9 +46,11 @@
 <td id="chatbot_outer_output">
 <label id="chatbot_label" style="display:block">Chatbot area</label>
 <br>
-<!-- make a new table to dynamically add rows -->
-<table id="chatbot_output">
+<!-- ---------------------------------------- -->
+<table id="chatbot_output" style='text-align: left; width: 100px; display:block'>
+<!-- dynamically add rows here -->
 </table>
+<!-- ---------------------------------------- -->
 </td>
 
 </tr>
@@ -292,8 +294,6 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	// document.getElementById("chatbot_textarea").innerHTML = out;
 	// document.getElementById("chatbot_output").appendChild(textarea_text);  // append textarea to the cell/td
 
-	// previous output: text to the textarea
-	document.getElementById("chatbot").innerHTML = out;
 }
 
 // ----------------------------------------------------
