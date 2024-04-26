@@ -264,21 +264,23 @@ async function openai_use_finetunned_model(model_name, prompt) {
 	  .then(res => {
 		  console.log("JSON.parse(JSON.stringify(res)): ", JSON.parse(JSON.stringify(res)));
 		  let out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content'];
+		  console.log("out: ", out);
 
       // Print response to Frontend
 
       // Create a cellText OR textarea
-      // const cellText = document.createTextNode(`${rowArray[i][j]}`);
+      const cellText = document.createTextNode(`${out}`);
+      document.getElementById("chatbot_output").appendChild(cellText);  // append cellText to the cell/td
       // OR
-      const textarea_text = document.createElement("textarea");
-      textarea_text.setAttribute("id", 'chatbot_textarea');
-      document.getElementById("chatbot_textarea").innerHTML = out;
-			document.getElementById("chatbot_output").appendChild(textarea_text);  // append textarea to the cell/td
+      // const textarea_text = document.createElement("textarea");
+      // textarea_text.setAttribute("id", 'chatbot_textarea');
+      // document.getElementById("chatbot_textarea").innerHTML = out;
+      // document.getElementById("chatbot_output").appendChild(textarea_text);  // append textarea to the cell/td
 
       // previous output: text to the textarea
 		  document.getElementById("chatbot").innerHTML = out;
   
-		  console.log("out: ", out);
+		  
 	  })
 	  .catch((error) => console.error(error));
 
