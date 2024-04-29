@@ -12,4 +12,4 @@ Chat-bot technology used in a self-transformative manner can be the start of a n
 
 [Latest working version: Long example WITH journal example] https://CodeSolutions2.github.io/audio_2_text_webapp/index8.html 
 
-[Latest working version: Short example WITHOUT journal example (Includes: Step 0: transcribe file (uses example text), Step 1: Sorts text by timestamp, creates Q&A about text, Step 2: puts Q&A into OpenAI format and file blob, uploads file blob to OpenAI, submits uploaded file to OpenAI finetuning, Step 3: Use finetunned model to ask questions about the text)] https://CodeSolutions2.github.io/audio_2_text_webapp/index9_small_example.html
+[Latest working version: Short example WITHOUT journal example (Includes: Step 0: transcribe file (uses example text), Step 1: Sorts text by timestamp, creates Q&A about text, Step 2: puts Q&A into OpenAI format and file blob, uploads file blob to OpenAI, submits uploaded file to OpenAI finetuning, Step 3: Use finetunned model to ask questions about the text)] https://CodeSolutions2.github.io/audio_2_text_webapp/index10_small_example.html
