@@ -206,19 +206,12 @@ async function transcribe_audios() {
 			dict_out['total_file_objects'].forEach(async function(file_object, index) {
 				
 				console.log("file_object:", file_object);
-			
-				filename = file_object.name;
-				console.log("filename:", filename);
-
-				let file_download_url = file_object.download_url;
-				// console.log("file_download_url:", file_download_url);
 				
 				if (dict_out['model_name'] == 'openai') {
-					await call_openai_model(file_download_url, dict_out['API_KEY'])
+					await call_openai_model(file_object.download_url, dict_out['API_KEY'])
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
 				} else {
-					// custom_model
-					await call_custom_model(file_download_url)
+					await call_custom_model(file_object.download_url)
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
 				}
 				
@@ -248,14 +241,18 @@ async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 	await fetch(file_download_url)
 		.then(response => response.blob())
 		.then(async function(blob_object) { 
-			// console.log("blob_object: ", blob_object);
-
+			// Transform blob into a file
+			return new File ([blob_object], "recording.mp3", {type: "audio/mp3"});
+		})
+		.then(async function(file_blob_object) { 
 			// Use transcription or translation model randomly
 			let random_val = Math.floor(Math.random()*2); 
 			if (random_val == 1) {
-				await openai_transcription(blob_object, 'blob_object', file_download_url, OPENAI_API_KEY);
+				console.log("openai_transcription");
+				await openai_transcription(file_blob_object, 'file_blob_object', "openai_transcription", OPENAI_API_KEY);
 			} else {
-				await openai_translation(blob_object, 'blob_object', file_download_url, OPENAI_API_KEY);
+				console.log("openai_translation");
+				await openai_translation(file_blob_object, 'file_blob_object', "openai_translation", OPENAI_API_KEY);
 			}
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -265,8 +262,11 @@ async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 // ----------------------------------------------------
 
 
-async function openai_transcription(file_input, which_input, date_string, OPENAI_API_KEY) {
+async function openai_transcription(file_input, which_input, header_string, OPENAI_API_KEY) {
 
+	console.log("which_input: ", which_input);
+	console.log("header_string: ", header_string);
+	
 	const url = 'https://api.openai.com/v1/audio/transcriptions';
 
 	const headers = new Headers();
@@ -297,7 +297,7 @@ async function openai_transcription(file_input, which_input, date_string, OPENAI
 	await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML += `${date_string}\n${result}\n`; 
+			document.getElementById('notification').innerHTML += `${header_string}\n${result}\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
@@ -307,7 +307,10 @@ async function openai_transcription(file_input, which_input, date_string, OPENAI
 // ----------------------------------------------------
 
 	
-async function openai_translation(file_input, which_input, date_string, OPENAI_API_KEY) {
+async function openai_translation(file_input, which_input, header_string, OPENAI_API_KEY) {
+
+	console.log("which_input: ", which_input);
+	console.log("header_string: ", header_string);
 	
 	const url = 'https://api.openai.com/v1/audio/translations';
 
@@ -339,7 +342,7 @@ async function openai_translation(file_input, which_input, date_string, OPENAI_A
 	return await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML += `${date_string}\n${result}\n`; 
+			document.getElementById('notification').innerHTML += `${header_string}\n${result}\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
