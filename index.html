@@ -206,13 +206,14 @@ async function transcribe_audios() {
 			dict_out['total_file_objects'].forEach(async function(file_object, index) {
 				
 				console.log("file_object:", file_object);
+				console.log("file_object download_url: ", file_object.download_url);
 				
 				if (dict_out['model_name'] == 'openai') {
 					await call_openai_model(file_object.download_url, dict_out['API_KEY'])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				} else {
 					await call_custom_model(file_object.download_url)
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				}
 				
 			});  // end of forEach
@@ -238,6 +239,8 @@ async function call_custom_model(file_download_url) {
 async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 	
 	// Read in the mp3 as file_download_url --> convert to  blob_object
+	console.log("file_download_url: ", file_download_url);
+	
 	await fetch(file_download_url)
 		.then(response => response.blob())
 		.then(async function(blob_object) { 
