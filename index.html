@@ -82,6 +82,7 @@ th#outputs {width: 100%; }
 
 var model_name = "";
 var API_KEY = "";
+var file_object = {};
 
 // ----------------------------------------------------
 	
@@ -204,7 +205,7 @@ async function transcribe_audios() {
 		})
 		.then(async function(dict_out) {
 
-			console.log("dict_out:", dict_out);
+			// console.log("dict_out:", dict_out);
 
 			console.log("dict_out['total_file_objects'][0].length :", dict_out['total_file_objects'][0].length);
 			
@@ -250,7 +251,7 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 	// Read in the mp3 as file_download_url --> convert to  blob_object
 	document.getElementById('temp').innerHTML = file_object.name;
 	
-	//console.log("file_object: ", file_object);
+	console.log("file_object: ", file_object);
 	
 	await fetch(file_object.download_url)
 		.then(response => response.blob())
