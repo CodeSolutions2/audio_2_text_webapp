@@ -20,7 +20,8 @@
 <th id="inputs">
 
 <h3>A. Input a list of audio urls OR a GitHub repository url</h3>
-For example, https://github.com/CodeSolutions2/audio_2_text_webapp.
+For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp.
+For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3 
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <br>
 <h3>B. Select a model to transcribe audio files</h3>
@@ -135,7 +136,7 @@ async function transcribe_audios() {
 			}
 			
 			console.log("model_name: ", model_name);
-			console.log("API_KEY: ", API_KEY);
+			// console.log("API_KEY: ", API_KEY);
 			return [model_name, API_KEY];
 		})
 		.then(async function(array) {
@@ -144,7 +145,8 @@ async function transcribe_audios() {
 			// OR
 			// https://github.com/repoOwner/repoName/audio_file0.mp3, https://github.com/repoOwner/repoName/audio_file1.mp3
 			var user_input = document.getElementById("audio_url").value;
-		
+			console.log("user_input: ", user_input);
+			
 			// ----------------------------------------------------
 
 			// Obtain a list of file_objects
@@ -152,6 +154,9 @@ async function transcribe_audios() {
 			
 			// look for .mp3, .wav in string
 			if (file.name.match(/.(mp3)$/i) || file.name.match(/.(wav)$/i)) {
+
+				console.log("String of file urls:");
+				
 				// user entered a repository file_name
 				var array_of_file_names = user_input.split(",");
 
@@ -159,22 +164,31 @@ async function transcribe_audios() {
 
 					// user entered a repository url only
 					let url_split = file_url.split("/");
+					console.log("url_split:", url_split);
 				
 					// take last two values of url_split
 					let file_name = url_split.pop();
 					let repoName = url_split.pop();
 					let repoOwner = url_split.pop();
+					console.log("file_name:", file_name);
+					console.log("repoName:", repoName);
+					console.log("repoOwner:", repoOwner);
 					
 					let out = await get_one_audio_file_object_from_repo(repoOwner, repoName, file_name);
 					total_file_objects.push(out);
 				}); // end of forEach
 			} else {
+				console.log("Repository url:");
+				
 				// user entered a repository url only
 				let url_split = user_input.split("/");
+				console.log("dict_out:", dict_out);
 				
 				// take last two values of url_split
 				let repoName = url_split.pop();
 				let repoOwner = url_split.pop();
+				console.log("repoName:", repoName);
+				console.log("repoOwner:", repoOwner);
 
 				let out = await get_audio_file_objects_from_repo(repoOwner, repoName);
 				total_file_objects.push(out);
@@ -186,6 +200,8 @@ async function transcribe_audios() {
 		})
 		.then(async function(dict_out) {
 
+			console.log("dict_out:", dict_out);
+			
 			dict_out['total_file_objects'].forEach(async function(file_object, index) {
 				
 				console.log("file_object:", file_object);
