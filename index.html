@@ -150,8 +150,6 @@ async function transcribe_audios() {
 			
 			// ----------------------------------------------------
 
-			// ----------------------------------------------------
-
 			// Obtain a list of file_objects
 			var total_file_objects = [];
 			
@@ -185,7 +183,7 @@ async function transcribe_audios() {
 				
 				// user entered a repository url only
 				let url_split = user_input.split("/");
-				console.log("dict_out:", dict_out);
+				console.log("url_split:", url_split);
 				
 				// take last two values of url_split
 				let repoName = url_split.pop();
