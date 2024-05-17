@@ -132,7 +132,7 @@ async function transcribe_audios() {
 			}
 			
 			if (openai == false && custom_model == false) {
-				document.getElementById('error').innerHTML = "Select a model name and image size.";
+				document.getElementById('error').innerHTML = "Select a model.";
 			}
 			
 			console.log("model_name: ", model_name);
@@ -244,7 +244,7 @@ async function call_custom_model(file_download_url) {
 async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 	
 	// Read in the mp3 as file_download_url --> convert to  blob_object
-	console.log("file_download_url: ", file_download_url);
+	// console.log("file_download_url: ", file_download_url);
 	
 	await fetch(file_download_url)
 		.then(response => response.blob())
@@ -256,10 +256,8 @@ async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 			// Use transcription or translation model randomly
 			let random_val = Math.floor(Math.random()*2); 
 			if (random_val == 1) {
-				console.log("openai_transcription");
 				await openai_transcription(file_blob_object, 'file_blob_object', "openai_transcription", OPENAI_API_KEY);
 			} else {
-				console.log("openai_translation");
 				await openai_translation(file_blob_object, 'file_blob_object', "openai_translation", OPENAI_API_KEY);
 			}
 		})
@@ -271,9 +269,6 @@ async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 
 
 async function openai_transcription(file_input, which_input, header_string, OPENAI_API_KEY) {
-
-	console.log("which_input: ", which_input);
-	console.log("header_string: ", header_string);
 	
 	const url = 'https://api.openai.com/v1/audio/transcriptions';
 
@@ -305,7 +300,7 @@ async function openai_transcription(file_input, which_input, header_string, OPEN
 	await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML += `${header_string}\n${result}\n`; 
+			document.getElementById('notification').innerHTML += `${header_string}\n\n${result}\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
@@ -316,9 +311,6 @@ async function openai_transcription(file_input, which_input, header_string, OPEN
 
 	
 async function openai_translation(file_input, which_input, header_string, OPENAI_API_KEY) {
-
-	console.log("which_input: ", which_input);
-	console.log("header_string: ", header_string);
 	
 	const url = 'https://api.openai.com/v1/audio/translations';
 
