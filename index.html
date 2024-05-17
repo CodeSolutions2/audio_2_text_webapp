@@ -27,8 +27,8 @@
 <input type="radio" id="openai" name="radio_name" value="openai" />
 <label for="openai">OpenAI Whisper</label>
 <br>
-<input type="radio" id="custom_tensorflow" name="radio_name" value="custom_tensorflow" />
-<label for="custom_tensorflow">Custom Tensorflow</label>
+<input type="radio" id="custom_model" name="radio_name" value="custom_model" />
+<label for="custom_model">Custom Model</label>
 </fieldset>
 <br>
 <label for="enter_key" id="enter_key" style="display:none">Enter OpenAI Key:</label>
@@ -92,8 +92,18 @@ async function processEvent_openai(event) {
 	}
 }
 
+async function processEvent_custom_model(event) {
+	if (this.getAttribute("checked") == false) {
+		document.getElementById("enter_key").style.display = "none";
+		document.getElementById("API_KEY").style.display = "none";
+	} else  {
+		document.getElementById("enter_key").style.display = "none";
+		document.getElementById("API_KEY").style.display = "none";
+	}
+}
+	
 document.getElementById("openai").addEventListener("click", processEvent_openai, false);
-
+document.getElementById("custom_model").addEventListener("click", processEvent_custom_model, false);
 
 // ----------------------------------------------------
 
@@ -108,18 +118,18 @@ async function transcribe_audios() {
 		.then(async function() {
 		
 			const openai = document.getElementById("openai").checked;
-			const custom_tensorflow = document.getElementById("custom_tensorflow").checked;
+			const custom_model = document.getElementById("custom_model").checked;
 	
-			if (openai == true && custom_tensorflow == false) {
+			if (openai == true && custom_model == false) {
 				model_name = 'openai';
 				API_KEY = document.getElementById("API_KEY").value;
 			}
 			
-			if (openai == false && custom_tensorflow == true) {
-				model_name = 'custom_tensorflow';
+			if (openai == false && custom_model == true) {
+				model_name = 'custom_model';
 			}
 			
-			if (openai == false && custom_tensorflow == false) {
+			if (openai == false && custom_model == false) {
 				document.getElementById('error').innerHTML = "Select a model name and image size.";
 			}
 			
