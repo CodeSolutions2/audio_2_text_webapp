@@ -218,7 +218,7 @@ async function transcribe_audios() {
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				}
 
-				if (dict_out['index'] > dict_out['total_file_objects'][0].length-1) {
+				if (dict_out['index'] >= dict_out['total_file_objects'][0].length-1) {
 					dict_out['flag'] == 'stop';
 				} else {
 					dict_out['index'] = dict_out['index'] + 1;
@@ -249,6 +249,8 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 	
 	// Read in the mp3 as file_download_url --> convert to  blob_object
 	document.getElementById('temp').innerHTML = file_object.name;
+	
+	//console.log("file_object: ", file_object);
 	
 	await fetch(file_object.download_url)
 		.then(response => response.blob())
