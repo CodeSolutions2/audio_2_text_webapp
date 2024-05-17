@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>    
+
+<h1>Audio-to-text webapp</h1>
+<ol type="A">
+  <!-- Ideally have a popup to save someone's audio to the repository -->
+	<li>Input a list of audio urls OR a GitHub repository url.</li>
+	<li>Output transcribed text.</li>
+	<li>Delete audio/s from this repo.</li>
+	<li>Download file with transcribed text.</li>
+</ol>
+
+<!-- View two split window -->
+<div align="left">
+<table style='text-align: left; width: 300px; display:block'>
+<tr>
+        
+<td>
+
+<h3>A. Input a list of audio urls OR a GitHub repository url</h3>
+<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
+
+<br>
+
+<h3>B. Select a model to transcribe audio files</h3>
+<fieldset>
+<input type="radio" id="openai" name="radio_name" value="openai" />
+<label for="openai">OpenAI Whisper</label>
+<br>
+<input type="radio" id="custom_tensorflow" name="radio_name" value="custom_tensorflow" />
+<label for="custom_tensorflow">Custom Tensorflow</label>
+</fieldset>
+
+<br>
+
+<label for="enter_key" id="enter_key" style="display:none">Enter OpenAI Key:</label>
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:none; text-align: left; width: 150px;">
+<button id="transcribe_audios" onclick="transcribe_audios()" style="display:block">Transcribe audios</button>
+<br>
+<h3 id="delete_audios_h3" style="display:none">C. Delete audio/s from this repo</h3>
+<button id="delete_audios" onclick="delete_audios()" style="display:none">Delete audios</button>
+<br> 
+<h3 id="download_transcription_h3" style="display:none">D. Download file with transcribed text</h3>
+<button id="download_transcription" onclick="download_transcription()" style="display:none">Download transcription</button>
+
+<!-- --------------------------------------------------- -->
+	  
+
+
+	  
+<script>
+
+
+  
+  // ----------------------------------------------------
+  
+</script>
+
+  </body>
+</html>
