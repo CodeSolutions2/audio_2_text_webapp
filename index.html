@@ -11,19 +11,17 @@
 	<li>Delete audio/s from this repo.</li>
 	<li>Download file with transcribed text.</li>
 </ol>
-
+<hr>
 <!-- View two split window -->
 <div align="left">
 <table style='text-align: left; width: 300px; display:block'>
 <tr>
         
-<td>
+<th id="inputs">
 
 <h3>A. Input a list of audio urls OR a GitHub repository url</h3>
-<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
-
+<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <br>
-
 <h3>B. Select a model to transcribe audio files</h3>
 <fieldset>
 <input type="radio" id="openai" name="radio_name" value="openai" />
@@ -32,11 +30,10 @@
 <input type="radio" id="custom_tensorflow" name="radio_name" value="custom_tensorflow" />
 <label for="custom_tensorflow">Custom Tensorflow</label>
 </fieldset>
-
 <br>
-
 <label for="enter_key" id="enter_key" style="display:none">Enter OpenAI Key:</label>
-<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:none; text-align: left; width: 150px;">
+<input id="API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:none; text-align: left; width: 150px;">
+	
 <button id="transcribe_audios" onclick="transcribe_audios()" style="display:block">Transcribe audios</button>
 <br>
 <h3 id="delete_audios_h3" style="display:none">C. Delete audio/s from this repo</h3>
@@ -44,18 +41,333 @@
 <br> 
 <h3 id="download_transcription_h3" style="display:none">D. Download file with transcribed text</h3>
 <button id="download_transcription" onclick="download_transcription()" style="display:none">Download transcription</button>
+</th>
+	
+<!-- ---------------------------------------- -->
 
+<th id="outputs">
+<div id="notification"></div>
+<div id="error"></div>
+</th>
+	
+</tr>
+</table>
+</div>  
+	
+<!-- ---------------------------------------- -->
+<!-- CSS -->
+<style>
+div { padding: 10px; display:block; font-family:courier; font-size:15px; height:300px; }
+	
+div#notification { position: relative; color: #3236a8; }
+div#error { position: relative; color: #bd1f17; }
+
+table {vertical-align: top; border-collapse: collapse; position: relative; z-index: 0; border: 0px solid black;}
+
+tr {vertical-align: top; border: 0px solid black; padding: 10px 10px; }
+
+th, td {vertical-align: top; border: 0px solid black; padding: 10px; }
+th#inputs {width: 100%; }
+th#outputs {width: 100%; }
+</style>
+	
 <!-- --------------------------------------------------- -->
 	  
-
 
 	  
 <script>
 
+var model_name = "";
+var API_KEY = "";
 
-  
-  // ----------------------------------------------------
-  
+// ----------------------------------------------------
+	
+async function processEvent_openai(event) {
+	if (this.getAttribute("checked") == false) {
+		document.getElementById("enter_key").style.display = "none";
+		document.getElementById("API_KEY").style.display = "none";
+	} else  {
+		document.getElementById("enter_key").style.display = "block";
+		document.getElementById("API_KEY").style.display = "block";
+	}
+}
+
+document.getElementById("openai").addEventListener("click", processEvent_openai, false);
+
+
+// ----------------------------------------------------
+
+	
+async function transcribe_audios() {
+
+	return await new Promise(r => setTimeout(r, 10))
+		.then(async function() { 
+			// Processing information
+			document.getElementById('notification').innerHTML += 'Processing audio\n';
+		})
+		.then(async function() {
+		
+			const openai = document.getElementById("openai").checked;
+			const custom_tensorflow = document.getElementById("custom_tensorflow").checked;
+	
+			if (openai == true && custom_tensorflow == false) {
+				model_name = 'openai';
+				API_KEY = document.getElementById("API_KEY").value;
+			}
+			
+			if (openai == false && custom_tensorflow == true) {
+				model_name = 'custom_tensorflow';
+			}
+			
+			if (openai == false && custom_tensorflow == false) {
+				document.getElementById('error').innerHTML = "Select a model name and image size.";
+			}
+			
+			console.log("model_name: ", model_name);
+			console.log("API_KEY: ", API_KEY);
+			return [model_name, API_KEY];
+		})
+		.then(async function(array) {
+			// user will give:
+			// https://github.com/repoOwner/repoName
+			// OR
+			// https://github.com/repoOwner/repoName/audio_file0.mp3, https://github.com/repoOwner/repoName/audio_file1.mp3
+			var user_input = document.getElementById("audio_url").value;
+		
+			// ----------------------------------------------------
+
+			// Obtain a list of file_objects
+			var total_file_objects = [];
+			
+			// look for .mp3, .wav in string
+			if (file.name.match(/.(mp3)$/i) || file.name.match(/.(wav)$/i)) {
+				// user entered a repository file_name
+				var array_of_file_names = user_input.split(",");
+
+				array_of_file_names.forEach(async function(file_url, index) {
+
+					// user entered a repository url only
+					let url_split = file_url.split("/");
+				
+					// take last two values of url_split
+					let file_name = url_split.pop();
+					let repoName = url_split.pop();
+					let repoOwner = url_split.pop();
+					
+					let out = await get_one_audio_file_object_from_repo(repoOwner, repoName, file_name);
+					total_file_objects.push(out);
+				}); // end of forEach
+			} else {
+				// user entered a repository url only
+				let url_split = user_input.split("/");
+				
+				// take last two values of url_split
+				let repoName = url_split.pop();
+				let repoOwner = url_split.pop();
+
+				let out = await get_audio_file_objects_from_repo(repoOwner, repoName);
+				total_file_objects.push(out);
+			}
+
+			return {total_file_objects: total_file_objects, 
+				model_name: array[0], 
+				API_KEY: array[1]};
+		})
+		.then(async function(dict_out) {
+
+			dict_out['total_file_objects'].forEach(async function(file_object, index) {
+				
+				console.log("file_object:", file_object);
+			
+				filename = file_object.name;
+				console.log("filename:", filename);
+
+				let file_download_url = file_object.download_url;
+				// console.log("file_download_url:", file_download_url);
+				
+				if (dict_out['model_name'] == 'openai') {
+					await call_openai_model(file_download_url, dict_out['API_KEY'])
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
+				} else {
+					// custom_model
+					await call_custom_model(file_download_url)
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
+				}
+				
+			});  // end of forEach
+		})
+		.then(async function() { document.getElementById('notification').innerHTML += '\nTranscription Processing Done'; })
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+}
+
+
+// ----------------------------------------------------
+
+
+async function call_custom_model(file_download_url) {
+
+	document.getElementById('error').innerHTML = 'Model is in development';
+}
+
+	
+// ----------------------------------------------------
+
+
+async function call_openai_model(file_download_url, OPENAI_API_KEY) {
+	
+	// Read in the mp3 as file_download_url --> convert to  blob_object
+	await fetch(file_download_url)
+		.then(response => response.blob())
+		.then(async function(blob_object) { 
+			// console.log("blob_object: ", blob_object);
+
+			// Use transcription or translation model randomly
+			let random_val = Math.floor(Math.random()*2); 
+			if (random_val == 1) {
+				await openai_transcription(blob_object, 'blob_object', file_download_url, OPENAI_API_KEY);
+			} else {
+				await openai_translation(blob_object, 'blob_object', file_download_url, OPENAI_API_KEY);
+			}
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+}
+
+
+// ----------------------------------------------------
+
+
+async function openai_transcription(file_input, which_input, date_string, OPENAI_API_KEY) {
+
+	const url = 'https://api.openai.com/v1/audio/transcriptions';
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
+	formData.append("model", "whisper-1");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
+	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	// Print text part of JSON response only with user message
+	await fetch(url, options)
+		.then(response => response.text())
+		.then(async function(result) { 
+			document.getElementById('notification').innerHTML += `${date_string}\n${result}\n`; 
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+	
+}
+
+
+// ----------------------------------------------------
+
+	
+async function openai_translation(file_input, which_input, date_string, OPENAI_API_KEY) {
+	
+	const url = 'https://api.openai.com/v1/audio/translations';
+
+	const headers = new Headers();
+	headers.append("Authorization", 'Bearer ' + OPENAI_API_KEY);
+	headers.append("Accept", "application/json");
+	
+	const formData = new FormData();
+	if (which_input == 'blob_object') {
+		formData.append("file", file_input);
+	} else {
+		// using a file_blob_object
+		formData.append("file", file_input, "recording.mp3"); // mp3, mp4, mpeg, mpga, m4a, wav, or webm
+	}
+	formData.append("model", "whisper-1");
+	formData.append("prompt", "Transcribe the audio");  // Style context for the transcription
+	formData.append("response_format", "text");  // json, text, srt, verbose_json, or vtt
+	formData.append("temperature", "0");  // The sampling temperature, between 0 (accurate) and 1 (random response)
+	formData.append("language", "en");
+	formData.append("transcription", "plain text"); // plain text, srt, vtt
+	
+	const options = {method: 'POST', 
+		       headers: headers, 
+		       body: formData,
+		       redirect: "follow"
+		      };
+	
+	// Print text part of JSON response only with user message
+	return await fetch(url, options)
+		.then(response => response.text())
+		.then(async function(result) { 
+			document.getElementById('notification').innerHTML += `${date_string}\n${result}\n`; 
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+	
+}
+
+	
+// ----------------------------------------------------
+	
+
+async function get_one_audio_file_object_from_repo(repoOwner, repoName, file_name) {
+
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+	let file_objects = [];
+	
+	return await fetch(url)
+		.then(res => res.json())
+		.then(data => {
+			data.forEach(async function(file) {
+				var regexp = new RegExp(`${file_name}`, 'g');
+				if (file.type === 'file' && file.name.match(regexp)) {
+					file_objects.push(file);
+				}
+			});
+			return file_objects;
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+	
+}
+
+
+// ----------------------------------------------------
+
+
+async function get_audio_file_objects_from_repo(repoOwner, repoName) {
+
+	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+	
+	var file_objects = [];
+	
+	return await fetch(url)
+		.then(res => res.json())
+		.then(data => {
+			data.forEach(async function(file) {
+				if (file.type === 'file' && file.name.match(/.(mp3)$/i)) {
+					file_objects.push(file);
+				}
+			});
+			return file_objects;
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+	
+}
+
+
+// ----------------------------------------------------
+	
 </script>
 
   </body>
