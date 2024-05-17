@@ -144,87 +144,15 @@ async function transcribe_audios() {
 			// https://github.com/repoOwner/repoName
 			// OR
 			// https://github.com/repoOwner/repoName/audio_file0.mp3, https://github.com/repoOwner/repoName/audio_file1.mp3
+			console.log("array: ", array);
+			
 			var user_input = document.getElementById("audio_url").value;
 			console.log("user_input: ", user_input);
 			
 			// ----------------------------------------------------
 
-			// Obtain a list of file_objects
-			var total_file_objects = [];
-			
-			// look for .mp3, .wav in string
-			if (file.name.match(/.(mp3)$/i) || file.name.match(/.(wav)$/i)) {
-
-				console.log("String of file urls:");
-				
-				// user entered a repository file_name
-				var array_of_file_names = user_input.split(",");
-
-				array_of_file_names.forEach(async function(file_url, index) {
-
-					// user entered a repository url only
-					let url_split = file_url.split("/");
-					console.log("url_split:", url_split);
-				
-					// take last two values of url_split
-					let file_name = url_split.pop();
-					let repoName = url_split.pop();
-					let repoOwner = url_split.pop();
-					console.log("file_name:", file_name);
-					console.log("repoName:", repoName);
-					console.log("repoOwner:", repoOwner);
-					
-					let out = await get_one_audio_file_object_from_repo(repoOwner, repoName, file_name);
-					total_file_objects.push(out);
-				}); // end of forEach
-			} else {
-				console.log("Repository url:");
-				
-				// user entered a repository url only
-				let url_split = user_input.split("/");
-				console.log("dict_out:", dict_out);
-				
-				// take last two values of url_split
-				let repoName = url_split.pop();
-				let repoOwner = url_split.pop();
-				console.log("repoName:", repoName);
-				console.log("repoOwner:", repoOwner);
-
-				let out = await get_audio_file_objects_from_repo(repoOwner, repoName);
-				total_file_objects.push(out);
-			}
-
-			return {total_file_objects: total_file_objects, 
-				model_name: array[0], 
-				API_KEY: array[1]};
 		})
-		.then(async function(dict_out) {
-
-			console.log("dict_out:", dict_out);
-			
-			dict_out['total_file_objects'].forEach(async function(file_object, index) {
-				
-				console.log("file_object:", file_object);
-			
-				filename = file_object.name;
-				console.log("filename:", filename);
-
-				let file_download_url = file_object.download_url;
-				// console.log("file_download_url:", file_download_url);
-				
-				if (dict_out['model_name'] == 'openai') {
-					await call_openai_model(file_download_url, dict_out['API_KEY'])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
-				} else {
-					// custom_model
-					await call_custom_model(file_download_url)
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); return out; })
-				}
-				
-			});  // end of forEach
-		})
-		.then(async function() { document.getElementById('notification').innerHTML += '\nTranscription Processing Done'; })
-		.catch(error => { document.getElementById('error').innerHTML = error; });
+		
 }
 
 
