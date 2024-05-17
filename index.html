@@ -115,7 +115,7 @@ async function transcribe_audios() {
 	return await new Promise(r => setTimeout(r, 10))
 		.then(async function() { 
 			// Processing information
-			document.getElementById('notification').innerHTML += 'Processing audio\n';
+			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + 'Processing audio\n';
 		})
 		.then(async function() {
 		
@@ -198,32 +198,35 @@ async function transcribe_audios() {
 			return {total_file_objects: total_file_objects, 
 				model_name: array[0], 
 				API_KEY: array[1],
-			       flag: 'run'};
+			       flag: 'run',
+			       index: 0};
 		})
 		.then(async function(dict_out) {
 
 			console.log("dict_out:", dict_out);
-			
-			let index = 0;
+
+			console.log("dict_out['total_file_objects'][0].length :", dict_out['total_file_objects'][0].length);
 			
 			while (dict_out['flag'] == 'run') {
 				
 				if (dict_out['model_name'] == 'openai') {
-					await call_openai_model(dict_out['total_file_objects'][0][index].download_url, dict_out['API_KEY'])
+					await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']].download_url, dict_out['API_KEY'])
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				} else {
-					await call_custom_model(dict_out['total_file_objects'][0][index].download_url)
+					await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']].download_url)
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				}
 
-				if (index > dict_out['total_file_objects'][0].length) {
+				if (dict_out['index'] > dict_out['total_file_objects'][0].length) {
 					dict_out['flag'] == 'stop';
 				} else {
-					index += 1;
+					dict_out['index'] = dict_out['index'] + 1;
 				}
+				
+				console.log("dict_out['index']:", dict_out['index']);
 			}
 		})
-		.then(async function() { document.getElementById('notification').innerHTML += '\nTranscription Processing Done'; })
+		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 		
 }
@@ -253,6 +256,9 @@ async function call_openai_model(file_download_url, OPENAI_API_KEY) {
 			return new File ([blob_object], "recording.mp3", {type: "audio/mp3"});
 		})
 		.then(async function(file_blob_object) { 
+
+			console.log('file_blob_object: ', file_blob_object);
+			
 			// Use transcription or translation model randomly
 			let random_val = Math.floor(Math.random()*2); 
 			if (random_val == 1) {
@@ -300,7 +306,7 @@ async function openai_transcription(file_input, which_input, header_string, OPEN
 	await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML += `${header_string}\n\n${result}\n`; 
+			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + `${header_string}\n\n${result}\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
@@ -342,7 +348,7 @@ async function openai_translation(file_input, which_input, header_string, OPENAI
 	return await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML += `${header_string}\n${result}\n`; 
+			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + `${header_string}\n${result}\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
