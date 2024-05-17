@@ -206,13 +206,13 @@ async function transcribe_audios() {
 			dict_out['total_file_objects'].forEach(async function(file_object, index) {
 				
 				console.log("file_object:", file_object);
-				console.log("file_object download_url: ", file_object.download_url);
+				console.log("file_object download_url: ", file_object[index].download_url);
 				
 				if (dict_out['model_name'] == 'openai') {
-					await call_openai_model(file_object.download_url, dict_out['API_KEY'])
+					await call_openai_model(file_object[index].download_url, dict_out['API_KEY'])
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				} else {
-					await call_custom_model(file_object.download_url)
+					await call_custom_model(file_object[index].download_url)
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				}
 				
