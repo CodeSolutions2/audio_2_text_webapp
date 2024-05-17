@@ -197,26 +197,31 @@ async function transcribe_audios() {
 
 			return {total_file_objects: total_file_objects, 
 				model_name: array[0], 
-				API_KEY: array[1]};
+				API_KEY: array[1],
+			       flag: 'run'};
 		})
 		.then(async function(dict_out) {
 
 			console.log("dict_out:", dict_out);
 			
-			dict_out['total_file_objects'].forEach(async function(file_object, index) {
-				
-				console.log("file_object:", file_object);
-				console.log("file_object download_url: ", file_object[index].download_url);
+			let index = 1;
+			
+			while (dict_out['flag'] == 'run') {
 				
 				if (dict_out['model_name'] == 'openai') {
-					await call_openai_model(file_object[index].download_url, dict_out['API_KEY'])
+					await call_openai_model(dict_out['total_file_objects'][0][index].download_url, dict_out['API_KEY'])
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				} else {
-					await call_custom_model(file_object[index].download_url)
+					await call_custom_model(dict_out['total_file_objects'][0][index].download_url)
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				}
-				
-			});  // end of forEach
+
+				if (index > dict_out['total_file_objects'][0].length) {
+					dict_out['flag'] == 'stop';
+				} else {
+					index += 1;
+				}
+			}
 		})
 		.then(async function() { document.getElementById('notification').innerHTML += '\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
