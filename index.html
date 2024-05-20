@@ -118,14 +118,51 @@ async function previewInput(event) {
 
 async function check_audio_upload() {
 
-	await fetch(document.getElementById('audio_input_display').src)
+	let audio_upload_url = document.getElementById('audio_input_display').src;
+	console.log('audio upload url: ', audio_upload_url);
+	
+	await fetch(audio_upload_url)
 		.then(response => response.blob())
 		.then(async function(blob_object) { 
 			// Transform blob into a file
 			//return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
 
 			console.log('blob_object: ', blob_object)
+			var base64_string = await readFileAsDataURL(blob_object); return base64_string;
 		})
+		.then(async function(base64_string) {
+					console.log("base64_string: ", base64_string);
+
+					// Follow the process on https://www.base64encode.org/enc/map/, to convert base64_string to ASCII
+					
+					// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
+					const regex = /data:audio\/mpeg;base64,/g;
+					base64_string = base64_string.replace(regex, '');
+					console.log("base64_string: ", base64_string);
+					
+					// Decode the Base64-encoded string --> obtain the mp3 data in binary string format
+					const binaryString = atob(base64_string);
+					console.log("binaryString: ", binaryString);
+
+					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
+					var character_array = binaryString.split('');
+					console.log("character_array: ", character_array);
+					
+					// Map each binary string character as an ASCII number
+					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
+					// console.log("byteArray: ", byteArray);
+					// return byteArray;
+
+					// bytes gives the same output as byteArray
+					const bytes = new Uint8Array(byteArray);
+					console.log("bytes: ", bytes);
+					return bytes;
+				})
+				.then(bytes => { 
+					console.log("bytes: ", bytes); 
+				 	// return new Blob(bytes, {type: "audio/mp3"});
+					return new Blob(bytes);
+				})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
