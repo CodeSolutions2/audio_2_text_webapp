@@ -205,24 +205,30 @@ async function transcribe_audios() {
 			// console.log("dict_out['index'] :", dict_out['index']);
 			// console.log("total_files-1 :", total_files-1);
 			// console.log("max_loops :", max_loops);
-			
-			while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
 
-				console.log('model_name: ', dict_out['model_name'])
-				
-				if (dict_out['model_name'] == 'openai') {
-					await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				} else {
-					console.log('HERE')
-					await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+			if (total_files == 0) {
+				document.getElementById('notification').innerHTML = "";
+				document.getElementById('error').innerHTML = '\n\n No files in Repository \n\n';
+			} else {
+			
+				while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
+	
+					console.log('model_name: ', dict_out['model_name'])
+					
+					if (dict_out['model_name'] == 'openai') {
+						await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+							.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+					} else {
+						console.log('HERE')
+						await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+							.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+					}
+					dict_out['index'] = dict_out['index'] + 1;
+					// console.log("dict_out['index']:", dict_out['index']);
 				}
-				dict_out['index'] = dict_out['index'] + 1;
-				// console.log("dict_out['index']:", dict_out['index']);
+
 			}
 		})
-		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 		
 }
