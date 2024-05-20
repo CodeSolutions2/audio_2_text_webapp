@@ -201,7 +201,6 @@ async function transcribe_audios() {
 			return {total_file_objects: total_file_objects, 
 				model_name: array[0], 
 				API_KEY: array[1],
-			       flag: 'run',
 			       index: 0};
 		})
 		.then(async function(dict_out) {
@@ -211,26 +210,23 @@ async function transcribe_audios() {
 			const total_files = dict_out['total_file_objects'][0].length;
 			console.log("total_files :", total_files);
 
-			
-			console.log("dict_out['index'] :", dict_out['index']);
-			console.log("total_files-1 :", total_files-1);
-			console.log("max_loops :", max_loops);
+			// console.log("dict_out['index'] :", dict_out['index']);
+			// console.log("total_files-1 :", total_files-1);
+			// console.log("max_loops :", max_loops);
 			
 			while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
 				
-				// if (dict_out['model_name'] == 'openai') {
-				//	await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-				//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				//} else {
-				//	await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-				//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				//}
+				if (dict_out['model_name'] == 'openai') {
+					await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				} else {
+					await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				}
 				
 				dict_out['index'] = dict_out['index'] + 1;
 				
-
-				console.log("dict_out['index']:", dict_out['index']);
-				console.log("dict_out['flag']:", dict_out['flag']);
+				// console.log("dict_out['index']:", dict_out['index']);
 			}
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\nTranscription Processing Done'; })
@@ -272,11 +268,11 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 			// Use transcription or translation model randomly
 			console.log('file name: ', document.getElementById('file_object_name').innerHTML)
 			
-			if (Math.floor(Math.random()*2) == 1) {
-				await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-			} else {
-				await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-			}
+			// if (Math.floor(Math.random()*2) == 1) {
+			//	await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+			//} else {
+			//	await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+			//}
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
