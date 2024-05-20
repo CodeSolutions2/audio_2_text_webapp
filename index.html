@@ -25,7 +25,7 @@ For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <br>
 <input id="audio_input" type="file" accept="audio/*">
-<audio controls id="audio_input_display" style="display:none"><source type="audio/mpeg"></audio>
+<audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" type="audio/mpeg"></audio>
 <button id="check_audio_upload" onclick="check_audio_upload()" style="display:block">check_audio_upload</button>
 <br>
 <h3>B. Select a model to transcribe audio files</h3>
@@ -109,7 +109,7 @@ async function previewInput(event) {
 		//document.getElementById('audio_input').src = e.target.result;
 
 		// get url for displaying the audio file
-		document.getElementById('audio_input_display').src = e.target.result;
+		document.getElementById('audio_source_input_display').src = e.target.result;
 		document.getElementById("audio_input_display").style.display = "block";
 	}
 	reader.readAsDataURL(file);
@@ -118,7 +118,7 @@ async function previewInput(event) {
 
 async function check_audio_upload() {
 
-	let audio_upload_url = document.getElementById('audio_input_display').src;
+	let audio_upload_url = document.getElementById('audio_source_input_display').src;
 	console.log('audio upload url: ', audio_upload_url);
 	
 	await fetch(audio_upload_url)
