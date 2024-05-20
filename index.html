@@ -20,12 +20,22 @@
 <th id="inputs">
 
 <h3>A. Input a list of audio urls OR a GitHub repository url</h3>
-For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp.
-For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3 
-<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+	
+<fieldset>
+<input type="radio" id="audio_input" name="radio_name" value="audio_input" />
+<label for="audio_input">Upload an audio file/s</label>
 <br>
-<input id="audio_input" type="file" accept="audio/*">
+<input type="radio" id="audio_repo" name="radio_name" value="audio_repo" />
+<label for="audio_repo">Read audio file/s from repository</label>
+</fieldset>
+
 <audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" type="audio/mpeg"></audio>
+
+<p id="audio_repo_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
+<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+<br>
+
+	
 <button id="check_audio_upload" onclick="check_audio_upload()" style="display:block">check_audio_upload</button>
 <br>
 <h3>B. Select a model to transcribe audio files</h3>
@@ -95,12 +105,13 @@ var max_loops = 10;
 		// const audioContext = new AudioContext();
 // ----------------------------------------------------
 
+document.getElementById("audio_input").addEventListener("click", previewInput, false);
 
-async function read_in_audio_from_PC() {
-	document.getElementById('audio_input').addEventListener("change", previewInput);
-}
 
 async function previewInput(event) {
+	
+	document.getElementById("audio_input_display").style.display = "block";
+	
 	const reader = new FileReader();
 	const file = event.target.files[0];
 
@@ -110,7 +121,7 @@ async function previewInput(event) {
 
 		// get url for displaying the audio file
 		document.getElementById('audio_source_input_display').src = e.target.result;
-		document.getElementById("audio_input_display").style.display = "block";
+		
 	}
 	reader.readAsDataURL(file);
 }
