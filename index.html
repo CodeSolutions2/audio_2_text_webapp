@@ -205,9 +205,10 @@ async function transcribe_audios() {
 		})
 		.then(async function(dict_out) {
 
-			// console.log("dict_out:", dict_out);
-
-			console.log("dict_out['total_file_objects'][0].length :", dict_out['total_file_objects'][0].length);
+			console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
+			
+			const total_files = dict_out['total_file_objects'][0].length;
+			console.log("total_files :", total_files);
 
 			// If one file to transcribe
 			if (dict_out['total_file_objects'][0].length == 1) {
@@ -217,27 +218,25 @@ async function transcribe_audios() {
 			}
 
 			
-			while (dict_out['flag'] == 'run') {
-				
-				//if (dict_out['model_name'] == 'openai') {
-				//	await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-				//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				//} else {
-				//	await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-				//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				//}
+			while (dict_out['flag'] == 'run' || dict_out['index'] < 5) {
 
-				if (dict_out['index'] >= dict_out['total_file_objects'][0].length-1) {
+				
+				if (dict_out['index'] > total_files-1) {
 					dict_out['flag'] == 'stop';
 				} else {
+					//if (dict_out['model_name'] == 'openai') {
+					//	await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+					//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+					//} else {
+					//	await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+					//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+					//}
+					
 					dict_out['index'] = dict_out['index'] + 1;
 				}
-				
+
 				console.log("dict_out['index']:", dict_out['index']);
 			}
-
-
-			
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
