@@ -22,14 +22,14 @@
 <h3>A. Input a list of audio urls OR a GitHub repository url</h3>
 	
 <fieldset>
-<input type="radio" id="audio_repo" name="radio_name0" value="audio_repo" checked />
+<input type="radio" id="audio_repo" name="radio_name0" value="audio_repo" />
 <label for="audio_repo">Read audio file/s from repository</label>
 <br>
 <input type="radio" id="audio_input" name="radio_name0" value="audio_input" />
 <label for="audio_input">Upload an audio file/s</label>
 </fieldset>
 <input type="file" id="file_input" accept="audio/*">
-<audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" src="" type="audio/mpeg"></audio>
+<audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" type="audio/mpeg"></audio>
 
 <p id="audio_repo_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
