@@ -98,11 +98,6 @@ var model_name = "";
 var API_KEY = "";
 var max_loops = 10;
 
-
-	// for legacy browsers
-		// const AudioContext = window.AudioContext || window.webkitAudioContext;
-		
-		// const audioContext = new AudioContext();
 // ----------------------------------------------------
 
 document.getElementById("audio_input").addEventListener("click", processEvent_audio_input_upload, false);
@@ -110,15 +105,12 @@ document.getElementById("audio_repo").addEventListener("click", processEvent_aud
 
 async function processEvent_audio_input_upload(event) {
 
-	if (this.getAttribute("checked") == false) {
-		document.getElementById("audio_input_display").style.display = "none";
-		document.getElementById("audio_repo_instructions").style.display = "none";
-		document.getElementById("audio_url").style.display = "none";
-	} else  {
-		document.getElementById("audio_input_display").style.display = "block";
-		document.getElementById("audio_repo_instructions").style.display = "none";
-		document.getElementById("audio_url").style.display = "none";
-
+	// This looks useless, but to restart it from the a used state this would reset the settings
+	document.getElementById("audio_input_display").style.display = "none";
+	document.getElementById("audio_repo_instructions").style.display = "none";
+	document.getElementById("audio_url").style.display = "none";
+	
+	if (this.getAttribute("checked") == true) {
 		document.getElementById("file_input").addEventListener("change", previewInput, false);
 	}
 }
@@ -126,7 +118,6 @@ async function processEvent_audio_input_upload(event) {
 async function previewInput(event) {
 	const reader = new FileReader();
 	const file = event.target.files[0];
-
 	reader.onload = function(e){
 		// get url for displaying the audio file
 		document.getElementById('audio_source_input_display').src = e.target.result;
@@ -145,57 +136,6 @@ async function processEvent_audio_input_repo(event) {
 		document.getElementById("audio_url").style.display = "block";
 	}
 }
-
-async function check_audio_upload() {
-
-	let audio_upload_url = document.getElementById('audio_source_input_display').src;
-	console.log('audio upload url: ', audio_upload_url);
-	
-	await fetch(audio_upload_url)
-		.then(response => response.blob())
-		.then(async function(blob_object) { 
-			// Transform blob into a file
-			//return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
-
-			console.log('blob_object: ', blob_object)
-			var base64_string = await readFileAsDataURL(blob_object); return base64_string;
-		})
-		.then(async function(base64_string) {
-					console.log("base64_string: ", base64_string);
-
-					// Follow the process on https://www.base64encode.org/enc/map/, to convert base64_string to ASCII
-					
-					// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
-					const regex = /data:audio\/mpeg;base64,/g;
-					base64_string = base64_string.replace(regex, '');
-					console.log("base64_string: ", base64_string);
-					
-					// Decode the Base64-encoded string --> obtain the mp3 data in binary string format
-					const binaryString = atob(base64_string);
-					console.log("binaryString: ", binaryString);
-
-					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
-					var character_array = binaryString.split('');
-					console.log("character_array: ", character_array);
-					
-					// Map each binary string character as an ASCII number
-					var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
-					// console.log("byteArray: ", byteArray);
-					// return byteArray;
-
-					// bytes gives the same output as byteArray
-					const bytes = new Uint8Array(byteArray);
-					console.log("bytes: ", bytes);
-					return bytes;
-				})
-				.then(bytes => { 
-					console.log("bytes: ", bytes); 
-				 	// return new Blob(bytes, {type: "audio/mp3"});
-					return new Blob(bytes);
-				})
-		.catch(error => { document.getElementById('error').innerHTML = error; });
-}
-
 	
 // ----------------------------------------------------
 	
@@ -265,59 +205,35 @@ async function transcribe_audios() {
 			
 			// ----------------------------------------------------
 
-			// Obtain a list of file_objects
-			var total_file_objects = [];
+			// If files are from upload or repo
+			const audio_input = document.getElementById("audio_input").checked;
+			const audio_repo = document.getElementById("audio_repo").checked;
 			
-			// look for .mp3, .wav in string
-			if (user_input.match(/.(mp3)$/i) || user_input.match(/.(wav)$/i)) {
-
-				console.log("String of file urls:");
-				
-				// user entered a repository file_name
-				var array_of_file_names = user_input.split(",");
-
-				array_of_file_names.forEach(async function(file_url, index) {
-
-					// user entered a repository url only
-					let url_split = file_url.split("/");
-					console.log("url_split:", url_split);
-				
-					// take last two values of url_split
-					let file_name = url_split.pop();
-					let repoName = url_split.pop();
-					let repoOwner = url_split.pop();
-					console.log("file_name:", file_name);
-					console.log("repoName:", repoName);
-					console.log("repoOwner:", repoOwner);
-					
-					let out = await get_one_audio_file_object_from_repo(repoOwner, repoName, file_name);
-					total_file_objects.push(out);
-				}); // end of forEach
-			} else {
-				console.log("Repository url:");
-				
-				// user entered a repository url only
-				let url_split = user_input.split("/");
-				console.log("url_split:", url_split);
-				
-				// take last two values of url_split
-				let repoName = url_split.pop();
-				let repoOwner = url_split.pop();
-				console.log("repoName:", repoName);
-				console.log("repoOwner:", repoOwner);
-
-				let out = await get_audio_file_objects_from_repo(repoOwner, repoName);
-				total_file_objects.push(out);
+			let total_file_objects = {};
+			
+			if (audio_input == true && audio_repo == false) {
+				let out = await process_user_input_uploadFiles();
+				total_file_objects = {0: {0: [out]}};
+			}
+			
+			if (audio_input == false && audio_repo == true) {
+				total_file_objects = await process_user_input_repoFiles(user_input);
+			}
+			
+			if (audio_input == false && audio_repo == false) {
+				document.getElementById('error').innerHTML = "Select an audio file using the upload button or a Github repository.";
 			}
 
+			
 			return {total_file_objects: total_file_objects, 
 				model_name: array[0], 
 				API_KEY: array[1],
 			       index: 0};
+			
 		})
 		.then(async function(dict_out) {
 
-			// console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
+			console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
 			
 			const total_files = dict_out['total_file_objects'][0].length;
 			// console.log("total_files :", total_files);
@@ -343,6 +259,75 @@ async function transcribe_audios() {
 		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 		
+}
+
+
+async function process_user_input_uploadFiles() {
+
+	document.getElementById("audio_input_display").style.display = "block";
+	let audio_upload_url = document.getElementById('audio_source_input_display').src;
+	console.log('audio upload url: ', audio_upload_url);
+	
+	await fetch(audio_upload_url)
+		.then(response => response.blob())
+		.then(async function(blob_object) { 
+			// Transform blob into a file
+			//return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
+			console.log('blob_object: ', blob_object)
+			return blob_object;
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+}
+
+
+async function process_user_input_repoFiles(user_input) {
+
+	// Obtain a list of file_objects
+	let total_file_objects = [];
+	
+	// look for .mp3, .wav in string
+	if (user_input.match(/.(mp3)$/i) || user_input.match(/.(wav)$/i)) {
+
+		console.log("String of file urls:");
+		
+		// user entered a repository file_name
+		var array_of_file_names = user_input.split(",");
+
+		array_of_file_names.forEach(async function(file_url, index) {
+
+			// user entered a repository url only
+			let url_split = file_url.split("/");
+			console.log("url_split:", url_split);
+		
+			// take last two values of url_split
+			let file_name = url_split.pop();
+			let repoName = url_split.pop();
+			let repoOwner = url_split.pop();
+			console.log("file_name:", file_name);
+			console.log("repoName:", repoName);
+			console.log("repoOwner:", repoOwner);
+			
+			let out = await get_one_audio_file_object_from_repo(repoOwner, repoName, file_name);
+			total_file_objects.push(out);
+		}); // end of forEach
+	} else {
+		console.log("Repository url:");
+		
+		// user entered a repository url only
+		let url_split = user_input.split("/");
+		console.log("url_split:", url_split);
+		
+		// take last two values of url_split
+		let repoName = url_split.pop();
+		let repoOwner = url_split.pop();
+		console.log("repoName:", repoName);
+		console.log("repoOwner:", repoOwner);
+
+		let out = await get_audio_file_objects_from_repo(repoOwner, repoName);
+		total_file_objects.push(out);
+	}
+
+	return total_file_objects;
 }
 
 
