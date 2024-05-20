@@ -71,7 +71,7 @@ tr {vertical-align: top; border: 0px solid black; padding: 10px 10px; }
 
 th, td {vertical-align: top; border: 0px solid black; padding: 10px; }
 th#inputs {width: 100%; }
-th#outputs {width: 100%; }
+th#outputs {width: 200px; }
 </style>
 	
 <!-- --------------------------------------------------- -->
@@ -82,8 +82,7 @@ th#outputs {width: 100%; }
 
 var model_name = "";
 var API_KEY = "";
-//var file_object = {};
-var max_loops = 5;
+var max_loops = 10;
 	
 // ----------------------------------------------------
 	
@@ -205,10 +204,10 @@ async function transcribe_audios() {
 		})
 		.then(async function(dict_out) {
 
-			console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
+			// console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
 			
 			const total_files = dict_out['total_file_objects'][0].length;
-			console.log("total_files :", total_files);
+			// console.log("total_files :", total_files);
 
 			// console.log("dict_out['index'] :", dict_out['index']);
 			// console.log("total_files-1 :", total_files-1);
@@ -251,7 +250,7 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 	// Read in the mp3 as file_download_url --> convert to  blob_object
 	document.getElementById('file_object_name').innerHTML = file_object.name;
 	
-	console.log("file_object: ", file_object);
+	// console.log("file_object: ", file_object);
 	
 	await fetch(file_object.download_url)
 		.then(response => response.blob())
@@ -260,15 +259,13 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 			return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
 		})
 		.then(async function(file_blob_object) { 
-			console.log('file_blob_object: ', file_blob_object);
+			// console.log('file_blob_object: ', file_blob_object);
 			
 			// Use transcription or translation model randomly
 			if (Math.floor(Math.random()*2) == 1) {
-				// await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-				console.log('openai_transcription')
+				await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
 			} else {
-				// await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-				console.log('openai_translation')
+				await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
 			}
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
