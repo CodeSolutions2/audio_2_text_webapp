@@ -82,7 +82,7 @@ th#outputs {width: 100%; }
 
 var model_name = "";
 var API_KEY = "";
-var file_object = {};
+//var file_object = {};
 var max_loops = 5;
 	
 // ----------------------------------------------------
@@ -225,7 +225,6 @@ async function transcribe_audios() {
 				}
 				
 				dict_out['index'] = dict_out['index'] + 1;
-				
 				// console.log("dict_out['index']:", dict_out['index']);
 			}
 		})
@@ -258,21 +257,19 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 		.then(response => response.blob())
 		.then(async function(blob_object) { 
 			// Transform blob into a file
-			console.log('file name -create file: ', document.getElementById('file_object_name').innerHTML)
-			
 			return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
 		})
 		.then(async function(file_blob_object) { 
 			console.log('file_blob_object: ', file_blob_object);
 			
 			// Use transcription or translation model randomly
-			console.log('file name: ', document.getElementById('file_object_name').innerHTML)
-			
-			// if (Math.floor(Math.random()*2) == 1) {
-			//	await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-			//} else {
-			//	await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-			//}
+			if (Math.floor(Math.random()*2) == 1) {
+				// await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+				console.log('openai_transcription')
+			} else {
+				// await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+				console.log('openai_translation')
+			}
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
