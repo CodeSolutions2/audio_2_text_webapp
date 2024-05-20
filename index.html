@@ -28,7 +28,7 @@
 <input type="radio" id="audio_repo" name="radio_name" value="audio_repo" />
 <label for="audio_repo">Read audio file/s from repository</label>
 </fieldset>
-
+<input type="file" id="file_input" accept="audio/*">
 <audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" type="audio/mpeg"></audio>
 
 <p id="audio_repo_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
@@ -108,24 +108,43 @@ var max_loops = 10;
 document.getElementById("audio_input").addEventListener("click", previewInput, false);
 
 
+async function processEvent_audio_input_upload(event) {
+
+	if (this.getAttribute("checked") == false) {
+		document.getElementById("audio_input_display").style.display = "none";
+		document.getElementById("audio_repo_instructions").style.display = "none";
+		document.getElementById("audio_url").style.display = "none";
+	} else  {
+		document.getElementById("audio_input_display").style.display = "block";
+		document.getElementById("audio_repo_instructions").style.display = "none";
+		document.getElementById("audio_url").style.display = "none";
+
+		document.getElementById("file_input").addEventListener("change", previewInput, false);
+	}
+}
+
 async function previewInput(event) {
-	
-	document.getElementById("audio_input_display").style.display = "block";
-	
 	const reader = new FileReader();
 	const file = event.target.files[0];
 
 	reader.onload = function(e){
-		// get url for the input audio file
-		//document.getElementById('audio_input').src = e.target.result;
-
 		// get url for displaying the audio file
 		document.getElementById('audio_source_input_display').src = e.target.result;
-		
 	}
 	reader.readAsDataURL(file);
 }
-
+	
+async function processEvent_audio_input_repo(event) {
+	if (this.getAttribute("checked") == false) {
+		document.getElementById("audio_input_display").style.display = "none";
+		document.getElementById("audio_repo_instructions").style.display = "none";
+		document.getElementById("audio_url").style.display = "none";
+	} else  {
+		document.getElementById("audio_input_display").style.display = "none";
+		document.getElementById("audio_repo_instructions").style.display = "block";
+		document.getElementById("audio_url").style.display = "block";
+	}
+}
 
 async function check_audio_upload() {
 
