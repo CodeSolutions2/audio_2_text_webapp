@@ -105,8 +105,8 @@ var max_loops = 10;
 		// const audioContext = new AudioContext();
 // ----------------------------------------------------
 
-document.getElementById("audio_input").addEventListener("click", previewInput, false);
-
+document.getElementById("audio_input").addEventListener("click", processEvent_audio_input_upload, false);
+document.getElementById("audio_repo").addEventListener("click", processEvent_audio_input_repo, false);
 
 async function processEvent_audio_input_upload(event) {
 
