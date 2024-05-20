@@ -83,7 +83,8 @@ th#outputs {width: 100%; }
 var model_name = "";
 var API_KEY = "";
 var file_object = {};
-
+var max_loops = 5;
+	
 // ----------------------------------------------------
 	
 async function processEvent_openai(event) {
@@ -213,7 +214,7 @@ async function transcribe_audios() {
 			
 
 			
-			while (dict_out['flag'] == 'run' || dict_out['index'] == 2) {
+			while (dict_out['index'] > total_files-1 && dict_out['index'] < max_loops) {
 
 				// Attempt to figure out indexing of file_object array
 				// if (total_files == 1) {
@@ -223,19 +224,16 @@ async function transcribe_audios() {
 				// }
 
 				
-				if (dict_out['index'] > total_files-1) {
-					dict_out['flag'] == 'stop';
-				} else {
-					//if (dict_out['model_name'] == 'openai') {
-					//	await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-					//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-					//} else {
-					//	await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-					//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-					//}
-					
-					dict_out['index'] = dict_out['index'] + 1;
-				}
+				//if (dict_out['model_name'] == 'openai') {
+				//	await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+				//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				//} else {
+				//	await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+				//		.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				//}
+				
+				dict_out['index'] = dict_out['index'] + 1;
+				
 
 				console.log("dict_out['index']:", dict_out['index']);
 				console.log("dict_out['flag']:", dict_out['flag']);
