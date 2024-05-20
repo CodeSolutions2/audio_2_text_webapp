@@ -30,9 +30,11 @@
 </fieldset>
 <input type="file" id="file_input" accept="audio/*">
 <audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" type="audio/mpeg"></audio>
+<button id="confirm_url" onclick="confirm_url()" style="display:block">confirm_url</button>
 
 <p id="audio_repo_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+	
 
 <br>
 <h3>B. Select a model to transcribe audio files</h3>
@@ -121,9 +123,14 @@ async function processEvent_audio_input_upload(event) {
 	document.getElementById("audio_repo_instructions").style.display = "none";
 	document.getElementById("audio_url").style.display = "none";
 	
-	if (this.getAttribute("checked") == true) {
-		document.getElementById("file_input").addEventListener("change", previewInput, false);
-	}
+	// if (this.getAttribute("checked") == true) {
+	//	document.getElementById("file_input").addEventListener("change", previewInput, false);
+	// }
+}
+
+
+async function confirm_url() {
+	document.getElementById("file_input").addEventListener("change", previewInput, false);
 }
 
 async function previewInput(event) {
@@ -135,6 +142,8 @@ async function previewInput(event) {
 	}
 	reader.readAsDataURL(file);
 }
+
+
 	
 // ----------------------------------------------------
 	
