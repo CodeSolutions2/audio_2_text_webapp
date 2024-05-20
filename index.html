@@ -207,6 +207,8 @@ async function transcribe_audios() {
 			// console.log("max_loops :", max_loops);
 			
 			while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
+
+				console.log('model_name: ', dict_out['model_name'])
 				
 				if (dict_out['model_name'] == 'openai') {
 					await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
