@@ -212,6 +212,7 @@ async function transcribe_audios() {
 					await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				} else {
+					console.log('HERE')
 					await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
 						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 				}
@@ -230,7 +231,7 @@ async function transcribe_audios() {
 
 async function call_custom_model(file_object) {
 
-	document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + 'Model is in development\n\n';
+	document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\n Model is in development \n\n';
 }
 
 	
