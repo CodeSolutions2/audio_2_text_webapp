@@ -18,11 +18,10 @@
 <tr>
         
 <th id="inputs">
-
 <h3>A. Input a list of audio urls OR a GitHub repository url</h3>
 For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. 
 For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3
-<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <br>
 <h3>B. Select a model to transcribe audio files</h3>
 <fieldset>
@@ -37,7 +36,6 @@ For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_
 <input id="API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:none; text-align: left; width: 150px;">
 <br>
 <button id="transcribe_audios" onclick="transcribe_audios()" style="display:block">Transcribe audios</button>
-
 </th>
 	
 <!-- ---------------------------------------- -->
