@@ -210,15 +210,17 @@ async function transcribe_audios() {
 			const total_files = dict_out['total_file_objects'][0].length;
 			console.log("total_files :", total_files);
 
-			// If one file to transcribe
-			if (dict_out['total_file_objects'][0].length == 1) {
-				console.log('file object - check correct index: ', dict_out['total_file_objects'][0][dict_out['index']])
-			} else {
-				console.log('file object - check correct index: ', dict_out['total_file_objects'][0][dict_out['index']])
-			}
+			
 
 			
-			while (dict_out['flag'] == 'run' || dict_out['index'] < 5) {
+			while (dict_out['flag'] == 'run' || dict_out['index'] == 2) {
+
+				// Attempt to figure out indexing of file_object array
+				// if (total_files == 1) {
+				// 	console.log('1 file found: ', dict_out['total_file_objects'][0][dict_out['index']])
+				// } else {
+				// 	console.log('2 or more files found: ', dict_out['total_file_objects'][0][dict_out['index']])
+				// }
 
 				
 				if (dict_out['index'] > total_files-1) {
@@ -236,6 +238,7 @@ async function transcribe_audios() {
 				}
 
 				console.log("dict_out['index']:", dict_out['index']);
+				console.log("dict_out['flag']:", dict_out['flag']);
 			}
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\nTranscription Processing Done'; })
