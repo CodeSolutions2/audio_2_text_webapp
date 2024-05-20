@@ -7,9 +7,9 @@
 <ol type="A">
   <!-- Ideally have a popup to save someone's audio to the repository -->
 	<li>Input a list of audio urls OR a GitHub repository url.</li>
-	<li>Output transcribed text.</li>
-	<li>Delete audio/s from this repo.</li>
-	<li>Download file with transcribed text.</li>
+	<li>Output transcribed text to the right.</li>
+	<li>Audio files are automatically deleted after translation from this repo.</li>
+	<li>Copy paste the transcribed text!</li>
 </ol>
 <hr>
 <!-- View two split window -->
@@ -23,6 +23,10 @@
 For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp.
 For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3 
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+<br>
+<input id="audio_input" type="file" accept="audio/*">
+<audio controls id="audio_input_display" style="display:none"><source type="audio/mpeg"></audio>
+<button id="check_audio_upload" onclick="check_audio_upload()" style="display:block">check_audio_upload</button>
 <br>
 <h3>B. Select a model to transcribe audio files</h3>
 <fieldset>
@@ -71,7 +75,7 @@ tr {vertical-align: top; border: 0px solid black; padding: 10px 10px; }
 
 th, td {vertical-align: top; border: 0px solid black; padding: 10px; }
 th#inputs {width: 100%; }
-th#outputs {width: 200px; }
+th#outputs {width: 400px; }
 </style>
 	
 <!-- --------------------------------------------------- -->
@@ -83,6 +87,48 @@ th#outputs {width: 200px; }
 var model_name = "";
 var API_KEY = "";
 var max_loops = 10;
+
+
+	// for legacy browsers
+		// const AudioContext = window.AudioContext || window.webkitAudioContext;
+		
+		// const audioContext = new AudioContext();
+// ----------------------------------------------------
+
+
+async function read_in_audio_from_PC() {
+	document.getElementById('audio_input').addEventListener("change", previewInput);
+}
+
+async function previewInput(event) {
+	const reader = new FileReader();
+	const file = event.target.files[0];
+
+	reader.onload = function(e){
+		// get url for the input audio file
+		//document.getElementById('audio_input').src = e.target.result;
+
+		// get url for displaying the audio file
+		document.getElementById('audio_input_display').src = e.target.result;
+		document.getElementById("audio_input_display").style.display = "block";
+	}
+	reader.readAsDataURL(file);
+}
+
+
+async function check_audio_upload() {
+
+	await fetch(document.getElementById('audio_input_display').src)
+		.then(response => response.blob())
+		.then(async function(blob_object) { 
+			// Transform blob into a file
+			//return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
+
+			console.log('blob_object: ', blob_object)
+		})
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+}
+
 	
 // ----------------------------------------------------
 	
@@ -227,7 +273,7 @@ async function transcribe_audios() {
 				// console.log("dict_out['index']:", dict_out['index']);
 			}
 		})
-		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\nTranscription Processing Done'; })
+		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 		
 }
@@ -307,7 +353,7 @@ async function openai_transcription(file_input, which_input, header_string, OPEN
 	await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + `openai_transcription\n${header_string}\n\n${result}\n`; 
+			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + `openai_transcription\n${header_string}\n\n${result}\n\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
@@ -349,7 +395,7 @@ async function openai_translation(file_input, which_input, header_string, OPENAI
 	return await fetch(url, options)
 		.then(response => response.text())
 		.then(async function(result) { 
-			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + `openai_translation\n${header_string}\n${result}\n`; 
+			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + `openai_translation\n${header_string}\n${result}\n\n`; 
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 	
