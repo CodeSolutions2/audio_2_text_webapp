@@ -7,7 +7,7 @@
 <ol type="A">
   <li>Select a model to transcribe audio files.</li>
 	<li>Input one or more audio files: [Option from GitHub] OR [Option upload].</li>
-  <li>View an audio file [audio display].</li>
+  	<li>View an audio file [audio display].</li>
 	<li>Transcribe audio files.</li>
 	<li>Copy paste the transcribed text!</li>
 </ol>
@@ -41,6 +41,7 @@
 <p id="audio_repo_instructions" style="display:block">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <h4>[Option upload] Upload an audio</h4>
+Use the Browse button to select an audio, then click 'Specify audio upload' to confirm the selection. 
 <input type="file" id="file_input" accept="audio/*">
 <button id="specify_audio_upload" onclick="specify_audio_upload()" style="display:block">Specify audio upload</button>
 
@@ -219,7 +220,7 @@ async function transcribe_audios_version2() {
 			
 			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length > 0) {
 				let out = await process_user_input_uploadFiles();
-				total_file_objects = {0: [0: [out]]};
+				total_file_objects = {0: [[out]]};
 			}
 			
 			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length == 0) {
