@@ -230,7 +230,7 @@ async function transcribe_audios_version2() {
 				let text_arr = text.split(',');
 				let filename = text_arr.at(0);
 				let file_download_url = text_arr.at(1);
-				total_file_objects = [[{0: {name: filename, download_url: file_download_url, base64_string: document.getElementById('audio_source_input_display').src} }]];
+				total_file_objects = [[{name: filename, download_url: file_download_url, base64_string: document.getElementById('audio_source_input_display').src} ]];
 				input_file_type = "option1";
 			}
 			
@@ -259,40 +259,37 @@ async function transcribe_audios_version2() {
 
 			// Specify which source audio to play
 			if (document.getElementById('audio_source_input_display').src.length == 0) {
-				// It is the GitHub repository method
-				// Select the first file from the list
-				document.getElementById('audio_source_input_display').src = dict_out['total_file_objects'][0][0].download_url;
+				// It is the GitHub repository method, select the first file from the list
+				document.getElementById('audio_source_input_display').src = dict_out['total_file_objects'][0][0].name;
 			}
 			return dict_out;
 		})
 		// D. Transcribe audio files
-		.then(async function(dict_out) {
-			console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
+		// .then(async function(dict_out) {
+		// 	console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
 			
-			const total_files = dict_out['total_file_objects'][0].length;
-			console.log("total_files :", total_files);
+		// 	const total_files = dict_out['total_file_objects'][0].length;
+		// 	console.log("total_files :", total_files);
 
-			console.log("dict_out['index'] :", dict_out['index']);
-			console.log("total_files-1 :", total_files-1);
-			console.log("max_loops :", max_loops);
+		// 	console.log("dict_out['index'] :", dict_out['index']);
+		// 	console.log("total_files-1 :", total_files-1);
+		// 	console.log("max_loops :", max_loops);
 			
-			while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
-				
-				if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option0") {
-					await call_openai_model_option0(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				} else if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option1") {
-					await call_openai_model_option1(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				} else {
-					await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-				}
-				
-				dict_out['index'] = dict_out['index'] + 1;
-				// console.log("dict_out['index']:", dict_out['index']);
-			}
-		})
+		// 	while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
+		// 		if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option0") {
+		// 			await call_openai_model_option0(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+		// 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+		// 		} else if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option1") {
+		// 			await call_openai_model_option1(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+		// 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+		// 		} else {
+		// 			await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+		// 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+		// 		}
+		// 		dict_out['index'] = dict_out['index'] + 1;
+		// 		// console.log("dict_out['index']:", dict_out['index']);
+		// 	}
+		// })
 		//.catch(error => { document.getElementById('error').innerHTML += error; });
 		
 }
