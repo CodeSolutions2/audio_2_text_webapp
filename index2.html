@@ -24,10 +24,10 @@
 
 <h3>A. Select a model to transcribe audio files</h3>
 <fieldset>
-<input type="radio" id="openai" name="radio_name1" value="openai" />
+<input type="radio" id="openai" name="radio_name0" value="openai" />
 <label for="openai">OpenAI Whisper</label>
 <br>
-<input type="radio" id="custom_model" name="radio_name1" value="custom_model" />
+<input type="radio" id="custom_model" name="radio_name0" value="custom_model" />
 <label for="custom_model">Custom Model</label>
 </fieldset>
 <br>
@@ -37,11 +37,20 @@
 <br>
 
 <h3>B. Input one or more audio files: [Option from GitHub] OR [Option upload]</h3>
-<h4>[Option from GitHub] A list of audio urls from a GitHub repository, a GitHub repository url</h4>
-<p id="audio_repo_instructions" style="display:block">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
-<input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
-<h4>[Option upload] Upload an audio</h4>
-Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.
+<fieldset>
+<input type="radio" id="option0_input_radio" name="radio_name1" value="option0_input_radio" />
+<label for="option0_input_radio">Option from GitHub</label>
+<br>
+<input type="radio" id="option1_input_radio" name="radio_name1" value="option1_input_radio" />
+<label for="option1_input_radio">Option upload</label>
+</fieldset>
+	
+<h4 id="option0_input_h4" style="display:none">[Option from GitHub] A list of audio urls from a GitHub repository, a GitHub repository url</h4>
+<p id="option0_input_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
+<input id="option0_input" type="text" value="" placeholder="option0_input" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+<h4 id="option1_input_h4" style="display:none">[Option upload] Upload an audio</h4>
+<p id="option1_input_instructions" style="display:none">Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.</p>
+
 <br>
 <input type="file" id="file_input" accept="audio/*" style="display:block">
 <br>
@@ -107,11 +116,11 @@ var max_loops = 10;
 	
 // 	if (this.getAttribute("checked") == false) {
 // 		document.getElementById("audio_repo_instructions").style.display = "none";
-// 		document.getElementById("audio_url").style.display = "none";
+// 		document.getElementById("option0_input").style.display = "none";
 // 	} else  {
 		
 // 		document.getElementById("audio_repo_instructions").style.display = "block";
-// 		document.getElementById("audio_url").style.display = "block";
+// 		document.getElementById("option0_input").style.display = "block";
 // 	}
 // }
 	
@@ -120,7 +129,7 @@ var max_loops = 10;
 	// This looks useless, but to restart it from the a used state this would reset the settings
 // 	document.getElementById("audio_input_display").style.display = "none";
 // 	document.getElementById("audio_repo_instructions").style.display = "none";
-// 	document.getElementById("audio_url").style.display = "none";
+// 	document.getElementById("option0_input").style.display = "none";
 	
 // 	if (this.getAttribute("checked") == true) {
 //     document.getElementById("file_input").addEventListener("change", previewInput, false);
@@ -219,13 +228,16 @@ async function transcribe_audios_version2() {
 			// ----------------------------------------------------
 			// Check if [Option from GitHub] or [Option upload] fields are checked
 			// ----------------------------------------------------
-			var user_input = document.getElementById("audio_url").value;
+			var user_input = document.getElementById("option0_input").value;
 			console.log("user_input: ", user_input);
 			
 			let total_file_objects = {};
 			let input_file_type = "";
+
+			const option0_input_radio = document.getElementById("option0_input_radio").checked;
+			const option1_input_radio = document.getElementById("option1_input_radio").checked;
 			
-			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length > 0) {
+			if (option0_input_radio == false && option1_input_radio == true) {
 				let text = document.getElementById('option1_information').innerHTML;
 				let text_arr = text.split(',');
 				let filename = text_arr.at(0);
@@ -234,16 +246,16 @@ async function transcribe_audios_version2() {
 				input_file_type = "option1";
 			}
 			
-			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length == 0) {
+			if (option0_input_radio == true && option1_input_radio == false) {
 				total_file_objects = await process_user_input_repoFiles(user_input);
 				input_file_type = "option0";
 			}
 			
-			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length == 0) {
+			if (option0_input_radio == false && option1_input_radio == false) {
 				document.getElementById('error').innerHTML += "No input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
 
-			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length > 0) {
+			if (option0_input_radio == true && option1_input_radio == true) {
 				document.getElementById('error').innerHTML += document.getElementById('error').innerHTML + "Both input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
 
@@ -256,6 +268,9 @@ async function transcribe_audios_version2() {
 		// C. View an audio file [audio display]
 		.then(async function(dict_out) { 
 			document.getElementById("audio_input_display").style.display = "block"; 
+
+			console.log("dict_out['total_file_objects'][0][0].name: ", dict_out['total_file_objects'][0][0].name);
+			console.log("document.getElementById('audio_source_input_display').src.length: ", document.getElementById('audio_source_input_display').src.length);
 
 			// Specify which source audio to play
 			if (document.getElementById('audio_source_input_display').src.length == 0) {
