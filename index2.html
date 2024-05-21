@@ -39,20 +39,19 @@
 <h3>B. Input one or more audio files: [Option from GitHub] OR [Option upload]</h3>
 <fieldset>
 <input type="radio" id="option0_input_radio" name="radio_name1" value="option0_input_radio" />
-<label for="option0_input_radio">Option from GitHub</label>
+<label for="option0_input_radio_label">Option from GitHub</label>
 <br>
 <input type="radio" id="option1_input_radio" name="radio_name1" value="option1_input_radio" />
-<label for="option1_input_radio">Option upload</label>
+<label for="option1_input_radio_label">Option upload</label>
 </fieldset>
 	
 <h4 id="option0_input_h4" style="display:none">[Option from GitHub] A list of audio urls from a GitHub repository, a GitHub repository url</h4>
 <p id="option0_input_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
 <input id="option0_input" type="text" value="" placeholder="option0_input" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+	
 <h4 id="option1_input_h4" style="display:none">[Option upload] Upload an audio</h4>
 <p id="option1_input_instructions" style="display:none">Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.</p>
-
-<br>
-<input type="file" id="file_input" accept="audio/*" style="display:block">
+<input type="file" id="option1_file_input" accept="audio/*" style="display:block">
 <br>
 
 <h3>C. View an audio file [audio display]</h3>
@@ -121,6 +120,7 @@ async function processEvent_audio_input_repo(event) {
 		// and other buttons non-visible
 		document.getElementById("option1_input_h4").style.display = "none";
 		document.getElementById("option1_input_instructions").style.display = "none";
+		document.getElementById("option1_file_input").style.display = "none";
 	} else  {
 		// Make all buttons non-visible to reset
 		document.getElementById("option0_input_h4").style.display = "none";
@@ -128,6 +128,7 @@ async function processEvent_audio_input_repo(event) {
 		document.getElementById("option0_input").style.display = "none";
 		document.getElementById("option1_input_h4").style.display = "none";
 		document.getElementById("option1_input_instructions").style.display = "none";
+		document.getElementById("option1_file_input").style.display = "none";
 	}
 }
 	
@@ -137,6 +138,7 @@ async function processEvent_audio_input_upload(event) {
 		// If option1 button checked, make option1 all buttons visible
 		document.getElementById("option1_input_h4").style.display = "block";
 		document.getElementById("option1_input_instructions").style.display = "block";
+		document.getElementById("option1_file_input").style.display = "block";
 
 		// and other buttons non-visible
 		document.getElementById("option0_input_h4").style.display = "none";
@@ -149,13 +151,14 @@ async function processEvent_audio_input_upload(event) {
 		document.getElementById("option0_input").style.display = "none";
 		document.getElementById("option1_input_h4").style.display = "none";
 		document.getElementById("option1_input_instructions").style.display = "none";
+		document.getElementById("option1_file_input").style.display = "none";
 	}
 }
 
 // ----------------------------------------------------
 
 // The eventlistener needs to be always running, to detect which file the user selected with browse
-document.getElementById("file_input").addEventListener("change", previewInput, false);
+document.getElementById("option1_file_input").addEventListener("change", previewInput, false);
 
 async function previewInput(event) {
 	
