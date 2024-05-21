@@ -44,8 +44,6 @@
 Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.
 <br>
 <input type="file" id="file_input" accept="audio/*" style="display:block">
-<button id="confirm_audio_selection" onclick="confirm_audio_selection()" style="display:block">Confirm audio selection</button>
-
 <br>
 
 <h3>C. View an audio file [audio display]</h3>
@@ -133,11 +131,6 @@ var max_loops = 10;
 
 // The eventlistener needs to be always running, to detect which file the user selected with browse
 document.getElementById("file_input").addEventListener("change", previewInput, false);
-
-// Confirm that the audio was selected
-// async function confirm_audio_selection() {
-// 	console.log("file_upload_url :", document.getElementById('audio_source_input_display').src);
-// }
 
 async function previewInput(event) {
 	
