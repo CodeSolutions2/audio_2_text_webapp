@@ -111,21 +111,21 @@ document.getElementById("option1_input_radio").addEventListener("click", process
 
 async function processEvent_audio_input_repo(event) {
 	
-	if (this.getAttribute("checked") == true) {
+	if (this.getAttribute("checked") == false) {
+		// Make all buttons non-visible to reset
+		document.getElementById("option0_input_h4").style.display = "none";
+		document.getElementById("option0_input_instructions").style.display = "none";
+		document.getElementById("option0_input").style.display = "none";
+		document.getElementById("option1_input_h4").style.display = "none";
+		document.getElementById("option1_input_instructions").style.display = "none";
+		document.getElementById("option1_file_input").style.display = "none";
+	} else  {
 		// If repo button checked, make repo all buttons visible
 		document.getElementById("option0_input_h4").style.display = "block";
 		document.getElementById("option0_input_instructions").style.display = "block";
 		document.getElementById("option0_input").style.display = "block";
 		
 		// and other buttons non-visible
-		document.getElementById("option1_input_h4").style.display = "none";
-		document.getElementById("option1_input_instructions").style.display = "none";
-		document.getElementById("option1_file_input").style.display = "none";
-	} else  {
-		// Make all buttons non-visible to reset
-		document.getElementById("option0_input_h4").style.display = "none";
-		document.getElementById("option0_input_instructions").style.display = "none";
-		document.getElementById("option0_input").style.display = "none";
 		document.getElementById("option1_input_h4").style.display = "none";
 		document.getElementById("option1_input_instructions").style.display = "none";
 		document.getElementById("option1_file_input").style.display = "none";
