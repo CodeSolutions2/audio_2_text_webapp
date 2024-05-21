@@ -179,7 +179,7 @@ async function previewInput(event) {
 	const reader = new FileReader();
 	reader.onload = function(e){
 		//console.log("e.target.result :", e.target.result);
-		document.getElementById('audio_source_input_display').src = e.target.result; // the base64_string of the audio file
+		document.getElementById('audio_source_input_display').src = e.target.result; // temporarily save: the base64_string of the audio file
 	}
 	reader.readAsDataURL(file);
 }
@@ -485,6 +485,10 @@ async function call_openai_model_option1(file_object, OPENAI_API_KEY) {
 			return new Blob(bytes, {type: "audio/mp3"});
 		})
 		.then(async function(blob_object) { 
+
+			// Create a url for the blob
+			document.getElementById('audio_source_input_display').src = URL.createObjectURL(blob_object);
+			
 			// Transform blob into a file
 			return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
 		})
