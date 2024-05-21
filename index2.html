@@ -41,9 +41,10 @@
 <p id="audio_repo_instructions" style="display:block">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <h4>[Option upload] Upload an audio</h4>
-Use the Browse button to select an audio, then click 'Specify audio upload' to confirm the selection. 
+Use the Browse button to select an audio, then click 'Specify audio upload' to confirm the selection.
+<br>
 <input type="file" id="file_input" accept="audio/*">
-<button id="specify_audio_upload" onclick="specify_audio_upload()" style="display:block">Specify audio upload</button>
+<button id="confirm_audio_selection" onclick="confirm_audio_selection()" style="display:block">Confirm audio selection</button>
 
 <br>
 
@@ -129,7 +130,7 @@ var max_loops = 10;
 
 // ----------------------------------------------------
 
-async function specify_audio_upload() {
+async function confirm_audio_selection() {
 	document.getElementById("file_input").addEventListener("change", previewInput, false);
 
 	console.log("file_upload_url :", document.getElementById('audio_source_input_display').src);
@@ -177,11 +178,7 @@ document.getElementById("custom_model").addEventListener("click", processEvent_c
 async function transcribe_audios_version2() {
 
 	return await new Promise(r => setTimeout(r, 10))
-		.then(async function() { 
-			// Processing information
-			document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + 'Processing audio\n';
-		})
-    // A. Select a model to transcribe audio files
+		// A. Select a model to transcribe audio files
 		.then(async function() {
 			const openai = document.getElementById("openai").checked;
 			const custom_model = document.getElementById("custom_model").checked;
@@ -203,7 +200,7 @@ async function transcribe_audios_version2() {
 			// console.log("API_KEY: ", API_KEY);
 			return [model_name, API_KEY];
 		})
-    // B. Input one or more audio files: [Option from GitHub] OR [Option upload]
+		// B. Input one or more audio files: [Option from GitHub] OR [Option upload]
 		.then(async function(array) {
 			// user will give:
 			// https://github.com/repoOwner/repoName
@@ -280,7 +277,6 @@ async function transcribe_audios_version2() {
 				// console.log("dict_out['index']:", dict_out['index']);
 			//}
 		})
-		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 		
 }
@@ -368,6 +364,13 @@ async function call_custom_model(file_object) {
 	
 // ----------------------------------------------------
 
+async function start_processing_notification() {
+	// Processing information
+	document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + 'Processing audio\n';
+}
+
+// ----------------------------------------------------
+
 
 async function call_openai_model(file_object, OPENAI_API_KEY) {
 	
@@ -375,8 +378,9 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 	document.getElementById('file_object_name').innerHTML = file_object.name;
 	
 	// console.log("file_object: ", file_object);
-	
-	await fetch(file_object.download_url)
+
+	await start_processing_notification()
+		.then(async function() { let response = await fetch(file_object.download_url); return response; })
 		.then(response => response.blob())
 		.then(async function(blob_object) { 
 			// Transform blob into a file
@@ -392,6 +396,7 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 				await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
 			}
 		})
+		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
