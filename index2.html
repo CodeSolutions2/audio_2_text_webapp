@@ -64,6 +64,7 @@ Use the Browse button to select an audio, then click 'Confirm audio selection' t
 <div id="notification"></div>
 <div id="error"></div>
 <div id="file_object_name" style="display:none"></div>
+<div id="option1_information" style="display:none"></div>
 </th>
 	
 </tr>
@@ -134,9 +135,9 @@ var max_loops = 10;
 document.getElementById("file_input").addEventListener("change", previewInput, false);
 
 // Confirm that the audio was selected
-async function confirm_audio_selection() {
-	console.log("file_upload_url :", document.getElementById('audio_source_input_display').src);
-}
+// async function confirm_audio_selection() {
+// 	console.log("file_upload_url :", document.getElementById('audio_source_input_display').src);
+// }
 
 async function previewInput(event) {
 	
@@ -150,25 +151,14 @@ async function previewInput(event) {
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
 	console.log("file :", file);
 	
-	const file_path1 = event.target.value;  // value: "C:\\fakepath\\filename.mp3"
-	console.log("file_path1 :", file_path1);
-
-	// ---------------------
-	
-	let file_list = event.target.files;
-	var filenames = [];
-	for (let i=0; i<file_list.length; i++) {
-		filenames.push(file_list[i].name)
-	}
-	console.log("filenames :", filenames);
+	document.getElementById('option1_information').innerHTML = file.name;
 
 	// ---------------------
 
 	const reader = new FileReader();
 	reader.onload = function(e){
-		// get url for displaying the audio file
 		console.log("e.target.result :", e.target.result);
-		document.getElementById('audio_source_input_display').src = e.target.result;
+		document.getElementById('audio_source_input_display').src = e.target.result; // the bytes of the audio file
 	}
 	reader.readAsDataURL(file);
 }
@@ -242,8 +232,11 @@ async function transcribe_audios_version2() {
 			let total_file_objects = {};
 			
 			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length > 0) {
-				let out = await process_user_input_uploadFiles();
-				total_file_objects = {0: [[out]]};
+				let text = document.getElementById('option1_information').innerHTML;
+				let text_arr = text.split(',');
+				let filename = text_arr.at(0);
+				let file_download_url = text_arr.at(1);
+				total_file_objects = [[{0: {name: filename, download_url: file_download_url, bytes: document.getElementById('audio_source_input_display').src} }]];
 			}
 			
 			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length == 0) {
@@ -257,25 +250,26 @@ async function transcribe_audios_version2() {
 			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length > 0) {
 				document.getElementById('error').innerHTML = "Both input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
-      
+
+			console.log("total_file_objects: ", total_file_objects);
+			
 			// ----------------------------------------------------
 			
 			return {total_file_objects: total_file_objects, model_name: array[0], API_KEY: array[1], index: 0};
 		})
-			// C. View an audio file [audio display]
-    .then(async function(dict_out) { 
-      document.getElementById("audio_input_display").style.display = "block"; 
+		// C. View an audio file [audio display]
+		.then(async function(dict_out) { 
+			document.getElementById("audio_input_display").style.display = "block"; 
 
-      // Specify which source audio to play
-      if (document.getElementById('audio_source_input_display').src.length == 0) {
-        // It is the GitHub repository method
-        // Select the first file from the list
-        document.getElementById('audio_source_input_display').src = dict_out['total_file_objects'][0][0].download_url;
-      }
-      
-      return dict_out;
-    })
-    // D. Transcribe audio files
+			// Specify which source audio to play
+			if (document.getElementById('audio_source_input_display').src.length == 0) {
+				// It is the GitHub repository method
+				// Select the first file from the list
+				document.getElementById('audio_source_input_display').src = dict_out['total_file_objects'][0][0].download_url;
+			}
+			return dict_out;
+		})
+		// D. Transcribe audio files
 		.then(async function(dict_out) {
 			console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
 			
@@ -305,26 +299,6 @@ async function transcribe_audios_version2() {
 }
 
 
-// ----------------------------------------------------
-
-
-async function process_user_input_uploadFiles() {
-
-	let audio_upload_url = document.getElementById('audio_source_input_display').src;
-	console.log('audio upload url: ', audio_upload_url);
-	
-	await fetch(audio_upload_url)
-		.then(response => response.blob())
-		.then(async function(blob_object) { 
-			// Transform blob into a file
-			//return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
-			console.log('blob_object: ', blob_object)
-			return blob_object;
-		})
-		.catch(error => { document.getElementById('error').innerHTML = error; });
-
-	
-}
 
 // ----------------------------------------------------
 
@@ -404,7 +378,11 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 	// Read in the mp3 as file_download_url --> convert to  blob_object
 	document.getElementById('file_object_name').innerHTML = file_object.name;
 	
-	// console.log("file_object: ", file_object);
+	console.log("file_object: ", file_object);
+
+	console.log("file_object.download_url: ", file_object.download_url);
+
+	console.log("file_object.name: ", file_object.name);
 
 	await start_processing_notification()
 		.then(async function() { let response = await fetch(file_object.download_url); return response; })
