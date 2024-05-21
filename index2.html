@@ -202,7 +202,7 @@ async function transcribe_audios_version2() {
 			}
 			
 			if (openai == false && custom_model == false) {
-				document.getElementById('error').innerHTML = "Select a model.";
+				document.getElementById('error').innerHTML += "Select a model.";
 			}
 			
 			console.log("model_name: ", model_name);
@@ -237,11 +237,11 @@ async function transcribe_audios_version2() {
 			}
 			
 			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length == 0) {
-				document.getElementById('error').innerHTML = "No input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
+				document.getElementById('error').innerHTML += "No input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
 
 			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length > 0) {
-				document.getElementById('error').innerHTML = "Both input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
+				document.getElementById('error').innerHTML += document.getElementById('error').innerHTML + "Both input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
 
 			console.log("total_file_objects: ", total_file_objects);
@@ -287,7 +287,7 @@ async function transcribe_audios_version2() {
 				// console.log("dict_out['index']:", dict_out['index']);
 			//}
 		})
-		.catch(error => { document.getElementById('error').innerHTML = error; });
+		//.catch(error => { document.getElementById('error').innerHTML += error; });
 		
 }
 
