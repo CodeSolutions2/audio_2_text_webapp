@@ -43,7 +43,7 @@
 <h4>[Option upload] Upload an audio</h4>
 Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.
 <br>
-<input type="file" id="file_input" accept="audio/*">
+<input type="file" id="file_input" accept="audio/*" style="display:block">
 <button id="confirm_audio_selection" onclick="confirm_audio_selection()" style="display:block">Confirm audio selection</button>
 
 <br>
@@ -130,20 +130,44 @@ var max_loops = 10;
 
 // ----------------------------------------------------
 
-async function confirm_audio_selection() {
-	document.getElementById("file_input").addEventListener("change", previewInput, false);
+// The eventlistener needs to be always running, to detect which file the user selected with browse
+document.getElementById("file_input").addEventListener("change", previewInput, false);
 
+// Confirm that the audio was selected
+async function confirm_audio_selection() {
 	console.log("file_upload_url :", document.getElementById('audio_source_input_display').src);
 }
 
 async function previewInput(event) {
-	const reader = new FileReader();
-
-	console.log("event :", event);
 	
-	const file = event.target.files[0];
+	// ---------------------
+	
+	console.log("event :", event);
+
+	// ---------------------
+	
+	// Take the first file
+	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
+	console.log("file :", file);
+	
+	const file_path1 = event.target.value;  // value: "C:\\fakepath\\filename.mp3"
+	console.log("file_path1 :", file_path1);
+
+	// ---------------------
+	
+	let file_list = event.target.files;
+	var filenames = [];
+	for (let i=0; i<file_list.length; i++) {
+		filenames.push(file_list[i].name)
+	}
+	console.log("filenames :", filenames);
+
+	// ---------------------
+
+	const reader = new FileReader();
 	reader.onload = function(e){
 		// get url for displaying the audio file
+		console.log("e.target.result :", e.target.result);
 		document.getElementById('audio_source_input_display').src = e.target.result;
 	}
 	reader.readAsDataURL(file);
@@ -209,9 +233,9 @@ async function transcribe_audios_version2() {
 			// OR
 			// https://github.com/repoOwner/repoName/audio_file0.mp3, https://github.com/repoOwner/repoName/audio_file1.mp3
 
-      // ----------------------------------------------------
-      // Check if [Option from GitHub] or [Option upload] fields are checked
-      // ----------------------------------------------------
+			// ----------------------------------------------------
+			// Check if [Option from GitHub] or [Option upload] fields are checked
+			// ----------------------------------------------------
 			var user_input = document.getElementById("audio_url").value;
 			console.log("user_input: ", user_input);
 			
@@ -230,18 +254,15 @@ async function transcribe_audios_version2() {
 				document.getElementById('error').innerHTML = "No input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
 
-      if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length > 0) {
+			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length > 0) {
 				document.getElementById('error').innerHTML = "Both input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
 			}
       
-      // ----------------------------------------------------
+			// ----------------------------------------------------
 			
-			return {total_file_objects: total_file_objects, 
-              model_name: array[0], 
-              API_KEY: array[1],
-              index: 0};
+			return {total_file_objects: total_file_objects, model_name: array[0], API_KEY: array[1], index: 0};
 		})
-    // C. View an audio file [audio display]
+			// C. View an audio file [audio display]
     .then(async function(dict_out) { 
       document.getElementById("audio_input_display").style.display = "block"; 
 
@@ -301,7 +322,11 @@ async function process_user_input_uploadFiles() {
 			return blob_object;
 		})
 		.catch(error => { document.getElementById('error').innerHTML = error; });
+
+	
 }
+
+// ----------------------------------------------------
 
 
 async function process_user_input_repoFiles(user_input) {
