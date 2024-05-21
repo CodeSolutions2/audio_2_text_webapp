@@ -151,7 +151,7 @@ async function previewInput(event) {
 	const reader = new FileReader();
 	reader.onload = function(e){
 		//console.log("e.target.result :", e.target.result);
-		document.getElementById('audio_source_input_display').src = e.target.result; // the bytes of the audio file
+		document.getElementById('audio_source_input_display').src = e.target.result; // the base64_string of the audio file
 	}
 	reader.readAsDataURL(file);
 }
@@ -223,17 +223,20 @@ async function transcribe_audios_version2() {
 			console.log("user_input: ", user_input);
 			
 			let total_file_objects = {};
+			let input_file_type = "";
 			
 			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length > 0) {
 				let text = document.getElementById('option1_information').innerHTML;
 				let text_arr = text.split(',');
 				let filename = text_arr.at(0);
 				let file_download_url = text_arr.at(1);
-				total_file_objects = [[{0: {name: filename, download_url: file_download_url, bytes: document.getElementById('audio_source_input_display').src} }]];
+				total_file_objects = [[{0: {name: filename, download_url: file_download_url, base64_string: document.getElementById('audio_source_input_display').src} }]];
+				input_file_type = "option1";
 			}
 			
 			if (user_input.length > 0 && document.getElementById('audio_source_input_display').src.length == 0) {
 				total_file_objects = await process_user_input_repoFiles(user_input);
+				input_file_type = "option0";
 			}
 			
 			if (user_input.length == 0 && document.getElementById('audio_source_input_display').src.length == 0) {
@@ -248,7 +251,7 @@ async function transcribe_audios_version2() {
 			
 			// ----------------------------------------------------
 			
-			return {total_file_objects: total_file_objects, model_name: array[0], API_KEY: array[1], index: 0};
+			return {total_file_objects: total_file_objects, model_name: array[0], API_KEY: array[1], index: 0, input_file_type: input_file_type};
 		})
 		// C. View an audio file [audio display]
 		.then(async function(dict_out) { 
@@ -269,23 +272,26 @@ async function transcribe_audios_version2() {
 			const total_files = dict_out['total_file_objects'][0].length;
 			console.log("total_files :", total_files);
 
-			// console.log("dict_out['index'] :", dict_out['index']);
-			// console.log("total_files-1 :", total_files-1);
-			// console.log("max_loops :", max_loops);
+			console.log("dict_out['index'] :", dict_out['index']);
+			console.log("total_files-1 :", total_files-1);
+			console.log("max_loops :", max_loops);
 			
-			//while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
+			while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
 				
-			//	if (dict_out['model_name'] == 'openai') {
-			//		await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-			//			.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-			//	} else {
-			//		await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-			//			.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-			//	}
+				if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option0") {
+					await call_openai_model_option0(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				} else if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option1") {
+					await call_openai_model_option1(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				} else {
+					await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+						.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+				}
 				
-			//	dict_out['index'] = dict_out['index'] + 1;
+				dict_out['index'] = dict_out['index'] + 1;
 				// console.log("dict_out['index']:", dict_out['index']);
-			//}
+			}
 		})
 		//.catch(error => { document.getElementById('error').innerHTML += error; });
 		
@@ -366,7 +372,7 @@ async function start_processing_notification() {
 // ----------------------------------------------------
 
 
-async function call_openai_model(file_object, OPENAI_API_KEY) {
+async function call_openai_model_option0(file_object, OPENAI_API_KEY) {
 	
 	// Read in the mp3 as file_download_url --> convert to  blob_object
 	document.getElementById('file_object_name').innerHTML = file_object.name;
@@ -398,6 +404,73 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
+
+// ----------------------------------------------------
+
+
+async function call_openai_model_option1(file_object, OPENAI_API_KEY) {
+	
+	// Read in the mp3 as file_download_url --> convert to  blob_object
+	document.getElementById('file_object_name').innerHTML = file_object.name;
+	
+	console.log("file_object: ", file_object);
+
+	console.log("file_object.base64_string: ", file_object.base64_string);
+
+	console.log("file_object.name: ", file_object.name);
+
+	await start_processing_notification()
+		.then(async function() {
+			let base64_string = file_object.base64_string;
+			// console.log("base64_string: ", base64_string);
+
+			// Follow the process on https://www.base64encode.org/enc/map/, to convert base64_string to ASCII
+			
+			// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
+			const regex = /data:audio\/mpeg;base64,/g;
+			base64_string = base64_string.replace(regex, '');
+			console.log("base64_string: ", base64_string);
+			
+			// Decode the Base64-encoded string --> obtain the mp3 data in binary string format
+			const binaryString = atob(base64_string);
+			console.log("binaryString: ", binaryString);
+
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
+			var character_array = binaryString.split('');
+			console.log("character_array: ", character_array);
+			
+			// Map each binary string character as an ASCII number
+			var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
+			// console.log("byteArray: ", byteArray);
+			// return byteArray;
+
+			// bytes gives the same output as byteArray
+			const bytes = new Uint8Array(byteArray);
+			console.log("bytes: ", bytes);
+			return bytes;
+		})
+		.then(bytes => { 
+			console.log("bytes: ", bytes); 
+			// return new Blob(bytes, {type: "audio/mp3"});
+			return new Blob(bytes);
+		})
+		.then(async function(blob_object) { 
+			// Transform blob into a file
+			return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
+		})
+		.then(async function(file_blob_object) { 
+			// console.log('file_blob_object: ', file_blob_object);
+			
+			// Use transcription or translation model randomly
+			if (Math.floor(Math.random()*2) == 1) {
+				await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+			} else {
+				await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+			}
+		})
+		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+}
 
 // ----------------------------------------------------
 
