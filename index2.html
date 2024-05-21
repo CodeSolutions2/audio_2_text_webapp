@@ -41,7 +41,7 @@
 <p id="audio_repo_instructions" style="display:block">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
 <input id="audio_url" type="text" value="" placeholder="audio_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <h4>[Option upload] Upload an audio</h4>
-Use the Browse button to select an audio, then click 'Specify audio upload' to confirm the selection.
+Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.
 <br>
 <input type="file" id="file_input" accept="audio/*">
 <button id="confirm_audio_selection" onclick="confirm_audio_selection()" style="display:block">Confirm audio selection</button>
@@ -134,11 +134,13 @@ async function confirm_audio_selection() {
 	document.getElementById("file_input").addEventListener("change", previewInput, false);
 
 	console.log("file_upload_url :", document.getElementById('audio_source_input_display').src);
-  // This worked: it printed the loaded audio
 }
 
 async function previewInput(event) {
 	const reader = new FileReader();
+
+	console.log("event :", event);
+	
 	const file = event.target.files[0];
 	reader.onload = function(e){
 		// get url for displaying the audio file
