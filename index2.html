@@ -134,7 +134,15 @@ async function processEvent_audio_input_repo(event) {
 	
 async function processEvent_audio_input_upload(event) {
 
-	if (this.getAttribute("checked") == true) {
+	if (this.getAttribute("checked") == false) {
+		// Make all buttons non-visible to reset
+		document.getElementById("option0_input_h4").style.display = "none";
+		document.getElementById("option0_input_instructions").style.display = "none";
+		document.getElementById("option0_input").style.display = "none";
+		document.getElementById("option1_input_h4").style.display = "none";
+		document.getElementById("option1_input_instructions").style.display = "none";
+		document.getElementById("option1_file_input").style.display = "none";
+	} else  {
 		// If option1 button checked, make option1 all buttons visible
 		document.getElementById("option1_input_h4").style.display = "block";
 		document.getElementById("option1_input_instructions").style.display = "block";
@@ -144,14 +152,6 @@ async function processEvent_audio_input_upload(event) {
 		document.getElementById("option0_input_h4").style.display = "none";
 		document.getElementById("option0_input_instructions").style.display = "none";
 		document.getElementById("option0_input").style.display = "none";
-	} else  {
-		// Make all buttons non-visible to reset
-		document.getElementById("option0_input_h4").style.display = "none";
-		document.getElementById("option0_input_instructions").style.display = "none";
-		document.getElementById("option0_input").style.display = "none";
-		document.getElementById("option1_input_h4").style.display = "none";
-		document.getElementById("option1_input_instructions").style.display = "none";
-		document.getElementById("option1_file_input").style.display = "none";
 	}
 }
 
