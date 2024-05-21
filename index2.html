@@ -143,13 +143,13 @@ async function previewInput(event) {
 	
 	// ---------------------
 	
-	console.log("event :", event);
+	// console.log("event :", event);
 
 	// ---------------------
 	
 	// Take the first file
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
-	console.log("file :", file);
+	// console.log("file :", file);
 	
 	document.getElementById('option1_information').innerHTML = file.name + ',' + event.target.value;
 
@@ -157,7 +157,7 @@ async function previewInput(event) {
 
 	const reader = new FileReader();
 	reader.onload = function(e){
-		console.log("e.target.result :", e.target.result);
+		//console.log("e.target.result :", e.target.result);
 		document.getElementById('audio_source_input_display').src = e.target.result; // the bytes of the audio file
 	}
 	reader.readAsDataURL(file);
