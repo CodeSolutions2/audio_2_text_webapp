@@ -289,10 +289,9 @@ async function transcribe_audios_version2() {
 			document.getElementById("audio_input_display").style.display = "block"; 
 
 			console.log("dict_out['total_file_objects'][0][0].name: ", dict_out['total_file_objects'][0][0].name);
-			console.log("document.getElementById('audio_source_input_display').src.length: ", document.getElementById('audio_source_input_display').src.length);
 
 			// Specify which source audio to play
-			if (document.getElementById('audio_source_input_display').src.length == 0) {
+			if (document.getElementById("option0_input_radio").checked == true && document.getElementById("option1_input_radio").checked == false) {
 				// It is the GitHub repository method, select the first file from the list
 				document.getElementById('audio_source_input_display').src = dict_out['total_file_objects'][0][0].name;
 			}
