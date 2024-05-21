@@ -90,7 +90,7 @@ table {vertical-align: top; border-collapse: collapse; position: relative; z-ind
 
 tr {vertical-align: top; border: 0px solid black; padding: 10px 10px; }
 
-th, td {vertical-align: top; border: 0px solid black; padding: 10px; }
+th, td {vertical-align: top; border: 0px solid black; padding: 10px; width:300px }
 th#inputs {width: 100%; }
 th#outputs {width: 800px; }
 </style>
@@ -107,34 +107,50 @@ var max_loops = 10;
 
 // ----------------------------------------------------
 
-// document.getElementById("audio_repo").addEventListener("click", processEvent_audio_input_repo, false);
-// document.getElementById("audio_input").addEventListener("click", processEvent_audio_input_upload, false);
+document.getElementById("option0_input_radio").addEventListener("click", processEvent_audio_input_repo, false);
+document.getElementById("option1_input_radio").addEventListener("click", processEvent_audio_input_upload, false);
 
-// async function processEvent_audio_input_repo(event) {
-
-// 	document.getElementById("audio_input_display").style.display = "none";
+async function processEvent_audio_input_repo(event) {
 	
-// 	if (this.getAttribute("checked") == false) {
-// 		document.getElementById("audio_repo_instructions").style.display = "none";
-// 		document.getElementById("option0_input").style.display = "none";
-// 	} else  {
+	if (this.getAttribute("checked") == true) {
+		// If repo button checked, make repo all buttons visible
+		document.getElementById("option0_input_h4").style.display = "block";
+		document.getElementById("option0_input_instructions").style.display = "block";
+		document.getElementById("option0_input").style.display = "block";
 		
-// 		document.getElementById("audio_repo_instructions").style.display = "block";
-// 		document.getElementById("option0_input").style.display = "block";
-// 	}
-// }
+		// and other buttons non-visible
+		document.getElementById("option1_input_h4").style.display = "none";
+		document.getElementById("option1_input_instructions").style.display = "none";
+	} else  {
+		// Make all buttons non-visible to reset
+		document.getElementById("option0_input_h4").style.display = "none";
+		document.getElementById("option0_input_instructions").style.display = "none";
+		document.getElementById("option0_input").style.display = "none";
+		document.getElementById("option1_input_h4").style.display = "none";
+		document.getElementById("option1_input_instructions").style.display = "none";
+	}
+}
 	
-// async function processEvent_audio_input_upload(event) {
+async function processEvent_audio_input_upload(event) {
 
-	// This looks useless, but to restart it from the a used state this would reset the settings
-// 	document.getElementById("audio_input_display").style.display = "none";
-// 	document.getElementById("audio_repo_instructions").style.display = "none";
-// 	document.getElementById("option0_input").style.display = "none";
-	
-// 	if (this.getAttribute("checked") == true) {
-//     document.getElementById("file_input").addEventListener("change", previewInput, false);
-// 	}
-// }
+	if (this.getAttribute("checked") == true) {
+		// If option1 button checked, make option1 all buttons visible
+		document.getElementById("option1_input_h4").style.display = "block";
+		document.getElementById("option1_input_instructions").style.display = "block";
+
+		// and other buttons non-visible
+		document.getElementById("option0_input_h4").style.display = "none";
+		document.getElementById("option0_input_instructions").style.display = "none";
+		document.getElementById("option0_input").style.display = "none";
+	} else  {
+		// Make all buttons non-visible to reset
+		document.getElementById("option0_input_h4").style.display = "none";
+		document.getElementById("option0_input_instructions").style.display = "none";
+		document.getElementById("option0_input").style.display = "none";
+		document.getElementById("option1_input_h4").style.display = "none";
+		document.getElementById("option1_input_instructions").style.display = "none";
+	}
+}
 
 // ----------------------------------------------------
 
