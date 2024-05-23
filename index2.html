@@ -55,7 +55,8 @@
 <br>
 
 <h3>C. View an audio file [audio display]</h3>
-<audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" src="" type="audio/mpeg"></audio>
+<!-- <audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" src="" type="audio/mpeg"></audio> -->
+<audio controls id="audio_input_display" style="display:none"></audio>
 	
 <br>
 
@@ -162,19 +163,19 @@ async function processEvent_audio_input_upload(event) {
 // The eventlistener needs to be always running, to detect which file the user selected with browse
 document.getElementById("option1_file_input").addEventListener("change", previewInput, false);
 
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioContext = new window.AudioContext();
+// window.AudioContext = window.AudioContext || window.webkitAudioContext;
+// var audioContext = new window.AudioContext();
 // OR
-// var audioElement = document.getElementById("audio_input_display");
-// var audioContext = audioElement.getContext("");
-
+var audioElement = document.getElementById("audio_input_display");
+var audioContext = new AudioContext();
+// const source = audioContext.createMediaElementSource(audioElement);
 
 function playSound(arraybuffer) {
     audioContext.decodeAudioData(arraybuffer, function (buf) {
-        document.getElementById('audio_source_input_display') = audioContext.createBufferSource();
-        document.getElementById('audio_source_input_display').connect(audioContext.destination);
-        document.getElementById('audio_source_input_display').buffer = buf;
-        document.getElementById('audio_source_input_display').start(0);
+        var source = audioContext.createBufferSource(audioElement);
+        source.connect(audioContext.destination);
+        source.buffer = buf;
+        source.start(0);
     });
 }
 
@@ -202,15 +203,15 @@ async function previewInput(event) {
     // document.getElementById('audio_source_input_display').src = e.target.result; // temporarily save: the base64_string of the audio file
 
     // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
-    await fetch(e.target.result)
-      .then(response => response.arrayBuffer())
-      .then(arraybuffer => audioContext.decodeAudioData(arraybuffer))
-      .then(async function(decoded_arraybuffer) {
-	      decoded_arraybuffer = decoded_arraybuffer;
+    // await fetch(e.target.result)
+    //   .then(response => response.arrayBuffer())
+    //   .then(arraybuffer => audioContext.decodeAudioData(arraybuffer))
+    //   .then(async function(decoded_arraybuffer) {
+	//       decoded_arraybuffer = decoded_arraybuffer;
         // document.getElementById('audio_source_input_display') = audioContext.createBufferSource();
         // document.getElementById('audio_source_input_display').connect(audioContext.destination);
         // document.getElementById('audio_source_input_display').buffer = decoded_arraybuffer;
-      })
+     //  })
 
     // Try 2: 
     // await fetch(e.target.result)
@@ -221,12 +222,12 @@ async function previewInput(event) {
 		// })
 
     // Try 3:
-    // playSound(e.target.result)
+    playSound(e.target.result)
     
     
 	}
-	reader.readAsDataURL(file);  // for Try 0, 1, 2
-  // reader.readAsArrayBuffer(file);  // for Try 3
+	// reader.readAsDataURL(file);  // for Try 0, 1, 2
+  reader.readAsArrayBuffer(file);  // for Try 3
 }
 
 
