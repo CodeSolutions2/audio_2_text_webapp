@@ -114,13 +114,13 @@ async function previewInput(event) {
 	
 	// Take the first file
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
-	console.log("file :", file);
+	// console.log("file :", file);
 
 	// ---------------------
 	
 	// Set the file name
-	// document.getElementById("file_name").value = ;
-	// document.getElementById('file_name').placeholder = ;
+	document.getElementById("file_name").value = file.name;
+	document.getElementById('file_name').placeholder = file.name;
 
 	// ---------------------
 
@@ -134,8 +134,8 @@ async function previewInput(event) {
 		// ---------------------
 		
 		await fetch(e.target.result)
-			    .then(response => response.arrayBuffer())
-			    .then(async function(arraybuffer) {
+			.then(response => response.arrayBuffer())
+			.then(async function(arraybuffer) {
 				    
 				    // ----------------------------
 				    
@@ -150,12 +150,14 @@ async function previewInput(event) {
 				    // ----------------------------
 
 				    // Decode the arraybuffer - *** this should be the audio data to play ***
-				    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
-				    console.log("decoded_arraybuffer:", decoded_arraybuffer);
+				    return audioContext.decodeAudioData(arraybuffer);
+			    })
+			.then(async function(decoded_arraybuffer) {
 
-				    console.log("Object.keys(decoded_arraybuffer):", Object.keys(decoded_arraybuffer));
-
-				    // ----------------------------
+				console.log("decoded_arraybuffer:", decoded_arraybuffer);
+				console.log("Object.keys(decoded_arraybuffer):", Object.keys(decoded_arraybuffer));
+				
+				// ----------------------------
 
 				    // Create the audio source
 				    var source = audioContext.createMediaElementSource(audioElement);
@@ -168,7 +170,7 @@ async function previewInput(event) {
 				    
 				    // Set the file_download_url
 				    // Put the text data in a temporary blob file, and create a url to the data
-				    const blob = new Blob([decoded_arraybuffer], { type: 'audio/mpeg' });
+				    const blob = new Blob([decoded_arraybuffer], { type: file.type });
 				    
 				    // Create a url for the data object
 				    const url = URL.createObjectURL(blob);
@@ -207,7 +209,7 @@ async function previewInput(event) {
 				    // Did nothing 
 				    // source.connect(audioContext.destination);
 				    // console.log("source after destination:", source);
-			    })
+			})
 			        
 			    
 		
