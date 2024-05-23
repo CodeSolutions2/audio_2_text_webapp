@@ -150,9 +150,14 @@ async function previewInput(event) {
 		    var source = audioContext.createMediaElementSource(audioElement);
 		    // var source = audioContext.createBufferSource(audioElement);
 		    source.id = "source_name";
-		    console.log("source:", source);
+
+		    create_blob_url_for_data(decoded_arraybuffer);
+		    source.src = document.getElementById("file_download_url").value;
+		    
+		    console.log("source before destination:", source);
 		    
 		    source.connect(audioContext.destination);
+		    console.log("source after destination:", source);
 	    })
 	        
 		    // source.buffer = decoded_arraybuffer;
@@ -176,6 +181,18 @@ async function previewInput(event) {
 }
   
 
+
+async function create_blob_url_for_data(decoded_arraybuffer) {
+	
+	// Put the text data in a temporary blob file, and create a url to the data
+	const blob = new Blob([decoded_arraybuffer], { type: 'audio/mpeg' });
+	
+	// Create a url for the data object
+	const url = URL.createObjectURL(blob);
+	document.getElementById("file_download_url").value = url;
+	document.getElementById('file_download_url').placeholder = url;
+}
+	
 // ----------------------------------------------------
 	
 async function processEvent_openai(event) {
@@ -233,7 +250,9 @@ async function transcribe_audio() {
 		.then(async function(array) {
 
 			// Insert the audio file information into the dictionary
-			total_file_objects = [[{name: filename, file_download_url: file_download_url, audio_data: decoded_arraybuffer} ]];			
+			total_file_objects = [[{name: filename, 
+						file_download_url: document.getElementById("file_download_url").value, 
+						audio_data: decoded_arraybuffer} ]];			
 
 			console.log("total_file_objects: ", total_file_objects);
 			
