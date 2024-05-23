@@ -160,7 +160,7 @@ async function previewInput(event) {
 		    // Way 1: blob url of decoded_arraybuffer
 		    // source.src = document.getElementById("file_download_url").value;  // did not work
 		    // Way 2: try decoded_arraybuffer directly
-		    source.src = decoded_arraybuffer;
+		    source.src = decoded_arraybuffer.value;
 		    
 		    console.log("source:", source);
 		    
