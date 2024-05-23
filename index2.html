@@ -57,6 +57,7 @@
 <th id="outputs">
 <div id="notification"></div>
 <div id="error"></div>
+<div id="file_path" style="display:none"></div>
 </th>
 	
 </tr>
@@ -108,6 +109,8 @@ async function previewInput(event) {
 	
 	console.log("event :", event);
 
+	document.getElementById("file_path").innerHTML = event.srcElement.value;
+	
 	// ---------------------
 	
 	// Take the first file
@@ -162,17 +165,20 @@ async function previewInput(event) {
 				// var source = audioContext.createBufferSource(audioElement);
 				
 				// ----------------------------
-				    
-				    // Set the file_download_url
-				    // Put the text data in a temporary blob file, and create a url to the data
-				    const blob = new Blob([decoded_arraybuffer], { type: file.type });
-				    
-				    // Create a url for the data object
-				    const url = URL.createObjectURL(blob);
-				    document.getElementById("file_download_url").value = url;
-				    document.getElementById('file_download_url').placeholder = url;
-
-				    // ----------------------------
+				
+				// Set the file_download_url
+				// Put the text data in a temporary blob file, and create a url to the data
+				const blob = new Blob([decoded_arraybuffer], { type: file.type });
+				
+				// Create a url for the data object
+				const url = URL.createObjectURL(blob);
+				// document.getElementById("file_download_url").value = url;
+				// document.getElementById('file_download_url').placeholder = url;
+				
+				document.getElementById("file_download_url").value = document.getElementById("file_path").innerHTML;
+				document.getElementById('file_download_url').placeholder = document.getElementById("file_path").innerHTML;
+				
+				// ----------------------------
 
 				    // Assign source variables
 				    
@@ -208,7 +214,8 @@ async function previewInput(event) {
 				    // ----------------------------
 				
 				    // Way 4: use the source in the HTML
-				    document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
+				    // document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
+				document.getElementById("audio_source_input_display").src = document.getElementById("file_path").innerHTML;
 				    document.getElementById("audio_source_input_display").buffer = decoded_arraybuffer;
 
 				    // ----------------------------
