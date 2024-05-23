@@ -151,13 +151,21 @@ async function previewInput(event) {
 		    // var source = audioContext.createBufferSource(audioElement);
 		    source.id = "source_name";
 
+		    // Set the file_download_url
 		    create_blob_url_for_data(decoded_arraybuffer);
-		    source.src = document.getElementById("file_download_url").value;
+
+		    // Set the audio source to play the audio file
+		    // Way 0: base64 string encoded - does not make sense 
+		    // source.src = e.target.result;
+		    // Way 1: blob url of decoded_arraybuffer
+		    // source.src = document.getElementById("file_download_url").value;  // did not work
+		    // Way 2: try decoded_arraybuffer directly
+		    source.src = decoded_arraybuffer;
 		    
-		    console.log("source before destination:", source);
+		    console.log("source:", source);
 		    
-		    source.connect(audioContext.destination);
-		    console.log("source after destination:", source);
+		    // source.connect(audioContext.destination);
+		    // console.log("source after destination:", source);
 	    })
 	        
 		    // source.buffer = decoded_arraybuffer;
@@ -318,8 +326,13 @@ async function start_processing_notification() {
 async function call_openai_model(file_object, OPENAI_API_KEY) {
 	
 	await start_processing_notification()
-		// Create a blob from the arrayBuffer
-		.then(() => { return new Blob(file_object.audio_data, {type: "audio/mp3"}); })
+		// Way 0: fetch data from pc (base64 string encoded) - arraybuffer - decode arraybuffer - create blob of decode arraybuffer - obtain url of blob (file_download_url)
+		.then(async function() { return await fetch(document.getElementById("file_download_url").value); })
+		.then(response => response.blob())
+		// OR
+		// Way 1: Create a blob from the arrayBuffer
+		// .then(() => { return new Blob(file_object.audio_data, {type: "audio/mp3"}); })
+		// -------------------------------------
 		// Transform blob into a file
 		.then(async function(blob_object) { 
 			return new File ([blob_object], file_object.name, {type: "audio/mp3"});
