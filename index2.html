@@ -286,11 +286,13 @@ async function transcribe_audio() {
 
 			// Try to get the audio file from the DOM
 			console.log("audio: ", document.getElementById("audio_input_display"))
+
+			console.log("audioElement source: ", document.getElementById("audio_input_display")).getElementsByTagName("source")[0];
 			
 			// Insert the audio file information into the dictionary
 			total_file_objects = [[{name: document.getElementById("file_name").value, 
 						file_download_url: document.getElementById("file_download_url").value, 
-						audio_data: decoded_arraybuffer} ]];			
+						audio_data: ""} ]];			
 
 			console.log("total_file_objects: ", total_file_objects);
 			
