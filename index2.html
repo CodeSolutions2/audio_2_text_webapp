@@ -141,15 +141,14 @@ async function previewInput(event) {
     await fetch(e.target.result)
 	    .then(response => response.arrayBuffer())
 	    .then(arraybuffer => {
-		    var audioContext = new AudioContext();
-		    var source = audioContext.createMediaElementSource(audioElement);
-		    // var source = audioContext.createBufferSource(audioElement);
-
 		    console.log("arraybuffer:", arraybuffer);
 		    
+		    var audioContext = new AudioContext();
 		    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
 		    console.log("decoded_arraybuffer:", decoded_arraybuffer);
 
+		    var source = audioContext.createMediaElementSource(audioElement);
+		    // var source = audioContext.createBufferSource(audioElement);
 		    source.connect(audioContext.destination);
 	    })
 	        
