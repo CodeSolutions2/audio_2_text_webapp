@@ -104,9 +104,7 @@ document.getElementById("upload_file").addEventListener("change", previewInput, 
 // var audioContext = new window.AudioContext();
 // OR
 var audioElement = document.getElementById("audio_input_display");
-var audioContext = new AudioContext();
-var source = audioContext.createMediaElementSource(audioElement);
-// var source = audioContext.createBufferSource(audioElement);
+
 
 function playSound(arraybuffer) {
     audioContext.decodeAudioData(arraybuffer, function (buf) {
@@ -142,13 +140,20 @@ async function previewInput(event) {
     // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
     await fetch(e.target.result)
 	    .then(response => response.arrayBuffer())
-	    .then(arraybuffer => audioContext.decodeAudioData(arraybuffer))
-	    .then(async function(decoded_arraybuffer) {
-		    decoded_arraybuffer = decoded_arraybuffer;
+	    .then(arraybuffer => {
+		    var audioContext = new AudioContext();
+		    var source = audioContext.createMediaElementSource(audioElement);
+		    // var source = audioContext.createBufferSource(audioElement);
+
+		    console.log("arraybuffer:", arraybuffer);
+		    
+		    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
 		    console.log("decoded_arraybuffer:", decoded_arraybuffer);
+	    })
+	        
 		    // source.connect(audioContext.destination);
 		    // source.buffer = decoded_arraybuffer;
-	    })
+	    
 
     // Try 2: 
     // await fetch(e.target.result)
@@ -242,30 +247,28 @@ async function transcribe_audio() {
 			return dict_out;
 		})
 		// D. Transcribe audio files
-		.then(async function(dict_out) {
-		 	console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
+		// .then(async function(dict_out) {
+		//  	console.log("dict_out['total_file_objects']:", dict_out['total_file_objects']);
 			
-		 	const total_files = dict_out['total_file_objects'][0].length;
-		 	console.log("total_files :", total_files);
+		//  	const total_files = dict_out['total_file_objects'][0].length;
+		//  	console.log("total_files :", total_files);
 
-		 	console.log("dict_out['index'] :", dict_out['index']);
-		 	console.log("total_files-1 :", total_files-1);
-		 	console.log("max_loops :", max_loops);
+		//  	console.log("dict_out['index'] :", dict_out['index']);
+		//  	console.log("total_files-1 :", total_files-1);
+		//  	console.log("max_loops :", max_loops);
 			
-		 	while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
-		 		
+		//  	while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
 		 		if (dict_out['model_name'] == 'openai') {
-		 			await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-		 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-		 		} else {
-		 			await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
-		 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-		 		}
-		 		dict_out['index'] = dict_out['index'] + 1;
-		 		// console.log("dict_out['index']:", dict_out['index']);
-		 	}
-		})
-		//.catch(error => { document.getElementById('error').innerHTML += error; });
+		//  			await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+		//  				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+		//  		} else {
+		//  			await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
+		//  				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
+		//  		}
+		//  		dict_out['index'] = dict_out['index'] + 1;
+		//  	}
+		// })
+		.catch(error => { document.getElementById('error').innerHTML += error; });
 		
 }
 
@@ -301,14 +304,12 @@ async function call_openai_model(file_object, OPENAI_API_KEY) {
 			return new File ([blob_object], file_object.name, {type: "audio/mp3"});
 		})
 		.then(async function(file_blob_object) { 
-			// console.log('file_blob_object: ', file_blob_object);
-			
 			// Use transcription or translation model randomly
-			if (Math.floor(Math.random()*2) == 1) {
-				await openai_transcription(file_blob_object, 'file_blob_object', file_object.name, OPENAI_API_KEY);
-			} else {
-				await openai_translation(file_blob_object, 'file_blob_object', file_object.name, OPENAI_API_KEY);
-			}
+		 	if (Math.floor(Math.random()*2) == 1) {
+		 		await openai_transcription(file_blob_object, 'file_blob_object', file_object.name, OPENAI_API_KEY);
+		 	} else {
+		 		await openai_translation(file_blob_object, 'file_blob_object', file_object.name, OPENAI_API_KEY);
+		 	}
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
