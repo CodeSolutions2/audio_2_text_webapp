@@ -43,7 +43,7 @@
 
 <h3>C. View an audio file [audio display]</h3>
 <audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" src="" type="audio/mpeg"></audio>
-<!-- <audio controls id="audio_input_display" style="display:none"></audio> -->
+<audio controls id="audio_input_display_js" style="display:none"></audio>
 	
 <br>
 
@@ -97,7 +97,7 @@ var max_loops = 10;
 // The eventlistener needs to be always running, to detect which file the user selected with browse
 document.getElementById("upload_file").addEventListener("change", previewInput, false);
 
-var audioElement = document.getElementById("audio_input_display");
+var audioElement = document.getElementById("audio_input_display_js");
 var audioContext = {};
 	
 	
@@ -358,11 +358,14 @@ async function start_processing_notification() {
 
 
 async function call_openai_model(file_object, OPENAI_API_KEY) {
+
+	console.log("blob file to fetch: ", document.getElementById("file_download_url").value);
 	
 	await start_processing_notification()
 		// Way 0: fetch data from pc (base64 string encoded) - arraybuffer - decode arraybuffer - create blob of decode arraybuffer - obtain url of blob (file_download_url)
 		.then(async function() { return await fetch(document.getElementById("file_download_url").value); })
-		// .then(response => response.blob())
+		.then(response => response.arrayBuffer())
+		.then(arrayBuffer => { return new Blob(arrayBuffer, {type: "audio/mp3"}); })
 		// OR
 		// Way 1: Create a blob from the arrayBuffer
 		// .then(() => { return new Blob(file_object.audio_data, {type: "audio/mp3"}); })
