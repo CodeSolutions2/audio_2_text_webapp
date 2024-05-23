@@ -112,7 +112,7 @@ async function previewInput(event) {
 	
 	// Take the first file
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
-	// console.log("file :", file);
+	console.log("file :", file);
 
 	// ---------------------
 	
@@ -157,15 +157,11 @@ async function previewInput(event) {
 				// ----------------------------
 				
 				// Create the audio source
-				    // var source = audioContext.createMediaElementSource(audioElement);
-
-				    // OR
-				    
-				    // var source = audioContext.createBufferSource(audioElement);
-
+				var source = audioContext.createMediaElementSource(audioElement);
+				// OR
+				// var source = audioContext.createBufferSource(audioElement);
 				
-				    
-				    // ----------------------------
+				// ----------------------------
 				    
 				    // Set the file_download_url
 				    // Put the text data in a temporary blob file, and create a url to the data
@@ -195,27 +191,27 @@ async function previewInput(event) {
 				    // source.src = document.getElementById("file_name").value;  // it will think the file is in the GitHub repository
 
 				    // [1] 
-				    // source.buffer = decoded_arraybuffer;
+				    source.buffer = decoded_arraybuffer;
 
 				    // [2]
-				    // source.id = "audio_source_input_display";
+				    source.id = "audio_source_input_display_js";
 
 				    // [3]
-				    // source.type = file.type;
-
-				    // Way 4: use the source in the HTML
-				    // document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
-				    document.getElementById("audio_source_input_display").src = decoded_arraybuffer;
-				    document.getElementById("audio_source_input_display").buffer = decoded_arraybuffer;
+				    source.type = file.type;
 
 				    // ----------------------------
-				    
+
+				    source.connect(audioContext.destination);  // it adds a field in the object source, but did nothing
+				    source.start(0);
 				    // console.log("source:", source);
 
 				    // ----------------------------
-				    
-				    // source.connect(audioContext.destination);  // it adds a field in the object source, but did nothing 
-				    // console.log("source after destination:", source);
+				
+				    // Way 4: use the source in the HTML
+				    document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
+				    document.getElementById("audio_source_input_display").buffer = decoded_arraybuffer;
+
+				    // ----------------------------
 			})
 			        
 			    
