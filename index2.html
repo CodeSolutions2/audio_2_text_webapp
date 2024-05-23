@@ -5,8 +5,8 @@
 
 <h1>Audio-to-text webapp</h1>
 <ol type="A">
-  <li>Select a model to transcribe audio files.</li>
-	<li>Input one or more audio files: [Option from GitHub] OR [Option upload].</li>
+	<li>Select a model to transcribe audio files.</li>
+	<li>Upload an audio file</li>
   	<li>View an audio file [audio display].</li>
 	<li>Transcribe audio files.</li>
 	<li>Copy paste the transcribed text!</li>
@@ -33,25 +33,11 @@
 <br>
 <label for="enter_key" id="enter_key" style="display:none">Enter OpenAI Key:</label>
 <input id="API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:none; text-align: left; width: 150px;">
-
 <br>
 	
-<h3>B. Input one or more audio files: [Option from GitHub] OR [Option upload]</h3>
-<fieldset>
-<input type="radio" id="option0_input_radio" name="radio_name1" value="option0_input_radio" />
-<label for="option0_input_radio_label">Option for GitHub</label>
-<br>
-<input type="radio" id="option1_input_radio" name="radio_name1" value="option1_input_radio" />
-<label for="option1_input_radio_label">Option for user</label>
-</fieldset>
-	
-<h4 id="option0_input_h4" style="display:none">[Option from GitHub] A list of audio urls from a GitHub repository, a GitHub repository url</h4>
-<p id="option0_input_instructions" style="display:none">For example, GitHub repository url: https://github.com/CodeSolutions2/audio_2_text_webapp. For example, list of audio urls: https://github.com/CodeSolutions2/audio_2_text_webapp/test.mp3, https://github.com/CodeSolutions2/audio_2_text_webapp/test1.mp3</p>
-<input id="option0_input" type="text" value="" placeholder="option0_input" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
-	
-<h4 id="option1_input_h4" style="display:none">[Option upload] Upload an audio</h4>
-<p id="option1_input_instructions" style="display:none">Use the Browse button to select an audio, then click 'Confirm audio selection' to confirm the selection.</p>
-<input type="file" id="option1_file_input" accept="audio/*" style="display:none">
+<h3>B. Upload an audio file</h3>
+<input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+<input type="file" id="upload_file" accept="audio/*" style="display:block">
 <br>
 
 <h3>C. View an audio file [audio display]</h3>
@@ -61,7 +47,7 @@
 <br>
 
 <h3>D. Transcribe audio files</h3>
-<button id="transcribe_audios" onclick="transcribe_audios_version2()" style="display:block">Transcribe audios</button>
+<button id="transcribe_audio" onclick="transcribe_audio()" style="display:block">Transcribe audios</button>
 
 </th>
 	
@@ -70,8 +56,6 @@
 <th id="outputs">
 <div id="notification"></div>
 <div id="error"></div>
-<div id="file_object_name" style="display:none"></div>
-<div id="option1_information" style="display:none"></div>
 </th>
 	
 </tr>
@@ -104,64 +88,17 @@ th#outputs {width: 800px; }
 var model_name = "";
 var API_KEY = "";
 var max_loops = 10;
+
+	
+var filename = "filename.txt";
+var file_download_url = "";
 var decoded_arraybuffer = "";
+			
 
 // ----------------------------------------------------
-
-document.getElementById("option0_input_radio").addEventListener("click", processEvent_audio_input_repo, false);
-document.getElementById("option1_input_radio").addEventListener("click", processEvent_audio_input_upload, false);
-
-async function processEvent_audio_input_repo(event) {
-	
-	if (this.getAttribute("checked") == false) {
-		// Make all buttons non-visible to reset
-		document.getElementById("option0_input_h4").style.display = "none";
-		document.getElementById("option0_input_instructions").style.display = "none";
-		document.getElementById("option0_input").style.display = "none";
-		document.getElementById("option1_input_h4").style.display = "none";
-		document.getElementById("option1_input_instructions").style.display = "none";
-		document.getElementById("option1_file_input").style.display = "none";
-	} else  {
-		// If repo button checked, make repo all buttons visible
-		document.getElementById("option0_input_h4").style.display = "block";
-		document.getElementById("option0_input_instructions").style.display = "block";
-		document.getElementById("option0_input").style.display = "block";
-		
-		// and other buttons non-visible
-		document.getElementById("option1_input_h4").style.display = "none";
-		document.getElementById("option1_input_instructions").style.display = "none";
-		document.getElementById("option1_file_input").style.display = "none";
-	}
-}
-	
-async function processEvent_audio_input_upload(event) {
-
-	if (this.getAttribute("checked") == false) {
-		// Make all buttons non-visible to reset
-		document.getElementById("option0_input_h4").style.display = "none";
-		document.getElementById("option0_input_instructions").style.display = "none";
-		document.getElementById("option0_input").style.display = "none";
-		document.getElementById("option1_input_h4").style.display = "none";
-		document.getElementById("option1_input_instructions").style.display = "none";
-		document.getElementById("option1_file_input").style.display = "none";
-	} else  {
-		// If option1 button checked, make option1 all buttons visible
-		document.getElementById("option1_input_h4").style.display = "block";
-		document.getElementById("option1_input_instructions").style.display = "block";
-		document.getElementById("option1_file_input").style.display = "block";
-
-		// and other buttons non-visible
-		document.getElementById("option0_input_h4").style.display = "none";
-		document.getElementById("option0_input_instructions").style.display = "none";
-		document.getElementById("option0_input").style.display = "none";
-	}
-}
-
-// ----------------------------------------------------
-
 
 // The eventlistener needs to be always running, to detect which file the user selected with browse
-document.getElementById("option1_file_input").addEventListener("change", previewInput, false);
+document.getElementById("upload_file").addEventListener("change", previewInput, false);
 
 // window.AudioContext = window.AudioContext || window.webkitAudioContext;
 // var audioContext = new window.AudioContext();
@@ -169,10 +106,12 @@ document.getElementById("option1_file_input").addEventListener("change", preview
 var audioElement = document.getElementById("audio_input_display");
 var audioContext = new AudioContext();
 // const source = audioContext.createMediaElementSource(audioElement);
+var source = audioContext.createBufferSource(audioElement);
 
 function playSound(arraybuffer) {
     audioContext.decodeAudioData(arraybuffer, function (buf) {
-        var source = audioContext.createBufferSource(audioElement);
+	decoded_arraybuffer = buf;
+        // var source = audioContext.createBufferSource(audioElement);
         source.connect(audioContext.destination);
         source.buffer = buf;
         source.start(0);
@@ -191,7 +130,6 @@ async function previewInput(event) {
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
 	// console.log("file :", file);
 	
-	document.getElementById('option1_information').innerHTML = file.name + ',' + event.target.value;
 
 	// ---------------------
 
@@ -200,7 +138,7 @@ async function previewInput(event) {
 		//console.log("e.target.result :", e.target.result);
 
     // Try 0
-    // document.getElementById('audio_source_input_display').src = e.target.result; // temporarily save: the base64_string of the audio file
+    // document.getElementById('audio_source_input_display').src = e.target.result; 
 
     // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
     // await fetch(e.target.result)
@@ -218,7 +156,7 @@ async function previewInput(event) {
     //   .then(response => response.blob())
     //   .then(async function(blob_object) { 
 			// Transform blob into a file
-		// 	return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
+		// 	return new File ([blob_object], file_object.name, {type: "audio/mp3"});
 		// })
 
     // Try 3:
@@ -229,8 +167,6 @@ async function previewInput(event) {
 	// reader.readAsDataURL(file);  // for Try 0, 1, 2
   reader.readAsArrayBuffer(file);  // for Try 3
 }
-
-
   
 
 // ----------------------------------------------------
@@ -261,7 +197,7 @@ document.getElementById("custom_model").addEventListener("click", processEvent_c
 // ----------------------------------------------------
 
 
-async function transcribe_audios_version2() {
+async function transcribe_audio() {
 
 	return await new Promise(r => setTimeout(r, 10))
 		// A. Select a model to transcribe audio files
@@ -288,62 +224,22 @@ async function transcribe_audios_version2() {
 		})
 		// B. Input one or more audio files: [Option from GitHub] OR [Option upload]
 		.then(async function(array) {
-			// user will give:
-			// https://github.com/repoOwner/repoName
-			// OR
-			// https://github.com/repoOwner/repoName/audio_file0.mp3, https://github.com/repoOwner/repoName/audio_file1.mp3
 
-			// ----------------------------------------------------
-			// Check if [Option from GitHub] or [Option upload] fields are checked
-			// ----------------------------------------------------
-			var user_input = document.getElementById("option0_input").value;
-			console.log("user_input: ", user_input);
-			
-			let total_file_objects = {};
-			let input_file_type = "";
-
-			const option0_input_radio = document.getElementById("option0_input_radio").checked;
-			const option1_input_radio = document.getElementById("option1_input_radio").checked;
-			
-			if (option0_input_radio == false && option1_input_radio == true) {
-				let text = document.getElementById('option1_information').innerHTML;
-				let text_arr = text.split(',');
-				let filename = text_arr.at(0);
-				let file_download_url = text_arr.at(1);
-				total_file_objects = [[{name: filename, download_url: file_download_url, base64_string: document.getElementById('audio_source_input_display').src} ]];
-				input_file_type = "option1";
-			}
-			
-			if (option0_input_radio == true && option1_input_radio == false) {
-				total_file_objects = await process_user_input_repoFiles(user_input);
-				input_file_type = "option0";
-			}
-			
-			if (option0_input_radio == false && option1_input_radio == false) {
-				document.getElementById('error').innerHTML += "No input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
-			}
-
-			if (option0_input_radio == true && option1_input_radio == true) {
-				document.getElementById('error').innerHTML += document.getElementById('error').innerHTML + "Both input methods are selected. Select an audio file input method: [Option from GitHub] or [Option upload].";
-			}
+			// Insert the audio file information into the dictionary
+			total_file_objects = [[{name: filename, file_download_url: file_download_url, audio_data: decoded_arraybuffer} ]];			
 
 			console.log("total_file_objects: ", total_file_objects);
 			
 			// ----------------------------------------------------
 			
-			return {total_file_objects: total_file_objects, model_name: array[0], API_KEY: array[1], index: 0, input_file_type: input_file_type};
+			return {total_file_objects: total_file_objects, model_name: array[0], API_KEY: array[1], index: 0};
 		})
 		// C. View an audio file [audio display]
 		.then(async function(dict_out) { 
+
+			// Make the audio player visible
 			document.getElementById("audio_input_display").style.display = "block"; 
 
-			console.log("dict_out['total_file_objects'][0][0].name: ", dict_out['total_file_objects'][0][0].name);
-
-			// Specify which source audio to play
-			if (document.getElementById("option0_input_radio").checked == true && document.getElementById("option1_input_radio").checked == false) {
-				// It is the GitHub repository method, select the first file from the list
-				document.getElementById('audio_source_input_display').src = dict_out['total_file_objects'][0][0].name;
-			}
 			return dict_out;
 		})
 		// D. Transcribe audio files
@@ -358,11 +254,9 @@ async function transcribe_audios_version2() {
 		 	console.log("max_loops :", max_loops);
 			
 		 	while (dict_out['index'] < total_files && dict_out['index'] < max_loops) {
-		 		if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option0") {
-		 			await call_openai_model_option0(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
-		 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
-		 		} else if (dict_out['model_name'] == 'openai' && dict_out["input_file_type"] == "option1") {
-		 			await call_openai_model_option1(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
+		 		
+		 		if (dict_out['model_name'] == 'openai') {
+		 			await call_openai_model(dict_out['total_file_objects'][0][dict_out['index']], dict_out['API_KEY'])
 		 				.then(async function() { await new Promise(r => setTimeout(r, 5000)); })
 		 		} else {
 		 			await call_custom_model(dict_out['total_file_objects'][0][dict_out['index']])
@@ -374,61 +268,6 @@ async function transcribe_audios_version2() {
 		})
 		//.catch(error => { document.getElementById('error').innerHTML += error; });
 		
-}
-
-
-
-// ----------------------------------------------------
-
-
-async function process_user_input_repoFiles(user_input) {
-
-	// Obtain a list of file_objects
-	let total_file_objects = [];
-	
-	// look for .mp3, .wav in string
-	if (user_input.match(/.(mp3)$/i) || user_input.match(/.(wav)$/i)) {
-
-		console.log("String of file urls:");
-		
-		// user entered a repository file_name
-		var array_of_file_names = user_input.split(",");
-
-		array_of_file_names.forEach(async function(file_url, index) {
-
-			// user entered a repository url only
-			let url_split = file_url.split("/");
-			console.log("url_split:", url_split);
-		
-			// take last two values of url_split
-			let file_name = url_split.pop();
-			let repoName = url_split.pop();
-			let repoOwner = url_split.pop();
-			console.log("file_name:", file_name);
-			console.log("repoName:", repoName);
-			console.log("repoOwner:", repoOwner);
-			
-			let out = await get_one_audio_file_object_from_repo(repoOwner, repoName, file_name);
-			total_file_objects.push(out);
-		}); // end of forEach
-	} else {
-		console.log("Repository url:");
-		
-		// user entered a repository url only
-		let url_split = user_input.split("/");
-		console.log("url_split:", url_split);
-		
-		// take last two values of url_split
-		let repoName = url_split.pop();
-		let repoOwner = url_split.pop();
-		console.log("repoName:", repoName);
-		console.log("repoOwner:", repoOwner);
-
-		let out = await get_audio_file_objects_from_repo(repoOwner, repoName);
-		total_file_objects.push(out);
-	}
-
-	return total_file_objects;
 }
 
 
@@ -451,68 +290,25 @@ async function start_processing_notification() {
 // ----------------------------------------------------
 
 
-async function call_openai_model_option0(file_object, OPENAI_API_KEY) {
+
+
+async function call_openai_model(file_object, OPENAI_API_KEY) {
 	
-	// Read in the mp3 as file_download_url --> convert to  blob_object
-	document.getElementById('file_object_name').innerHTML = file_object.name;
-	
-	console.log("file_object: ", file_object);
-
-	console.log("file_object.download_url: ", file_object.download_url);
-
-	console.log("file_object.name: ", file_object.name);
-
 	await start_processing_notification()
-		.then(async function() { return await fetch(file_object.download_url); })
-		.then(response => response.blob())
+		// Create a blob from the arrayBuffer
+		.then(() => { return new Blob(file_object.audio_data, {type: "audio/mp3"}); })
+		// Transform blob into a file
 		.then(async function(blob_object) { 
-			// Transform blob into a file
-			return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
+			return new File ([blob_object], file_object.name, {type: "audio/mp3"});
 		})
 		.then(async function(file_blob_object) { 
 			// console.log('file_blob_object: ', file_blob_object);
 			
 			// Use transcription or translation model randomly
 			if (Math.floor(Math.random()*2) == 1) {
-				await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+				await openai_transcription(file_blob_object, 'file_blob_object', file_object.name, OPENAI_API_KEY);
 			} else {
-				await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-			}
-		})
-		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
-		.catch(error => { document.getElementById('error').innerHTML = error; });
-}
-
-
-// ----------------------------------------------------
-
-
-async function call_openai_model_option1(file_object, OPENAI_API_KEY) {
-	
-	// Read in the mp3 as file_download_url --> convert to  blob_object
-	document.getElementById('file_object_name').innerHTML = file_object.name;
-	
-
-	await start_processing_notification()
-		.then(() => { 
-			return new Blob(decoded_arraybuffer, {type: "audio/mp3"});
-		})
-		.then(async function(blob_object) { 
-
-			// Create a url for the blob
-			document.getElementById('audio_source_input_display').src = URL.createObjectURL(blob_object);
-			
-			// Transform blob into a file
-			return new File ([blob_object], document.getElementById('file_object_name').innerHTML, {type: "audio/mp3"});
-		})
-		.then(async function(file_blob_object) { 
-			// console.log('file_blob_object: ', file_blob_object);
-			
-			// Use transcription or translation model randomly
-			if (Math.floor(Math.random()*2) == 1) {
-				await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
-			} else {
-				await openai_translation(file_blob_object, 'file_blob_object', document.getElementById('file_object_name').innerHTML, OPENAI_API_KEY);
+				await openai_translation(file_blob_object, 'file_blob_object', file_object.name, OPENAI_API_KEY);
 			}
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = document.getElementById('notification').innerHTML + '\n\nTranscription Processing Done'; })
