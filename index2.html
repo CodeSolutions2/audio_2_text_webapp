@@ -132,56 +132,57 @@ async function previewInput(event) {
 
 	const reader = new FileReader();
 	reader.onload = async function(e){
+		
 		//console.log("e.target.result :", e.target.result);
 
-    // Try 0
-    // document.getElementById('audio_source_input_display').src = e.target.result; 
-
-    // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
-    await fetch(e.target.result)
-	    .then(response => response.arrayBuffer())
-	    .then(arraybuffer => {
-		    console.log("arraybuffer:", arraybuffer);
+		    // Try 0
+		    // document.getElementById('audio_source_input_display').src = e.target.result; 
+		
+		    // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
+		    await fetch(e.target.result)
+			    .then(response => response.arrayBuffer())
+			    .then(arraybuffer => {
+				    console.log("arraybuffer:", arraybuffer);
+				    
+				    var audioContext = new AudioContext();
+				    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
+				    console.log("decoded_arraybuffer:", decoded_arraybuffer);
+		
+				    var source = audioContext.createMediaElementSource(audioElement);
+				    // var source = audioContext.createBufferSource(audioElement);
+				    source.id = "source_name";
+		
+				    // Set the file_download_url
+				    create_blob_url_for_data(decoded_arraybuffer);
+		
+				    // Set the audio source to play the audio file
+				    // Way 0: base64 string encoded - does not make sense 
+				    // source.src = e.target.result;
+				    // Way 1: blob url of decoded_arraybuffer
+				    // source.src = document.getElementById("file_download_url").value;  // did not work
+				    // Way 2: try decoded_arraybuffer directly
+				    // source.src = decoded_arraybuffer.value;  // undefined
+				    source.src = decoded_arraybuffer.<value>;
+				    console.log("source:", source);
+				    
+				    // source.connect(audioContext.destination);
+				    // console.log("source after destination:", source);
+			    })
+			        
+				    // source.buffer = decoded_arraybuffer;
+			    
+		
+		    // Try 2: 
+		    // await fetch(e.target.result)
+		    //   .then(response => response.blob())
+		    //   .then(async function(blob_object) { 
+					// Transform blob into a file
+				// 	return new File ([blob_object], file_object.name, {type: "audio/mp3"});
+				// })
+		
+		    // Try 3:
+		    // playSound(e.target.result)
 		    
-		    var audioContext = new AudioContext();
-		    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
-		    console.log("decoded_arraybuffer:", decoded_arraybuffer);
-
-		    var source = audioContext.createMediaElementSource(audioElement);
-		    // var source = audioContext.createBufferSource(audioElement);
-		    source.id = "source_name";
-
-		    // Set the file_download_url
-		    create_blob_url_for_data(decoded_arraybuffer);
-
-		    // Set the audio source to play the audio file
-		    // Way 0: base64 string encoded - does not make sense 
-		    // source.src = e.target.result;
-		    // Way 1: blob url of decoded_arraybuffer
-		    // source.src = document.getElementById("file_download_url").value;  // did not work
-		    // Way 2: try decoded_arraybuffer directly
-		    source.src = decoded_arraybuffer.value;
-		    
-		    console.log("source:", source);
-		    
-		    // source.connect(audioContext.destination);
-		    // console.log("source after destination:", source);
-	    })
-	        
-		    // source.buffer = decoded_arraybuffer;
-	    
-
-    // Try 2: 
-    // await fetch(e.target.result)
-    //   .then(response => response.blob())
-    //   .then(async function(blob_object) { 
-			// Transform blob into a file
-		// 	return new File ([blob_object], file_object.name, {type: "audio/mp3"});
-		// })
-
-    // Try 3:
-    // playSound(e.target.result)
-    
     
 	}
 	reader.readAsDataURL(file);  // for Try 0, 1, 2
