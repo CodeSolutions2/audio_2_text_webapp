@@ -149,9 +149,10 @@ async function previewInput(event) {
 		    
 		    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
 		    console.log("decoded_arraybuffer:", decoded_arraybuffer);
+
+		    source.connect(audioContext.destination);
 	    })
 	        
-		    // source.connect(audioContext.destination);
 		    // source.buffer = decoded_arraybuffer;
 	    
 
