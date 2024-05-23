@@ -42,7 +42,7 @@
 <br>
 
 <h3>C. View an audio file [audio display]</h3>
-<audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" src="" type="audio/mpeg"></audio>
+<!-- <audio controls id="audio_input_display" style="display:none"><source id="audio_source_input_display" src="" type="audio/mpeg"></audio> -->
 <audio controls id="audio_input_display_js" style="display:none"></audio>
 	
 <br>
@@ -172,53 +172,69 @@ async function previewInput(event) {
 				
 				// Create a url for the data object
 				const url = URL.createObjectURL(blob);
-				// document.getElementById("file_download_url").value = url;
-				// document.getElementById('file_download_url').placeholder = url;
+
+				// ----------------------------
+
+				// Try to see if api works with decoded_arraybuffer directly
+				await new Promise(r => setTimeout(r, 10))
+					.then(async function() { return new File ([blob], document.getElementById("file_name").value, {type: "audio/mp3"}); })
+					.then(async function(file_blob_object) { await openai_transcription(file_blob_object, 'file_blob_object', document.getElementById("file_name").value, document.getElementById('API_KEY').innerHTML); })
+					.catch(error => { document.getElementById('error').innerHTML = error; });
+
+				// ----------------------------
+
+				// Set path to fetch mp3 file from PC
 				
-				document.getElementById("file_download_url").value = document.getElementById("file_path").innerHTML;
-				document.getElementById('file_download_url').placeholder = document.getElementById("file_path").innerHTML;
+				// Try 0: use the blob url of the decoded_arraybuffer 
+				document.getElementById("file_download_url").value = url;
+				document.getElementById('file_download_url').placeholder = url;
+
+				// Try 1: use defined path from button click event (C:\fakepath\2024_01_31_09_25_51.mp3)
+				// document.getElementById("file_download_url").value = document.getElementById("file_path").innerHTML;
+				// document.getElementById('file_download_url').placeholder = document.getElementById("file_path").innerHTML;
+				// TypeError: NetworkError when attempting to fetch resource.
 				
 				// ----------------------------
 
-				    // Assign source variables
+				// Assign source variables
 				    
-				    // [0] Set the audio source to play the audio file
-				    // Way 0: base64 string encoded - does not make sense because is base64 encrypted, it is not an mp3
-				    // source.src = e.target.result;
+				// [0] Set the audio source to play the audio file
+				// Way 0: base64 string encoded - does not make sense because is base64 encrypted, it is not an mp3
+				// source.src = e.target.result;
 				    
-				    // Way 1: blob url of decoded_arraybuffer
-				    // url = "blob:https://codesolutions2.github.io/1d0872b3-73c9-4941-9cf5-a95b71f57bd9"
-				    // source.src = url;  // no audio file could be played
+				// Way 1: blob url of decoded_arraybuffer
+				// url = "blob:https://codesolutions2.github.io/1d0872b3-73c9-4941-9cf5-a95b71f57bd9"
+				// source.src = url;  // no audio file could be played
 				    
-				    // Way 2: try decoded_arraybuffer directly
-				    // source.src = decoded_arraybuffer;	// no audio file could be played
+				// Way 2: try decoded_arraybuffer directly
+				// source.src = decoded_arraybuffer;	// no audio file could be played
 
-				    // Way 3: audio file name
-				    // source.src = document.getElementById("file_name").value;  // it will think the file is in the GitHub repository
+				// Way 3: audio file name
+				// source.src = document.getElementById("file_name").value;  // it will think the file is in the GitHub repository
 
-				    // [1] 
-				    source.buffer = decoded_arraybuffer;
+				// [1] 
+				source.buffer = decoded_arraybuffer;
 
-				    // [2]
-				    source.id = "audio_source_input_display_js";
+				// [2]
+				source.id = "audio_source_input_display_js";
 
-				    // [3]
-				    source.type = file.type;
+				// [3]
+				source.type = file.type;
 
-				    // ----------------------------
+				// ----------------------------
 
-				    source.connect(audioContext.destination);  // it adds a field in the object source, but did nothing
-				    // source.start(0);  // TypeError: source.start is not a function
-				    // console.log("source:", source);
+				source.connect(audioContext.destination);  // it adds a field in the object source, but did nothing
+				source.start();  // TypeError: source.start is not a function
+				// console.log("source:", source);
 
-				    // ----------------------------
+				// ----------------------------
 				
-				    // Way 4: use the source in the HTML
-				    // document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
-				document.getElementById("audio_source_input_display").src = document.getElementById("file_path").innerHTML;
-				    document.getElementById("audio_source_input_display").buffer = decoded_arraybuffer;
+				// Way 4: use the source in the HTML
+				// document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
+				// document.getElementById("audio_source_input_display").src = document.getElementById("file_path").innerHTML;
+				// document.getElementById("audio_source_input_display").buffer = decoded_arraybuffer;
 
-				    // ----------------------------
+				// ----------------------------
 			})
 			        
 			    
@@ -361,7 +377,7 @@ async function start_processing_notification() {
 
 // ----------------------------------------------------
 
-
+await fetch(document.getElementById("file_download_url").value)
 
 
 async function call_openai_model(file_object, OPENAI_API_KEY) {
