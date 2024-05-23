@@ -36,6 +36,7 @@
 <br>
 	
 <h3>B. Upload an audio file</h3>
+<input id="file_name" type="text" value="" placeholder="file_name" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
 <input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
 <input type="file" id="upload_file" accept="audio/*" style="display:block">
 <br>
@@ -89,9 +90,6 @@ var model_name = "";
 var API_KEY = "";
 var max_loops = 10;
 
-	
-var filename = "filename.txt";
-var file_download_url = "";
 var decoded_arraybuffer = "";
 			
 
@@ -105,15 +103,6 @@ document.getElementById("upload_file").addEventListener("change", previewInput, 
 // OR
 var audioElement = document.getElementById("audio_input_display");
 
-
-function playSound(arraybuffer) {
-    audioContext.decodeAudioData(arraybuffer, function (buf) {
-	decoded_arraybuffer = buf;
-        source.connect(audioContext.destination);
-        // source.buffer = buf;
-        // source.start(0);
-    });
-}
 
 async function previewInput(event) {
 	
@@ -131,48 +120,94 @@ async function previewInput(event) {
 	// ---------------------
 
 	const reader = new FileReader();
+	
 	reader.onload = async function(e){
 		
-		// console.log("e.target.result :", e.target.result);
+		console.log("e.target.result :", e.target.result);
 		
 		// Try 0
 		// document.getElementById('audio_source_input_display').src = e.target.result;
+
+
 		
 		// Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
 		    await fetch(e.target.result)
 			    .then(response => response.arrayBuffer())
-			    .then(arraybuffer => {
-				    console.log("arraybuffer:", arraybuffer);
+			    .then(arraybuffer => arraybuffer)
+			    .then(async function(arraybuffer) {
 				    
+				    // ----------------------------
+				    
+				    // Print arraybuffer
+				    console.log("arraybuffer:", arraybuffer);
+
+				    // ----------------------------
+
+				    // Create the audio context
 				    var audioContext = new AudioContext();
+
+				    // ----------------------------
+
+				    // Decode the arraybuffer - *** this should be the audio data to play ***
 				    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
 				    console.log("decoded_arraybuffer:", decoded_arraybuffer);
-		
+
+				    console.log("decoded_arraybuffer.length:", decoded_arraybuffer.length);
+
+				    // ----------------------------
+
+				    // Create the audio source
 				    var source = audioContext.createMediaElementSource(audioElement);
+
+				    // OR
+				    
 				    // var source = audioContext.createBufferSource(audioElement);
-				    source.id = "source_name";
-		
+				    
+				    // ----------------------------
+				    
 				    // Set the file_download_url
-				    create_blob_url_for_data(decoded_arraybuffer);
-		
-				    // Set the audio source to play the audio file
+				    // Put the text data in a temporary blob file, and create a url to the data
+				    const blob = new Blob([decoded_arraybuffer], { type: 'audio/mpeg' });
+				    
+				    // Create a url for the data object
+				    const url = URL.createObjectURL(blob);
+				    document.getElementById("file_download_url").value = url;
+				    document.getElementById('file_download_url').placeholder = url;
+
+				    // ----------------------------
+
+				    // Assign source variables
+				    
+				    // [0] Set the audio source to play the audio file
 				    // Way 0: base64 string encoded - does not make sense because is base64 encrypted, it is not an mp3
 				    // source.src = e.target.result;
 				    
 				    // Way 1: blob url of decoded_arraybuffer
-				    // source.src = document.getElementById("file_download_url").value;  // did not work
+				    // source.src = url;  // did not work
 				    
 				    // Way 2: try decoded_arraybuffer directly
 				    // source.src = decoded_arraybuffer.value;  // undefined
 				    // source.src = decoded_arraybuffer.<value>; // error
 				    source.src = decoded_arraybuffer;
-				    console.log("source:", source);
+
+				    // [1] 
+				    source.buffer = decoded_arraybuffer;
+
+				    // [2]
+				    source.id = "source_name";
+
+
+				    // ----------------------------
 				    
+				    console.log("source:", source);
+
+				    // ----------------------------
+
+				    // Did nothing 
 				    // source.connect(audioContext.destination);
 				    // console.log("source after destination:", source);
 			    })
 			        
-				    // source.buffer = decoded_arraybuffer;
 			    
 		
 		    // Try 2: 
@@ -183,27 +218,13 @@ async function previewInput(event) {
 				// 	return new File ([blob_object], file_object.name, {type: "audio/mp3"});
 				// })
 		
-		    // Try 3:
-		    // playSound(e.target.result)
-		    
     
 	}
 	reader.readAsDataURL(file);  // for Try 0, 1, 2
   	// reader.readAsArrayBuffer(file);  // for Try 3
 }
-  
 
 
-async function create_blob_url_for_data(decoded_arraybuffer) {
-	
-	// Put the text data in a temporary blob file, and create a url to the data
-	const blob = new Blob([decoded_arraybuffer], { type: 'audio/mpeg' });
-	
-	// Create a url for the data object
-	const url = URL.createObjectURL(blob);
-	document.getElementById("file_download_url").value = url;
-	document.getElementById('file_download_url').placeholder = url;
-}
 	
 // ----------------------------------------------------
 	
@@ -262,7 +283,7 @@ async function transcribe_audio() {
 		.then(async function(array) {
 
 			// Insert the audio file information into the dictionary
-			total_file_objects = [[{name: filename, 
+			total_file_objects = [[{name: document.getElementById("file_name").value, 
 						file_download_url: document.getElementById("file_download_url").value, 
 						audio_data: decoded_arraybuffer} ]];			
 
