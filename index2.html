@@ -194,7 +194,7 @@ async function previewInput(event) {
 	// ---------------------
 
 	const reader = new FileReader();
-	reader.onload = function(e){
+	reader.onload = async function(e){
 		//console.log("e.target.result :", e.target.result);
 
     // Try 0
