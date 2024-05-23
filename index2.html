@@ -98,9 +98,6 @@ var decoded_arraybuffer = "";
 // The eventlistener needs to be always running, to detect which file the user selected with browse
 document.getElementById("upload_file").addEventListener("change", previewInput, false);
 
-// window.AudioContext = window.AudioContext || window.webkitAudioContext;
-// var audioContext = new window.AudioContext();
-// OR
 var audioElement = document.getElementById("audio_input_display");
 
 
@@ -155,7 +152,6 @@ async function previewInput(event) {
 			.then(async function(decoded_arraybuffer) {
 
 				console.log("decoded_arraybuffer:", decoded_arraybuffer);
-				console.log("Object.keys(decoded_arraybuffer):", Object.keys(decoded_arraybuffer));
 				
 				// ----------------------------
 
