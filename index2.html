@@ -90,7 +90,6 @@ var model_name = "";
 var API_KEY = "";
 var max_loops = 10;
 
-var decoded_arraybuffer = "";
 			
 
 // ----------------------------------------------------
@@ -203,7 +202,7 @@ async function previewInput(event) {
 				    // ----------------------------
 
 				    // Did nothing 
-				    // source.connect(audioContext.destination);
+				    source.connect(audioContext.destination);
 				    // console.log("source after destination:", source);
 			})
 			        
@@ -281,6 +280,9 @@ async function transcribe_audio() {
 		// B. Input one or more audio files: [Option from GitHub] OR [Option upload]
 		.then(async function(array) {
 
+			// Try to get the audio file from the DOM
+			console.log("audio: ", document.getElementById("audio_input_display"))
+			
 			// Insert the audio file information into the dictionary
 			total_file_objects = [[{name: document.getElementById("file_name").value, 
 						file_download_url: document.getElementById("file_download_url").value, 
