@@ -103,6 +103,7 @@ th#outputs {width: 800px; }
 var model_name = "";
 var API_KEY = "";
 var max_loops = 10;
+var decoded_arraybuffer = "";
 
 // ----------------------------------------------------
 
@@ -200,14 +201,15 @@ async function previewInput(event) {
     // Try 0
     // document.getElementById('audio_source_input_display').src = e.target.result; // temporarily save: the base64_string of the audio file
 
-    // Try 1: 
+    // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
     await fetch(e.target.result)
       .then(response => response.arrayBuffer())
       .then(arraybuffer => audioContext.decodeAudioData(arraybuffer))
       .then(async function(decoded_arraybuffer) {
-        document.getElementById('audio_source_input_display') = audioContext.createBufferSource();
-        document.getElementById('audio_source_input_display').connect(audioContext.destination);
-        document.getElementById('audio_source_input_display').buffer = decoded_arraybuffer;
+	      decoded_arraybuffer = decoded_arraybuffer;
+        // document.getElementById('audio_source_input_display') = audioContext.createBufferSource();
+        // document.getElementById('audio_source_input_display').connect(audioContext.destination);
+        // document.getElementById('audio_source_input_display').buffer = decoded_arraybuffer;
       })
 
     // Try 2: 
@@ -489,46 +491,10 @@ async function call_openai_model_option1(file_object, OPENAI_API_KEY) {
 	// Read in the mp3 as file_download_url --> convert to  blob_object
 	document.getElementById('file_object_name').innerHTML = file_object.name;
 	
-	console.log("file_object: ", file_object);
-
-	console.log("file_object.base64_string: ", file_object.base64_string);
-
-	console.log("file_object.name: ", file_object.name);
 
 	await start_processing_notification()
-		.then(async function() {
-			let base64_string = file_object.base64_string;
-			// console.log("base64_string: ", base64_string);
-
-			// Follow the process on https://www.base64encode.org/enc/map/, to convert base64_string to ASCII
-			
-			// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
-			const regex = /data:audio\/mpeg;base64,/g;
-			base64_string = base64_string.replace(regex, '');
-			console.log("base64_string: ", base64_string);
-
-			// This is the .mp3 data!!! 
-			// Decode the Base64-encoded string --> obtain the mp3 data in binary string format
-			const binaryString = atob(base64_string);
-			console.log("binaryString: ", binaryString);
-			return binaryString;
-
-			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt
-			// var character_array = binaryString.split('');
-			// console.log("character_array: ", character_array);
-			
-			// Map each binary string character as an ASCII number
-			// var byteArray = character_array.map((character) => { return character.charCodeAt(0); });
-			// console.log("byteArray: ", byteArray);
-			// return byteArray;
-
-			// bytes gives the same output as byteArray
-			// const bytes = new Uint8Array(byteArray);
-			// console.log("bytes: ", bytes);
-			// return bytes;
-		})
-		.then(audio_data => { 
-			return new Blob(audio_data, {type: "audio/mp3"});
+		.then(() => { 
+			return new Blob(decoded_arraybuffer, {type: "audio/mp3"});
 		})
 		.then(async function(blob_object) { 
 
