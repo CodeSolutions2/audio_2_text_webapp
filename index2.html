@@ -99,7 +99,7 @@ var decoded_arraybuffer = "";
 document.getElementById("upload_file").addEventListener("change", previewInput, false);
 
 var audioElement = document.getElementById("audio_input_display");
-
+var audioContext = {};
 
 async function previewInput(event) {
 	
@@ -142,7 +142,7 @@ async function previewInput(event) {
 				    // ----------------------------
 
 				    // Create the audio context
-				    var audioContext = new AudioContext();
+				    audioContext = new AudioContext();
 
 				    // ----------------------------
 
