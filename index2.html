@@ -204,7 +204,8 @@ async function previewInput(event) {
 				    // source.type = file.type;
 
 				    // Way 4: use the source in the HTML
-				    document.getElementById("audio_source_input_display").src = url;
+				    // document.getElementById("audio_source_input_display").src = url;  // no audio file could be played
+				    document.getElementById("audio_source_input_display").src = decoded_arraybuffer;
 				    document.getElementById("audio_source_input_display").buffer = decoded_arraybuffer;
 
 				    // ----------------------------
@@ -297,7 +298,7 @@ async function transcribe_audio() {
 			// Insert the audio file information into the dictionary
 			total_file_objects = [[{name: document.getElementById("file_name").value, 
 						file_download_url: document.getElementById("file_download_url").value, 
-						audio_data: ""} ]];			
+						audio_data: document.getElementById("audio_source_input_display").buffer}]];			
 
 			console.log("total_file_objects: ", total_file_objects);
 			
