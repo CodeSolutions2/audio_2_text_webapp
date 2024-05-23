@@ -114,26 +114,27 @@ async function previewInput(event) {
 	
 	// Take the first file
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
-	// console.log("file :", file);
+	console.log("file :", file);
+
+	// ---------------------
 	
+	// Set the file name
+	// document.getElementById("file_name").value = ;
+	// document.getElementById('file_name').placeholder = ;
 
 	// ---------------------
 
 	const reader = new FileReader();
 	
 	reader.onload = async function(e){
-		
-		console.log("e.target.result :", e.target.result);
-		
-		// Try 0
-		// document.getElementById('audio_source_input_display').src = e.target.result;
 
+		// Print base64_string
+		// console.log("e.target.result :", e.target.result);
 
+		// ---------------------
 		
-		// Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
-		    await fetch(e.target.result)
+		await fetch(e.target.result)
 			    .then(response => response.arrayBuffer())
-			    .then(arraybuffer => arraybuffer)
 			    .then(async function(arraybuffer) {
 				    
 				    // ----------------------------
@@ -152,7 +153,7 @@ async function previewInput(event) {
 				    var decoded_arraybuffer = audioContext.decodeAudioData(arraybuffer);
 				    console.log("decoded_arraybuffer:", decoded_arraybuffer);
 
-				    console.log("decoded_arraybuffer.length:", decoded_arraybuffer.length);
+				    console.log("Object.keys(decoded_arraybuffer):", Object.keys(decoded_arraybuffer));
 
 				    // ----------------------------
 
