@@ -133,12 +133,12 @@ async function previewInput(event) {
 	const reader = new FileReader();
 	reader.onload = async function(e){
 		
-		//console.log("e.target.result :", e.target.result);
-
-		    // Try 0
-		    // document.getElementById('audio_source_input_display').src = e.target.result; 
+		// console.log("e.target.result :", e.target.result);
 		
-		    // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
+		// Try 0
+		// document.getElementById('audio_source_input_display').src = e.target.result;
+		
+		// Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
 		    await fetch(e.target.result)
 			    .then(response => response.arrayBuffer())
 			    .then(arraybuffer => {
@@ -156,13 +156,16 @@ async function previewInput(event) {
 				    create_blob_url_for_data(decoded_arraybuffer);
 		
 				    // Set the audio source to play the audio file
-				    // Way 0: base64 string encoded - does not make sense 
+				    // Way 0: base64 string encoded - does not make sense because is base64 encrypted, it is not an mp3
 				    // source.src = e.target.result;
+				    
 				    // Way 1: blob url of decoded_arraybuffer
 				    // source.src = document.getElementById("file_download_url").value;  // did not work
+				    
 				    // Way 2: try decoded_arraybuffer directly
 				    // source.src = decoded_arraybuffer.value;  // undefined
-				    source.src = decoded_arraybuffer.<value>;
+				    // source.src = decoded_arraybuffer.<value>; // error
+				    source.src = decoded_arraybuffer;
 				    console.log("source:", source);
 				    
 				    // source.connect(audioContext.destination);
