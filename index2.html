@@ -149,6 +149,9 @@ async function previewInput(event) {
 
 		    var source = audioContext.createMediaElementSource(audioElement);
 		    // var source = audioContext.createBufferSource(audioElement);
+		    source.id = "source_name";
+		    console.log("source:", source);
+		    
 		    source.connect(audioContext.destination);
 	    })
 	        
