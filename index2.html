@@ -105,16 +105,15 @@ document.getElementById("upload_file").addEventListener("change", previewInput, 
 // OR
 var audioElement = document.getElementById("audio_input_display");
 var audioContext = new AudioContext();
-// const source = audioContext.createMediaElementSource(audioElement);
-var source = audioContext.createBufferSource(audioElement);
+var source = audioContext.createMediaElementSource(audioElement);
+// var source = audioContext.createBufferSource(audioElement);
 
 function playSound(arraybuffer) {
     audioContext.decodeAudioData(arraybuffer, function (buf) {
 	decoded_arraybuffer = buf;
-        // var source = audioContext.createBufferSource(audioElement);
         source.connect(audioContext.destination);
-        source.buffer = buf;
-        source.start(0);
+        // source.buffer = buf;
+        // source.start(0);
     });
 }
 
@@ -141,15 +140,15 @@ async function previewInput(event) {
     // document.getElementById('audio_source_input_display').src = e.target.result; 
 
     // Try 1: Uncaught (in promise) ReferenceError: cannot assign to function call
-    // await fetch(e.target.result)
-    //   .then(response => response.arrayBuffer())
-    //   .then(arraybuffer => audioContext.decodeAudioData(arraybuffer))
-    //   .then(async function(decoded_arraybuffer) {
-	//       decoded_arraybuffer = decoded_arraybuffer;
-        // document.getElementById('audio_source_input_display') = audioContext.createBufferSource();
-        // document.getElementById('audio_source_input_display').connect(audioContext.destination);
-        // document.getElementById('audio_source_input_display').buffer = decoded_arraybuffer;
-     //  })
+    await fetch(e.target.result)
+	    .then(response => response.arrayBuffer())
+	    .then(arraybuffer => audioContext.decodeAudioData(arraybuffer))
+	    .then(async function(decoded_arraybuffer) {
+		    decoded_arraybuffer = decoded_arraybuffer;
+		    console.log("decoded_arraybuffer:", decoded_arraybuffer);
+		    // source.connect(audioContext.destination);
+		    // source.buffer = decoded_arraybuffer;
+	    })
 
     // Try 2: 
     // await fetch(e.target.result)
@@ -160,12 +159,12 @@ async function previewInput(event) {
 		// })
 
     // Try 3:
-    playSound(e.target.result)
+    // playSound(e.target.result)
     
     
 	}
-	// reader.readAsDataURL(file);  // for Try 0, 1, 2
-  reader.readAsArrayBuffer(file);  // for Try 3
+	reader.readAsDataURL(file);  // for Try 0, 1, 2
+  	// reader.readAsArrayBuffer(file);  // for Try 3
 }
   
 
