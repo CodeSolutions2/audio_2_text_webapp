@@ -181,19 +181,23 @@ async function previewInput(event) {
 				    // source.src = e.target.result;
 				    
 				    // Way 1: blob url of decoded_arraybuffer
-				    // source.src = url;  // did not work
+				    // url = "blob:https://codesolutions2.github.io/1d0872b3-73c9-4941-9cf5-a95b71f57bd9"
+				    // source.src = url;  // no audio file could be played
 				    
 				    // Way 2: try decoded_arraybuffer directly
-				    // source.src = decoded_arraybuffer.value;  // undefined
-				    // source.src = decoded_arraybuffer.<value>; // error
-				    source.src = decoded_arraybuffer;
+				    // source.src = decoded_arraybuffer;	// no audio file could be played
+
+				    // Way 3: audio file name
+				    source.src = document.getElementById("file_name").value  // it will think the file is in the GitHub repository
 
 				    // [1] 
 				    source.buffer = decoded_arraybuffer;
 
 				    // [2]
-				    source.id = "source_name";
+				    source.id = "audio_source";
 
+				    // [3]
+				    source.type = file.type;
 
 				    // ----------------------------
 				    
