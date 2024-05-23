@@ -202,7 +202,7 @@ async function previewInput(event) {
 				    // ----------------------------
 
 				    source.connect(audioContext.destination);  // it adds a field in the object source, but did nothing
-				    source.start(0);
+				    // source.start(0);  // TypeError: source.start is not a function
 				    // console.log("source:", source);
 
 				    // ----------------------------
